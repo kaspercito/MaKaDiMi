@@ -1,0 +1,74 @@
+name: Compilar APK de MaKaDiMi
+
+# Se ejecuta al subir una etiqueta v* (ej. v2.3.1) o a mano desde la pestaña Actions.
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: temurin
+          cache: gradle
+
+      - name: Preparar Android SDK
+        run: |
+          SDKM="$ANDROID_HOME/cmdline-tools/latest/bin/sdkmanager"
+          yes | "$SDKM" --licenses > /dev/null || true
+          "$SDKM" "platforms;android-37.0" "platforms;android-36" "build-tools;36.0.0" || true
+
+      - name: Restaurar llave de firma
+        env:
+          KEYSTORE_B64: ${{ secrets.KEYSTORE_B64 }}
+        run: echo "$KEYSTORE_B64" | base64 -d > makadimi.jks
+
+      - name: Crear local.properties
+        env:
+          KEYSTORE_PASSWORD: ${{ secrets.KEYSTORE_PASSWORD }}
+          KEY_ALIAS: ${{ secrets.KEY_ALIAS }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+        run: |
+          {
+            echo "KEYSTORE_PATH=makadimi.jks"
+            echo "KEYSTORE_PASSWORD=$KEYSTORE_PASSWORD"
+            echo "KEY_ALIAS=$KEY_ALIAS"
+            echo "KEY_PASSWORD=$KEY_PASSWORD"
+          } > local.properties
+
+      - name: Compilar APK release
+        run: |
+          chmod +x gradlew
+          ./gradlew :androidApp:assembleRelease --no-daemon --stacktrace
+
+      - name: Renombrar APK
+        run: |
+          mkdir -p salida
+          for f in androidApp/build/outputs/apk/release/*.apk; do
+            cp "$f" "salida/MaKaDiMi-${GITHUB_REF_NAME}-arm64.apk"
+          done
+          ls -la salida
+
+      - name: Guardar APK como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: MaKaDiMi-apk
+          path: salida/*.apk
+
+      - name: Publicar Release en GitHub
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: salida/*.apk
+          generate_release_notes: true
