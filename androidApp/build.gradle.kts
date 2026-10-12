@@ -109,15 +109,7 @@ android {
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro",
             )
-            splits {
-                abi {
-                    isEnable = true
-                    reset()
-                    // Solo arm64-v8a (casi todos los celulares actuales): compila más rápido y el APK pesa menos.
-                    isUniversalApk = false
-                    include("arm64-v8a")
-                }
-            }
+            // Sin splits: ndk.abiFilters (defaultConfig) ya limita el APK a arm64-v8a.
         }
         debug {
             isMinifyEnabled = false
