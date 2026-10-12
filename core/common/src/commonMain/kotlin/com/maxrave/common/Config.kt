@@ -51,6 +51,12 @@ object Config {
  *
  */
 object SUPPORTED_LOCATION {
+    /** The phone's country if YouTube Music supports it as a content country, otherwise "US". */
+    fun fromCountry(country: String?): String {
+        val c = country?.uppercase().orEmpty()
+        return if (items.any { it.toString() == c }) c else "US"
+    }
+
     val items: Array<CharSequence> =
         arrayOf(
             "AE",
@@ -228,6 +234,35 @@ object SUPPORTED_LANGUAGE {
             "sv-SE",
             "hr-HR",
         )
+
+    /**
+     * Maps the phone's locale (e.g. `es` + `EC`, `pt` + `BR`, `he` + `IL`, `zh` + `Hant` + `TW`) to the
+     * closest entry of [codes]. [codes] holds exact tags like "es-ES", so comparing the phone's full tag
+     * with `codes.contains` never matches a regional variant such as "es-EC" and the app fell back to
+     * English. Only the language (and, for Chinese, the script/region) decides here. Unknown -> "en-US".
+     */
+    fun fromSystem(
+        language: String,
+        script: String = "",
+        country: String = "",
+    ): String {
+        val lang =
+            when (language.lowercase()) {
+                "he" -> "iw"
+                "in" -> "id"
+                else -> language.lowercase()
+            }
+        if (lang == "zh") {
+            val traditional =
+                script.equals("Hant", ignoreCase = true) ||
+                    country.uppercase() in setOf("TW", "HK", "MO")
+            return if (traditional) "zh-Hant-TW" else "zh-CN"
+        }
+        val sameLanguage = codes.filter { it.substringBefore("-").lowercase() == lang }
+        return sameLanguage.firstOrNull { it.substringAfterLast("-").equals(country, ignoreCase = true) }
+            ?: sameLanguage.firstOrNull()
+            ?: "en-US"
+    }
 
     fun getLanguageFromCode(code: String?): String {
         val index =
@@ -665,6 +700,13 @@ const val EXOPLAYER_DB_NAME = "exoplayer_internal.db"
 
 const val FIRST_TIME_MIGRATION = "first_time_migration"
 const val SELECTED_LANGUAGE = "selected_language"
+
+/**
+ * Set to [STATUS_DONE] once the user picks a language / content country by hand in Settings. Until
+ * then the app follows the phone's language and region every time it opens.
+ */
+const val LANGUAGE_MANUAL = "language_manual"
+const val LOCATION_MANUAL = "location_manual"
 
 const val STATUS_DONE = "status_done"
 

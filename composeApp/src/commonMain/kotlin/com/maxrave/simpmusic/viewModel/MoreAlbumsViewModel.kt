@@ -8,7 +8,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.launch
 import simpmusic.composeapp.generated.resources.Res
-import simpmusic.composeapp.generated.resources.error
+import simpmusic.composeapp.generated.resources.no_results_found
 
 class MoreAlbumsViewModel(
     private val albumRepository: AlbumRepository,
@@ -29,7 +29,7 @@ class MoreAlbumsViewModel(
                 } else {
                     _uiState.value =
                         MoreAlbumsUIState.Error(
-                            message = getString(Res.string.error),
+                            message = getString(Res.string.no_results_found),
                         )
                 }
             }
@@ -49,7 +49,7 @@ class MoreAlbumsViewModel(
                 } else {
                     _uiState.value =
                         MoreAlbumsUIState.Error(
-                            message = getString(Res.string.error),
+                            message = getString(Res.string.no_results_found),
                         )
                 }
             }

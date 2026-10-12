@@ -172,7 +172,7 @@
     <string name="save_last_played">שמור הושמע לאחרונה</string>
     <string name="save_last_played_track_and_queue">שמור את הרצועה האחרונה שהושמעה ואת התור</string>
     <string name="update_available">עדכון חדש זמין</string>
-    <string name="update_message">"גרסה %1$s זמין\nלשחרר:%2$s\nיומני שינוי:\n%3$s "</string>
+    <string name="update_message">גרסה %1$s זמינה\nהוצאה: %2$s\n</string>
     <string name="check_for_update">בדוק עדכונים</string>
     <string name="last_checked_at">נבדק לאחרונה ב %1$s</string>
     <string name="checking">בודק</string>

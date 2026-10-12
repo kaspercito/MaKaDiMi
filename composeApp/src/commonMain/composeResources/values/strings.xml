@@ -1007,4 +1007,5 @@ Built with ❤️ on top of the open source project SimpMusic by Tuan Minh Nguye
     <string name="log_stack_trace_lines">Stack trace · %1$s lines</string>
     <string name="log_hide_stack_trace">Hide stack trace</string>
     <string name="log_export_failed">Could not export the log</string>
+    <string name="songs_not_found_in_library">Couldn't find the selected songs in your library</string>
 </resources>

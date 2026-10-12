@@ -185,7 +185,7 @@
     <string name="save">Opslaan</string>
     <string name="saved">Opgeslagen</string>
     <string name="customactivityoncrash_error_activity_error_occurred_explanation">Er is een onverwachte fout opgetreden. Sorry voor het ongemak.</string>
-    <string name="help_build_lyrics_database"></string>
+    <string name="help_build_lyrics_database">Help MaKaDiMi bij het opbouwen van de lyricsdatabase</string>
     <string name="customactivityoncrash_error_activity_error_details_copy">Kopiëren naar klembord</string>
     <string name="yes">Ja</string>
     <string name="welcome_back">Welkom terug,</string>

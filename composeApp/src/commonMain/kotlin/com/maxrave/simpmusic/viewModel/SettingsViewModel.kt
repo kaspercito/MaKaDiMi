@@ -6,8 +6,11 @@ import coil3.SingletonImageLoader
 import coil3.annotation.ExperimentalCoilApi
 import com.eygraber.uri.Uri
 import com.maxrave.common.Config
+import com.maxrave.common.LANGUAGE_MANUAL
+import com.maxrave.common.LOCATION_MANUAL
 import com.maxrave.common.QUALITY
 import com.maxrave.common.SELECTED_LANGUAGE
+import com.maxrave.common.STATUS_DONE
 import com.maxrave.common.VIDEO_QUALITY
 import com.maxrave.domain.data.entities.DownloadState
 import com.maxrave.domain.data.entities.GoogleAccountEntity
@@ -1113,6 +1116,8 @@ class SettingsViewModel(
     fun changeLocation(location: String) {
         viewModelScope.launch {
             dataStoreManager.setLocation(location)
+            // From now on the app keeps this country instead of following the phone's region.
+            dataStoreManager.putString(LOCATION_MANUAL, STATUS_DONE)
             getLocation()
         }
     }
@@ -1358,6 +1363,8 @@ class SettingsViewModel(
     fun changeLanguage(code: String) {
         viewModelScope.launch {
             dataStoreManager.putString(SELECTED_LANGUAGE, code)
+            // From now on the app keeps this language instead of following the phone's.
+            dataStoreManager.putString(LANGUAGE_MANUAL, STATUS_DONE)
             Logger.w("SettingsViewModel", "changeLanguage: $code")
             getLanguage()
             changeLanguageNative(code)

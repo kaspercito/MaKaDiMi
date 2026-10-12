@@ -418,7 +418,7 @@
     <string name="disabled">停用</string>
     <string name="fade_audio_effect_duration">淡出音频效果持续时间(ms) (设置为0表示禁用)</string>
     <string name="duration">持续时间</string>
-    <string name="invalid_number"></string>
+    <string name="invalid_number">无效的数字</string>
     <string name="shuffle_not_available">随机播放功能暂不可用</string>
     <string name="radio_not_available">随机播放功能不可用</string>
     <string name="visitor_data_retrieved">已获取访客数据</string>

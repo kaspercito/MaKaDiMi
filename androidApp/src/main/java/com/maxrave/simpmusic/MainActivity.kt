@@ -5,6 +5,7 @@ import android.content.ComponentName
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.res.Configuration
+import android.content.res.Resources
 import android.os.Build
 import android.os.Bundle
 import android.os.IBinder
@@ -17,6 +18,7 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
 import androidx.core.net.toUri
+import androidx.core.os.ConfigurationCompat
 import androidx.core.os.LocaleListCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.work.Constraints
@@ -26,6 +28,8 @@ import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
 import com.eygraber.uri.toKmpUriOrNull
 import com.maxrave.common.FIRST_TIME_MIGRATION
+import com.maxrave.common.LANGUAGE_MANUAL
+import com.maxrave.common.LOCATION_MANUAL
 import com.maxrave.common.SELECTED_LANGUAGE
 import com.maxrave.common.STATUS_DONE
 import com.maxrave.common.SUPPORTED_LANGUAGE
@@ -153,50 +157,7 @@ class MainActivity : AppCompatActivity() {
                 ),
             )
         }
-        Logger.d("Italy", "Key: ${Locale.ITALY.toLanguageTag()}")
-
-        // Check if the migration has already been done or not
-        if (getString(FIRST_TIME_MIGRATION) != STATUS_DONE) {
-            Logger.d("Locale Key", "onCreate: ${Locale.getDefault().toLanguageTag()}")
-            if (SUPPORTED_LANGUAGE.codes.contains(Locale.getDefault().toLanguageTag())) {
-                Logger.d(
-                    "Contains",
-                    "onCreate: ${
-                        SUPPORTED_LANGUAGE.codes.contains(
-                            Locale.getDefault().toLanguageTag(),
-                        )
-                    }",
-                )
-                putString(SELECTED_LANGUAGE, Locale.getDefault().toLanguageTag())
-                if (SUPPORTED_LOCATION.items.contains(Locale.getDefault().country)) {
-                    putString("location", Locale.getDefault().country)
-                } else {
-                    putString("location", "US")
-                }
-            } else {
-                putString(SELECTED_LANGUAGE, "en-US")
-            }
-            // Fetch the selected language from wherever it was stored. In this case its SharedPref
-            getString(SELECTED_LANGUAGE)?.let {
-                Logger.d("Locale Key", "getString: $it")
-                // Set this locale using the AndroidX library that will handle the storage itself
-                val localeList = LocaleListCompat.forLanguageTags(it)
-                AppCompatDelegate.setApplicationLocales(localeList)
-                // Set the migration flag to ensure that this is executed only once
-                putString(FIRST_TIME_MIGRATION, STATUS_DONE)
-            }
-        }
-        if (AppCompatDelegate.getApplicationLocales().toLanguageTags() !=
-            getString(
-                SELECTED_LANGUAGE,
-            )
-        ) {
-            Logger.d(
-                "Locale Key",
-                "onCreate: ${AppCompatDelegate.getApplicationLocales().toLanguageTags()}",
-            )
-            putString(SELECTED_LANGUAGE, AppCompatDelegate.getApplicationLocales().toLanguageTags())
-        }
+        applyLanguageAndRegion()
 
         enableEdgeToEdge(
             navigationBarStyle =
@@ -307,6 +268,54 @@ class MainActivity : AppCompatActivity() {
     private fun checkForUpdate() {
         if (viewModel.shouldCheckForUpdate()) {
             viewModel.checkForUpdate()
+        }
+    }
+
+    /**
+     * Language and region: follow the phone unless the user picked one by hand in Settings.
+     *
+     * The phone's locale is read from [Resources.getSystem], not [Locale.getDefault]: once the app has
+     * called setApplicationLocales, Locale.getDefault() returns the app's own locale and would just echo
+     * the old choice back.
+     */
+    private fun applyLanguageAndRegion() {
+        val systemLocale: Locale =
+            ConfigurationCompat.getLocales(Resources.getSystem().configuration)[0]
+                ?: Locale.getDefault()
+        Logger.d("Locale Key", "system locale: ${systemLocale.toLanguageTag()}")
+
+        if (getString(LANGUAGE_MANUAL) == STATUS_DONE) {
+            // The user chose a language: keep it, and make sure the app locale matches what is stored.
+            val stored = getString(SELECTED_LANGUAGE)
+            if (!stored.isNullOrEmpty() &&
+                AppCompatDelegate.getApplicationLocales().toLanguageTags() != stored
+            ) {
+                AppCompatDelegate.setApplicationLocales(LocaleListCompat.forLanguageTags(stored))
+            }
+        } else {
+            val code =
+                SUPPORTED_LANGUAGE.fromSystem(
+                    language = systemLocale.language,
+                    script = systemLocale.script,
+                    country = systemLocale.country,
+                )
+            if (getString(SELECTED_LANGUAGE) != code) {
+                putString(SELECTED_LANGUAGE, code)
+            }
+            // Empty list = no per-app override, so Android's own resource lookup follows the phone.
+            if (!AppCompatDelegate.getApplicationLocales().isEmpty()) {
+                AppCompatDelegate.setApplicationLocales(LocaleListCompat.getEmptyLocaleList())
+            }
+        }
+
+        if (getString(LOCATION_MANUAL) != STATUS_DONE) {
+            val region = SUPPORTED_LOCATION.fromCountry(systemLocale.country)
+            if (getString("location") != region) {
+                putString("location", region)
+            }
+        }
+        if (getString(FIRST_TIME_MIGRATION) != STATUS_DONE) {
+            putString(FIRST_TIME_MIGRATION, STATUS_DONE)
         }
     }
 

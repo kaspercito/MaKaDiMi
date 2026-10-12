@@ -1907,7 +1907,7 @@ class SharedViewModel(
                                 makeToast(getString(Res.string.added_to_youtube_liked))
                                 getLikeStatus(videoId)
                             } else {
-                                makeToast(getString(Res.string.error))
+                                makeToast("${getString(Res.string.error)}: HTTP $response")
                             }
                         }
                 } else {
@@ -1919,7 +1919,7 @@ class SharedViewModel(
                                 makeToast(getString(Res.string.removed_from_youtube_liked))
                                 getLikeStatus(videoId)
                             } else {
-                                makeToast(getString(Res.string.error))
+                                makeToast("${getString(Res.string.error)}: HTTP $it")
                             }
                         }
                 }

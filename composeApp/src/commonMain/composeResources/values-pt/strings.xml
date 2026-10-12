@@ -176,11 +176,11 @@
     <string name="save_shuffle_and_repeat_mode">Salvar modo aleatório e de repetição</string>
     <string name="skip_silent">Pular Silencioso</string>
     <string name="skip_no_music_part">Pular parte da silenciosa da música</string>
-    <string name="time_out_check_internet_connection_or_change_piped_instance_in_settings">Tempo esgotado, verifique sua conexão com a internet</string>
+    <string name="time_out_check_internet_connection_or_change_piped_instance_in_settings">Tempo esgotado, verifique sua conexão com a internet (%1$s)</string>
     <string name="save_last_played">Salvar Última Reprodução</string>
     <string name="save_last_played_track_and_queue">Salvar a última faixa e fila reproduzidas</string>
     <string name="update_available">Nova atualização disponível</string>
-    <string name="update_message"></string>
+    <string name="update_message">Versão %1$s disponível\nLançamento: %2$s\n</string>
     <string name="check_for_update">Verificar atualizações</string>
     <string name="last_checked_at">Última verificação: %1$s</string>
     <string name="checking">Verificando</string>
@@ -252,7 +252,7 @@
     <string name="backup_create_failed">Falha ao criar backup</string>
     <string name="main_lyrics_provider">Provedor principal de letras</string>
     <string name="use_ai_translation">Usar Tradução de Letras com IA</string>
-    <string name="use_ai_translation_description">Enable lyrics translation using AI</string>
+    <string name="use_ai_translation_description">Ativar tradução de letras com IA</string>
     <string name="translation_language">Translation Language</string>
     <string name="follow_app_language">Siga o idioma do aplicativo</string>
     <string name="email">Email</string>
@@ -272,7 +272,7 @@
     <string name="free_space">Espaço livre</string>
     <string name="suggest">Sugestão</string>
     <string name="reload">Recarregar</string>
-    <string name="sort_by"></string>
+    <string name="sort_by">Ordenar por</string>
     <string name="sort">Ordenar</string>
     <string name="older_first">Mais Antigas Primeiro</string>
     <string name="newer_first">Mais Recentes Primeiro</string>
@@ -503,7 +503,7 @@
     <string name="log_in_to_discord">Faça login no Discord</string>
     <string name="intro_login_to_discord">Faça login para ativar o Rich Presence do Discord</string>
     <string name="enable_rich_presence">Ativar rich presence</string>
-    <string name="rich_presence_info"></string>
+    <string name="rich_presence_info">Mostrar informações da sessão de mídia no seu perfil do Discord</string>
     <string name="youtube_liked_music">Músicas curtidas do YouTube</string>
     <string name="keep_your_youtube_playlist_offline">Continuar mostrando sua lista de reprodução do YouTube quando estiver offline</string>
     <string name="keep_your_youtube_playlist_offline_description">Salvar sua lista de reprodução YT no local e manter para mostrar quando estiver offline</string>
@@ -563,8 +563,8 @@
     <string name="wrapped_not_enough_days">%1$s dias</string>
     <string name="wrapped_not_enough_progress">%1$s de %2$s dias</string>
     <string name="wrapped_open_analytics">Abrir Análise</string>
-    <string name="wrapped_recap_month">Recapitulação</string>
-    <string name="wrapped_recap_month_year">Recapitulação</string>
+    <string name="wrapped_recap_month">Resumo de %1$s</string>
+    <string name="wrapped_recap_month_year">Resumo de %1$s %2$s</string>
     <string name="wrapped_recap_subtitle">Suas músicas mais ouvidas nesse mês</string>
     <string name="month_full_jan">Janeiro</string>
     <string name="month_full_feb">Fevereiro</string>

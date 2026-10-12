@@ -172,7 +172,7 @@
     <string name="save_last_played">Simpan Terakhir Diputar</string>
     <string name="save_last_played_track_and_queue">Menyimpan lagu yang terakhir diputar dan antrean</string>
     <string name="update_available">Pembaruan baru tersedia</string>
-    <string name="update_message">"Versi %1$s tersedia\nRilis: %2$s\nLog diubah: \n%3$s "</string>
+    <string name="update_message">Versi %1$s tersedia\nRilis: %2$s\n</string>
     <string name="check_for_update">Cek versi terbaru</string>
     <string name="last_checked_at">Terakhir diperiksa pada %1$s</string>
     <string name="checking">Memeriksa</string>
@@ -204,7 +204,7 @@
     <string name="customactivityoncrash_error_activity_error_details_copied">Tersalin ke papan klip</string>
     <string name="customactivityoncrash_error_activity_error_details_clipboard_label">Informasi kesalahan</string>
     <string name="no_update">Versi ini adalah yang terbaru</string>
-    <string name="sleep_timer">Pengatur Waktu Tidur - %1$ menit</string>
+    <string name="sleep_timer">Pengatur Waktu Tidur - %1$s menit</string>
     <string name="sleep_timer_off">Atur Waktu Tidur</string>
     <string name="sleep_minutes">Waktu hitung mundur (menit)</string>
     <string name="set">Atur</string>

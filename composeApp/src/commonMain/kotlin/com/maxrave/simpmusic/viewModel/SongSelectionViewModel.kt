@@ -25,6 +25,7 @@ import simpmusic.composeapp.generated.resources.error
 import simpmusic.composeapp.generated.resources.error_occurred
 import simpmusic.composeapp.generated.resources.play_next
 import simpmusic.composeapp.generated.resources.removed_from_YouTube_playlist
+import simpmusic.composeapp.generated.resources.songs_not_found_in_library
 
 /**
  * Runs the bulk actions offered by
@@ -54,7 +55,7 @@ class SongSelectionViewModel(
         viewModelScope.launch {
             val songs = songsOf(videoIds)
             if (songs.isEmpty()) {
-                makeToast(getString(Res.string.error_occurred))
+                makeToast(getString(Res.string.songs_not_found_in_library))
                 return@launch
             }
             songs.asReversed().forEach { mediaPlayerHandler.playNext(it.toTrack()) }
@@ -66,7 +67,7 @@ class SongSelectionViewModel(
         viewModelScope.launch {
             val songs = songsOf(videoIds)
             if (songs.isEmpty()) {
-                makeToast(getString(Res.string.error_occurred))
+                makeToast(getString(Res.string.songs_not_found_in_library))
                 return@launch
             }
             mediaPlayerHandler.loadMoreCatalog(
@@ -149,7 +150,7 @@ class SongSelectionViewModel(
         viewModelScope.launch {
             val songs = songsOf(videoIds)
             if (songs.isEmpty()) {
-                makeToast(getString(Res.string.error_occurred))
+                makeToast(getString(Res.string.songs_not_found_in_library))
                 return@launch
             }
             songs.forEach { song ->
