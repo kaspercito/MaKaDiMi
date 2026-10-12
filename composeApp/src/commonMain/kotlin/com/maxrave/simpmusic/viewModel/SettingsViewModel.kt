@@ -8,6 +8,10 @@ import com.eygraber.uri.Uri
 import com.maxrave.common.Config
 import com.maxrave.common.LANGUAGE_MANUAL
 import com.maxrave.common.LOCATION_MANUAL
+import com.maxrave.common.OFFLINE_MODE
+import com.maxrave.common.OfflineMode
+import com.maxrave.common.SUPPORTED_LANGUAGE
+import com.maxrave.common.SUPPORTED_LOCATION
 import com.maxrave.common.QUALITY
 import com.maxrave.common.SELECTED_LANGUAGE
 import com.maxrave.common.STATUS_DONE
@@ -94,6 +98,16 @@ class SettingsViewModel(
     val location: StateFlow<String?> = _location
     private var _language: MutableStateFlow<String?> = MutableStateFlow(null)
     val language: StateFlow<String?> = _language
+
+    // true = sigue el idioma / la región del teléfono (aún no se ha elegido uno a mano en Ajustes).
+    private val _languageAuto = MutableStateFlow(true)
+    val languageAuto: StateFlow<Boolean> = _languageAuto
+    private val _locationAuto = MutableStateFlow(true)
+    val locationAuto: StateFlow<Boolean> = _locationAuto
+
+    // Modo offline: ninguna petición de red sale de la app (ver OfflineMode).
+    private val _offlineMode = MutableStateFlow(false)
+    val offlineMode: StateFlow<Boolean> = _offlineMode
     private var _loggedIn: MutableStateFlow<String?> = MutableStateFlow(null)
     val loggedIn: StateFlow<String?> = _loggedIn
     private var _normalizeVolume: MutableStateFlow<String?> = MutableStateFlow(null)
@@ -278,6 +292,9 @@ class SettingsViewModel(
     fun getData() {
         getLocation()
         getLanguage()
+        getLanguageAuto()
+        getLocationAuto()
+        getOfflineMode()
         getQuality()
         getPlayerCacheSize()
         getDownloadedCacheSize()
@@ -1118,6 +1135,25 @@ class SettingsViewModel(
             dataStoreManager.setLocation(location)
             // From now on the app keeps this country instead of following the phone's region.
             dataStoreManager.putString(LOCATION_MANUAL, STATUS_DONE)
+            _locationAuto.value = false
+            getLocation()
+        }
+    }
+
+    private fun getLocationAuto() {
+        viewModelScope.launch {
+            dataStoreManager.getString(LOCATION_MANUAL).collect { manual ->
+                _locationAuto.value = manual != STATUS_DONE
+            }
+        }
+    }
+
+    /** Vuelve a seguir la región del teléfono: borra la elección manual y aplica la región actual del sistema. */
+    fun setLocationAuto() {
+        viewModelScope.launch {
+            dataStoreManager.putString(LOCATION_MANUAL, "")
+            dataStoreManager.setLocation(SUPPORTED_LOCATION.fromCountry(systemLocaleNative().country))
+            _locationAuto.value = true
             getLocation()
         }
     }
@@ -1365,9 +1401,53 @@ class SettingsViewModel(
             dataStoreManager.putString(SELECTED_LANGUAGE, code)
             // From now on the app keeps this language instead of following the phone's.
             dataStoreManager.putString(LANGUAGE_MANUAL, STATUS_DONE)
+            _languageAuto.value = false
             Logger.w("SettingsViewModel", "changeLanguage: $code")
             getLanguage()
             changeLanguageNative(code)
+        }
+    }
+
+    private fun getLanguageAuto() {
+        viewModelScope.launch {
+            dataStoreManager.getString(LANGUAGE_MANUAL).collect { manual ->
+                _languageAuto.value = manual != STATUS_DONE
+            }
+        }
+    }
+
+    /** Vuelve a seguir el idioma del teléfono: borra la elección manual y quita el idioma propio de la app. */
+    fun setLanguageAuto() {
+        viewModelScope.launch {
+            dataStoreManager.putString(LANGUAGE_MANUAL, "")
+            val system = systemLocaleNative()
+            dataStoreManager.putString(
+                SELECTED_LANGUAGE,
+                SUPPORTED_LANGUAGE.fromSystem(system.language, system.script, system.country),
+            )
+            _languageAuto.value = true
+            getLanguage()
+            clearLanguageOverrideNative()
+        }
+    }
+
+    private fun getOfflineMode() {
+        viewModelScope.launch {
+            dataStoreManager.getString(OFFLINE_MODE).collect { value ->
+                val enabled = value == DataStoreManager.TRUE
+                OfflineMode.enabled = enabled
+                _offlineMode.value = enabled
+            }
+        }
+    }
+
+    /** Activa o desactiva el modo offline. Surte efecto al instante en todas las capas de red. */
+    fun setOfflineMode(enabled: Boolean) {
+        viewModelScope.launch {
+            dataStoreManager.putString(OFFLINE_MODE, if (enabled) DataStoreManager.TRUE else DataStoreManager.FALSE)
+            // Después de guardar, no antes: así el valor que reemite DataStore no pisa el cambio un instante.
+            OfflineMode.enabled = enabled
+            _offlineMode.value = enabled
         }
     }
 
@@ -2154,6 +2234,18 @@ expect fun getPackageName(): String
 expect fun getFileDir(): String
 
 expect fun changeLanguageNative(code: String)
+
+/** Idioma, script y país del teléfono (no los de la app, que pueden estar cambiados por el usuario). */
+data class SystemLocale(
+    val language: String,
+    val script: String,
+    val country: String,
+)
+
+expect fun systemLocaleNative(): SystemLocale
+
+/** Quita el idioma propio de la app para que vuelva a seguir al sistema. */
+expect fun clearLanguageOverrideNative()
 
 /** Number of equalizer bands, matching the ISO centres the desktop backend installs. */
 const val EQUALIZER_BAND_COUNT = 10

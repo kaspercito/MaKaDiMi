@@ -131,7 +131,11 @@ class ListenTogetherSession(
     fun createRoom(username: String) =
         launch {
             pendingUsername = username.trim()
-            client.send(MessageTypes.CREATE_ROOM, CreateRoomPayload(username = pendingUsername))
+            val sent = client.send(MessageTypes.CREATE_ROOM, CreateRoomPayload(username = pendingUsername))
+            if (!sent) {
+                // Antes el fallo era silencioso y el botón parecía no hacer nada.
+                _state.update { it.copy(error = "Not connected") }
+            }
         }
 
     fun joinRoom(

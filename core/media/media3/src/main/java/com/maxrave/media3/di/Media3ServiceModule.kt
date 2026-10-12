@@ -62,6 +62,7 @@ import com.maxrave.domain.repository.SearchRepository
 import com.maxrave.domain.repository.SongRepository
 import com.maxrave.domain.repository.StreamRepository
 import com.maxrave.logger.Logger
+import com.maxrave.media3.service.OfflineBlockInterceptor
 import com.maxrave.media3.cast.CastHandoffManager
 import com.maxrave.media3.cast.CastStreamResolver
 import com.maxrave.media3.exoplayer.CrossfadeExoPlayerAdapter
@@ -540,7 +541,8 @@ private fun provideHttpDataSourceFactory(
                 .readTimeout(30.seconds)
                 .proxy(
                     proxy,
-                ).addInterceptor(
+                ).addInterceptor(OfflineBlockInterceptor())
+                .addInterceptor(
                     HttpLoggingInterceptor()
                         .apply {
                             level = HttpLoggingInterceptor.Level.HEADERS

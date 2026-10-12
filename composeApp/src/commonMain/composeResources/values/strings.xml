@@ -1008,4 +1008,7 @@ Built with ❤️ on top of the open source project SimpMusic by Tuan Minh Nguye
     <string name="log_hide_stack_trace">Hide stack trace</string>
     <string name="log_export_failed">Could not export the log</string>
     <string name="songs_not_found_in_library">Couldn't find the selected songs in your library</string>
+    <string name="offline_mode_setting_title">Offline mode</string>
+    <string name="offline_mode_setting_description">Use no internet at all, so no mobile data is spent. Only your downloaded music and already cached content are available.</string>
+    <string name="automatic_system">Automatic (follow phone)</string>
 </resources>

@@ -27,6 +27,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import multiplatform.network.cmptoast.AppContext
+import com.maxrave.media3.service.OfflineBlockInterceptor
 import okhttp3.OkHttpClient
 import okio.FileSystem
 import org.koin.android.ext.koin.androidContext
@@ -125,7 +126,11 @@ class SimpMusicApplication :
                     add(
                         OkHttpNetworkFetcherFactory(
                             callFactory = {
-                                OkHttpClient()
+                                // Modo offline: sin red; las imágenes salen de la caché de disco.
+                                OkHttpClient
+                                    .Builder()
+                                    .addInterceptor(OfflineBlockInterceptor())
+                                    .build()
                             },
                         ),
                     )

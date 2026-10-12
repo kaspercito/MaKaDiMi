@@ -297,8 +297,11 @@ import simpmusic.composeapp.generated.resources.invalid_language_code
 import simpmusic.composeapp.generated.resources.invalid_port
 import simpmusic.composeapp.generated.resources.keep_backups
 import simpmusic.composeapp.generated.resources.keep_backups_format
+import simpmusic.composeapp.generated.resources.automatic_system
 import simpmusic.composeapp.generated.resources.keep_your_youtube_playlist_offline
 import simpmusic.composeapp.generated.resources.keep_your_youtube_playlist_offline_description
+import simpmusic.composeapp.generated.resources.offline_mode_setting_description
+import simpmusic.composeapp.generated.resources.offline_mode_setting_title
 import simpmusic.composeapp.generated.resources.kill_service_on_exit
 import simpmusic.composeapp.generated.resources.kill_service_on_exit_description
 import simpmusic.composeapp.generated.resources.language
@@ -351,7 +354,6 @@ import simpmusic.composeapp.generated.resources.lyrics_style_apple_music
 import simpmusic.composeapp.generated.resources.lyrics_style_classic
 import simpmusic.composeapp.generated.resources.main_lyrics_provider
 import simpmusic.composeapp.generated.resources.manage_your_youtube_accounts
-import simpmusic.composeapp.generated.resources.maxrave_dev
 import simpmusic.composeapp.generated.resources.monthly
 import simpmusic.composeapp.generated.resources.never
 import simpmusic.composeapp.generated.resources.no_account
@@ -513,6 +515,10 @@ fun SettingScreen(
 
     val language by viewModel.language.collectAsStateWithLifecycle()
     val location by viewModel.location.collectAsStateWithLifecycle()
+    val languageAuto by viewModel.languageAuto.collectAsStateWithLifecycle()
+    val locationAuto by viewModel.locationAuto.collectAsStateWithLifecycle()
+    val offlineMode by viewModel.offlineMode.collectAsStateWithLifecycle()
+    val automaticLabel = stringResource(Res.string.automatic_system)
     val quality by viewModel.quality.collectAsStateWithLifecycle()
     val downloadQuality by viewModel.downloadQuality.collectAsStateWithLifecycle()
     val autoDownloadLikedSongs by viewModel.autoDownloadLikedSongs.collectAsStateWithLifecycle()
@@ -954,6 +960,12 @@ fun SettingScreen(
         item(key = "content") {
             SettingGroup(title = stringResource(Res.string.content)) {
                 SettingItem(
+                    title = stringResource(Res.string.offline_mode_setting_title),
+                    subtitle = stringResource(Res.string.offline_mode_setting_description),
+                    smallSubtitle = true,
+                    switch = (offlineMode to { viewModel.setOfflineMode(it) }),
+                )
+                SettingItem(
                     title = stringResource(Res.string.youtube_account),
                     subtitle = stringResource(Res.string.manage_your_youtube_accounts),
                     onClick = {
@@ -963,7 +975,10 @@ fun SettingScreen(
                 )
                 SettingItem(
                     title = stringResource(Res.string.language),
-                    subtitle = SUPPORTED_LANGUAGE.getLanguageFromCode(language ?: "en-US"),
+                    subtitle =
+                        SUPPORTED_LANGUAGE.getLanguageFromCode(language ?: "en-US").let {
+                            if (languageAuto) "$automaticLabel · $it" else it
+                        },
                     onClick = {
                         viewModel.setAlertData(
                             SettingAlertState(
@@ -971,13 +986,16 @@ fun SettingScreen(
                                 selectOne =
                                     SettingAlertState.SelectData(
                                         listSelect =
-                                            SUPPORTED_LANGUAGE.items.map {
-                                                (it.toString() == SUPPORTED_LANGUAGE.getLanguageFromCode(language ?: "en-US")) to it.toString()
-                                            },
+                                            listOf(languageAuto to automaticLabel) +
+                                                SUPPORTED_LANGUAGE.items.map {
+                                                    (!languageAuto && it.toString() == SUPPORTED_LANGUAGE.getLanguageFromCode(language ?: "en-US")) to it.toString()
+                                                },
                                     ),
                                 confirm =
                                     runBlocking { getString(Res.string.change) } to { state ->
-                                        val code = SUPPORTED_LANGUAGE.getCodeFromLanguage(state.selectOne?.getSelected() ?: "English")
+                                        val picked = state.selectOne?.getSelected() ?: "English"
+                                        val isAuto = picked == automaticLabel
+                                        val code = SUPPORTED_LANGUAGE.getCodeFromLanguage(picked)
                                         viewModel.setBasicAlertData(
                                             SettingBasicAlertState(
                                                 title = runBlocking { getString(Res.string.warning) },
@@ -986,7 +1004,7 @@ fun SettingScreen(
                                                     runBlocking { getString(Res.string.change) } to {
                                                         sharedViewModel.activityRecreate()
                                                         viewModel.setBasicAlertData(null)
-                                                        viewModel.changeLanguage(code)
+                                                        if (isAuto) viewModel.setLanguageAuto() else viewModel.changeLanguage(code)
                                                     },
                                                 dismiss = runBlocking { getString(Res.string.cancel) },
                                             ),
@@ -999,7 +1017,7 @@ fun SettingScreen(
                 )
                 SettingItem(
                     title = stringResource(Res.string.content_country),
-                    subtitle = location ?: "",
+                    subtitle = if (locationAuto) "$automaticLabel · ${location ?: ""}" else location ?: "",
                     onClick = {
                         viewModel.setAlertData(
                             SettingAlertState(
@@ -1007,15 +1025,19 @@ fun SettingScreen(
                                 selectOne =
                                     SettingAlertState.SelectData(
                                         listSelect =
-                                            SUPPORTED_LOCATION.items.map { item ->
-                                                (item.toString() == location) to item.toString()
-                                            },
+                                            listOf(locationAuto to automaticLabel) +
+                                                SUPPORTED_LOCATION.items.map { item ->
+                                                    (!locationAuto && item.toString() == location) to item.toString()
+                                                },
                                     ),
                                 confirm =
                                     runBlocking { getString(Res.string.change) } to { state ->
-                                        viewModel.changeLocation(
-                                            state.selectOne?.getSelected() ?: "US",
-                                        )
+                                        val picked = state.selectOne?.getSelected() ?: "US"
+                                        if (picked == automaticLabel) {
+                                            viewModel.setLocationAuto()
+                                        } else {
+                                            viewModel.changeLocation(picked)
+                                        }
                                     },
                                 dismiss = runBlocking { getString(Res.string.cancel) },
                             ),
@@ -2720,7 +2742,7 @@ fun SettingScreen(
                 )
                 SettingItem(
                     title = stringResource(Res.string.author),
-                    subtitle = stringResource(Res.string.maxrave_dev),
+                    subtitle = BrandLinks.GITHUB_USER,
                     onClick = {
                         runCatching { uriHandler.openUri(BrandLinks.GITHUB_PROFILE) }
                     },

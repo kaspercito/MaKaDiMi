@@ -51,10 +51,10 @@ object Config {
  *
  */
 object SUPPORTED_LOCATION {
-    /** The phone's country if YouTube Music supports it as a content country, otherwise "US". */
+    /** The phone's country if YouTube Music supports it as a content country, otherwise "EC". */
     fun fromCountry(country: String?): String {
         val c = country?.uppercase().orEmpty()
-        return if (items.any { it.toString() == c }) c else "US"
+        return if (items.any { it.toString() == c }) c else "EC"
     }
 
     val items: Array<CharSequence> =

@@ -30,6 +30,8 @@ import com.eygraber.uri.toKmpUriOrNull
 import com.maxrave.common.FIRST_TIME_MIGRATION
 import com.maxrave.common.LANGUAGE_MANUAL
 import com.maxrave.common.LOCATION_MANUAL
+import com.maxrave.common.OfflineMode
+import com.maxrave.common.OFFLINE_MODE
 import com.maxrave.common.SELECTED_LANGUAGE
 import com.maxrave.common.STATUS_DONE
 import com.maxrave.common.SUPPORTED_LANGUAGE
@@ -139,6 +141,10 @@ class MainActivity : AppCompatActivity() {
         unloadKoinModules(viewModelModule)
         loadKoinModules(viewModelModule)
         VersionManager.initialize()
+        // Antes de arrancar el servicio, la comprobación de versión o la portada: así ya está decidido el
+        // modo offline y el idioma/región del teléfono (sin esperar a un segundo arranque).
+        OfflineMode.enabled = getString(OFFLINE_MODE) == DataStoreManager.TRUE
+        applyLanguageAndRegion()
         checkForUpdate()
         askIgnoreBatteryOptimizationsOnce()
         if (viewModel.recreateActivity.value || viewModel.isServiceRunning) {
@@ -157,7 +163,6 @@ class MainActivity : AppCompatActivity() {
                 ),
             )
         }
-        applyLanguageAndRegion()
 
         enableEdgeToEdge(
             navigationBarStyle =

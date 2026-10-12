@@ -968,4 +968,7 @@
     <string name="log_hide_stack_trace">Ocultar traza de pila</string>
     <string name="log_export_failed">No se pudo exportar el registro</string>
     <string name="songs_not_found_in_library">No se encontraron las canciones seleccionadas en tu biblioteca</string>
+    <string name="offline_mode_setting_title">Modo sin conexión</string>
+    <string name="offline_mode_setting_description">No usa internet en absoluto, así que no gasta datos móviles. Solo están disponibles tu música descargada y el contenido que ya está en caché.</string>
+    <string name="automatic_system">Automático (según el teléfono)</string>
 </resources>

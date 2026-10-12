@@ -115,3 +115,19 @@ actual fun changeLanguageNative(code: String) {
         ),
     )
 }
+
+actual fun systemLocaleNative(): SystemLocale =
+    SystemLocale(
+        language = System.getProperty("user.language").orEmpty(),
+        script = System.getProperty("user.script").orEmpty(),
+        country = System.getProperty("user.country").orEmpty(),
+    )
+
+actual fun deviceCountryNative(): String? = System.getProperty("user.country")?.takeIf { it.isNotBlank() }
+
+actual fun clearLanguageOverrideNative() {
+    val system = systemLocaleNative()
+    if (system.language.isNotEmpty()) {
+        Locale.setDefault(Locale.forLanguageTag(listOf(system.language, system.country).filter { it.isNotEmpty() }.joinToString("-")))
+    }
+}

@@ -344,3 +344,35 @@ actual fun changeLanguageNative(code: String) {
         e.printStackTrace()
     }
 }
+
+actual fun systemLocaleNative(): SystemLocale {
+    // Resources.getSystem(), no Locale.getDefault(): este último devuelve el idioma de la propia app
+    // en cuanto se ha llamado a setApplicationLocales, y repetiría la elección anterior.
+    val locale: Locale =
+        androidx.core.os.ConfigurationCompat
+            .getLocales(android.content.res.Resources.getSystem().configuration)[0]
+            ?: Locale.getDefault()
+    return SystemLocale(
+        language = locale.language,
+        script = locale.script,
+        country = locale.country,
+    )
+}
+
+actual fun deviceCountryNative(): String? =
+    runCatching {
+        val telephony =
+            getKoin().get<Context>().getSystemService(Context.TELEPHONY_SERVICE) as? android.telephony.TelephonyManager
+        // La red a la que estás conectado dice dónde estás; la SIM, de dónde es tu línea. No necesitan permisos.
+        listOf(telephony?.networkCountryIso, telephony?.simCountryIso)
+            .firstOrNull { !it.isNullOrBlank() }
+            ?.uppercase()
+    }.getOrNull()
+
+actual fun clearLanguageOverrideNative() {
+    try {
+        AppCompatDelegate.setApplicationLocales(LocaleListCompat.getEmptyLocaleList())
+    } catch (e: Exception) {
+        e.printStackTrace()
+    }
+}

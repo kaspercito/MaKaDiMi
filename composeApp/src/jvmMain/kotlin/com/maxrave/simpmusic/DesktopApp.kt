@@ -26,6 +26,7 @@ import coil3.disk.DiskCache
 import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import coil3.request.CachePolicy
 import coil3.request.crossfade
+import com.maxrave.common.OfflineMode
 import com.maxrave.common.AppIdentity
 import com.maxrave.data.di.loader.loadAllModules
 import com.maxrave.domain.manager.DataStoreManager
@@ -59,6 +60,7 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import multiplatform.network.cmptoast.ToastHost
 import multiplatform.network.cmptoast.showToast
+import okhttp3.Interceptor
 import okhttp3.OkHttpClient
 import okio.FileSystem
 import org.jetbrains.compose.resources.getString
@@ -480,7 +482,15 @@ fun runDesktopApp(args: Array<String> = emptyArray()) {
                                 add(
                                     OkHttpNetworkFetcherFactory(
                                         callFactory = {
-                                            OkHttpClient()
+                                            // Modo offline: sin red; las imágenes salen de la caché de disco.
+                                            OkHttpClient
+                                                .Builder()
+                                                .addInterceptor(
+                                                    Interceptor { chain ->
+                                                        if (OfflineMode.enabled) throw java.io.IOException(OfflineMode.BLOCKED_MESSAGE)
+                                                        chain.proceed(chain.request())
+                                                    },
+                                                ).build()
                                         },
                                     ),
                                 )

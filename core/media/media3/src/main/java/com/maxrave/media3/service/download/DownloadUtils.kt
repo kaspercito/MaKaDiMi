@@ -26,6 +26,7 @@ import com.maxrave.domain.mediaservice.handler.DownloadHandler
 import com.maxrave.domain.repository.SongRepository
 import com.maxrave.domain.repository.StreamRepository
 import com.maxrave.logger.Logger
+import com.maxrave.media3.service.OfflineBlockInterceptor
 import com.maxrave.media3.extension.isFullyCached
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -64,6 +65,7 @@ internal class DownloadUtils(
                     OkHttpDataSource.Factory(
                         OkHttpClient
                             .Builder()
+                            .addInterceptor(OfflineBlockInterceptor())
                             .build(),
                     ),
                 ),
@@ -172,7 +174,7 @@ internal class DownloadUtils(
             dataSourceFactory,
             Executor(Runnable::run),
         ).apply {
-            maxParallelDownloads = 20
+            maxParallelDownloads = 4
             minRetryCount = 3
             addListener(
                 MusicDownloadService.TerminalStateNotificationHelper(

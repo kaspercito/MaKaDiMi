@@ -342,6 +342,11 @@ private fun ColumnScope.WorkArea(
     // and the card would collapse through a frame of empty space.
     var lastError by remember { mutableStateOf("") }
     LaunchedEffect(state.error) { state.error?.let { lastError = it } }
+    // Sin conexión no se puede crear ni unirse a una sala, y antes solo se conectaba al tocar la barra de
+    // estado: el botón se quedaba gris sin explicación. Ahora se conecta al abrir la pantalla.
+    LaunchedEffect(Unit) {
+        if (state.connection is RoomConnection.Disconnected) viewModel.connect()
+    }
     AnimatedVisibility(visible = state.error != null) {
         ErrorCard(message = lastError, onDismiss = viewModel::clearError)
     }
@@ -380,8 +385,9 @@ private fun ColumnScope.WorkArea(
 
             PrimaryButton(
                 text = stringResource(Res.string.lt_create_room),
-                enabled = displayName.isNotBlank() && state.isConnected,
-                onClick = viewModel::createRoom,
+                enabled = displayName.isNotBlank(),
+                // Si la conexión se cayó, el toque la reintenta en vez de no hacer nada.
+                onClick = { if (state.isConnected) viewModel.createRoom() else viewModel.connect() },
             )
 
             DividerLabel(stringResource(Res.string.lt_or_join_with_code))
