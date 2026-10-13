@@ -2247,6 +2247,8 @@ expect fun systemLocaleNative(): SystemLocale
 /** Quita el idioma propio de la app para que vuelva a seguir al sistema. */
 expect fun clearLanguageOverrideNative()
 
+expect fun deviceCountryNative(): String?
+
 /** Number of equalizer bands, matching the ISO centres the desktop backend installs. */
 const val EQUALIZER_BAND_COUNT = 10
 
