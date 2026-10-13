@@ -1011,4 +1011,7 @@ Built with ❤️ on top of the open source project SimpMusic by Tuan Minh Nguye
     <string name="offline_mode_setting_title">Offline mode</string>
     <string name="offline_mode_setting_description">Use no internet at all, so no mobile data is spent. Only your downloaded music and already cached content are available.</string>
     <string name="automatic_system">Automatic (follow phone)</string>
+    <string name="update_now">Update now</string>
+    <string name="update_downloading">Downloading update…</string>
+    <string name="update_allow_install">Allow this app to install updates, then go back and tap Update now again.</string>
 </resources>

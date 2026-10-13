@@ -971,4 +971,7 @@
     <string name="offline_mode_setting_title">Modo sin conexión</string>
     <string name="offline_mode_setting_description">No usa internet en absoluto, así que no gasta datos móviles. Solo están disponibles tu música descargada y el contenido que ya está en caché.</string>
     <string name="automatic_system">Automático (según el teléfono)</string>
+    <string name="update_now">Actualizar ahora</string>
+    <string name="update_downloading">Descargando actualización…</string>
+    <string name="update_allow_install">Permite que esta app instale actualizaciones, vuelve y pulsa Actualizar ahora otra vez.</string>
 </resources>

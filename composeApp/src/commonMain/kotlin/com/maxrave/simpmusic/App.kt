@@ -26,6 +26,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Checkbox
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -39,6 +40,7 @@ import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -69,6 +71,9 @@ import com.maxrave.domain.manager.DataStoreManager.Values.TRUE
 import com.maxrave.logger.Logger
 import com.maxrave.simpmusic.expect.Orientation
 import com.maxrave.simpmusic.expect.currentOrientation
+import com.maxrave.simpmusic.expect.UpdateInstallResult
+import com.maxrave.simpmusic.expect.canInstallUpdateInApp
+import com.maxrave.simpmusic.expect.downloadAndInstallUpdate
 import com.maxrave.simpmusic.expect.openUrl
 import com.maxrave.simpmusic.expect.ui.layerBackdrop
 import com.maxrave.simpmusic.expect.ui.rememberBackdrop
@@ -114,6 +119,7 @@ import com.mikepenz.markdown.m3.markdownTypography
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
@@ -135,7 +141,10 @@ import simpmusic.composeapp.generated.resources.sleep_timer_off
 import simpmusic.composeapp.generated.resources.this_app_needs_to_access_your_notification
 import simpmusic.composeapp.generated.resources.this_link_is_not_supported
 import simpmusic.composeapp.generated.resources.unknown
+import simpmusic.composeapp.generated.resources.update_allow_install
 import simpmusic.composeapp.generated.resources.update_available
+import simpmusic.composeapp.generated.resources.update_downloading
+import simpmusic.composeapp.generated.resources.update_now
 import simpmusic.composeapp.generated.resources.update_message
 import simpmusic.composeapp.generated.resources.yes
 import kotlin.time.ExperimentalTime
@@ -832,6 +841,11 @@ fun App(
 
                 if (shouldShowUpdateDialog) {
                     val response = updateData ?: return@Scaffold
+                    // Descarga e instalación dentro de la app (Android). null = sin descarga en curso.
+                    var updateProgress by remember { mutableStateOf<Float?>(null) }
+                    var showAllowInstallHint by remember { mutableStateOf(false) }
+                    val updateScope = rememberCoroutineScope()
+                    val installInApp = response.assetUrl != null && canInstallUpdateInApp()
                     AlertDialog(
                         properties =
                             DialogProperties(
@@ -844,20 +858,54 @@ fun App(
                         },
                         confirmButton = {
                             TextButton(
+                                enabled = updateProgress == null,
                                 onClick = {
-                                    shouldShowUpdateDialog = false
-                                    viewModel.showedUpdateDialog = false
-                                    openUrl(com.maxrave.simpmusic.utils.BrandLinks.RELEASES_URL)
+                                    val apkUrl = response.assetUrl
+                                    if (installInApp && apkUrl != null) {
+                                        showAllowInstallHint = false
+                                        updateProgress = 0f
+                                        updateScope.launch {
+                                            val result =
+                                                downloadAndInstallUpdate(
+                                                    url = apkUrl,
+                                                    fileName = response.assetName ?: "update.apk",
+                                                    onProgress = { updateProgress = it },
+                                                )
+                                            updateProgress = null
+                                            when (result) {
+                                                UpdateInstallResult.InstallerOpened -> {
+                                                    shouldShowUpdateDialog = false
+                                                    viewModel.showedUpdateDialog = false
+                                                }
+
+                                                UpdateInstallResult.NeedsPermission -> {
+                                                    showAllowInstallHint = true
+                                                }
+
+                                                UpdateInstallResult.Failed -> {
+                                                    // Si algo falla, queda el método de siempre: abrir la página.
+                                                    shouldShowUpdateDialog = false
+                                                    viewModel.showedUpdateDialog = false
+                                                    openUrl(com.maxrave.simpmusic.utils.BrandLinks.RELEASES_URL)
+                                                }
+                                            }
+                                        }
+                                    } else {
+                                        shouldShowUpdateDialog = false
+                                        viewModel.showedUpdateDialog = false
+                                        openUrl(com.maxrave.simpmusic.utils.BrandLinks.RELEASES_URL)
+                                    }
                                 },
                             ) {
                                 Text(
-                                    stringResource(Res.string.download),
+                                    stringResource(if (installInApp) Res.string.update_now else Res.string.download),
                                     style = typo().bodySmall,
                                 )
                             }
                         },
                         dismissButton = {
                             TextButton(
+                                enabled = updateProgress == null,
                                 onClick = {
                                     shouldShowUpdateDialog = false
                                     viewModel.showedUpdateDialog = false
@@ -920,6 +968,24 @@ fun App(
                                         rememberScrollState(),
                                     ),
                             ) {
+                                updateProgress?.let { progress ->
+                                    Text(
+                                        text = "${stringResource(Res.string.update_downloading)} ${(progress * 100).toInt()}%",
+                                        style = typo().labelMedium,
+                                        modifier = Modifier.padding(vertical = 4.dp),
+                                    )
+                                    LinearProgressIndicator(
+                                        progress = { progress },
+                                        modifier = Modifier.fillMaxWidth().padding(bottom = 8.dp),
+                                    )
+                                }
+                                if (showAllowInstallHint) {
+                                    Text(
+                                        text = stringResource(Res.string.update_allow_install),
+                                        style = typo().labelMedium,
+                                        modifier = Modifier.padding(vertical = 4.dp),
+                                    )
+                                }
                                 Text(
                                     text = updateMessage,
                                     style = typo().labelMedium,
