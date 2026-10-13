@@ -70,6 +70,8 @@ kotlin {
                 // commonMain by default and will correctly pull the Android artifacts of any KMP
                 // dependencies declared in commonMain.
                 implementation(libs.ktor.client.okhttp)
+                implementation(libs.okhttp3.okhttp)
+                implementation(projects.common)
                 implementation(libs.brotli.dec)
             }
         }
@@ -77,6 +79,8 @@ kotlin {
         jvmMain {
             dependencies {
                 implementation(libs.ktor.client.okhttp)
+                implementation(libs.okhttp3.okhttp)
+                implementation(projects.common)
                 implementation(libs.brotli.dec)
             }
         }
