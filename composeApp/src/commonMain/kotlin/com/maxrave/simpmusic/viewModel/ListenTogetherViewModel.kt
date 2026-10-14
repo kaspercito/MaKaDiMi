@@ -35,6 +35,14 @@ class ListenTogetherViewModel(
 
         // Host conveniences live in settings but are applied by the session, so they are mirrored
         // onto it for as long as this screen exists.
+        // El nombre de la última vez. Antes el campo arrancaba vacío y "Crear sala" seguía gris hasta
+        // escribir uno, sin ninguna pista de por qué; parecía que la sala no se dejaba crear.
+        viewModelScope.launch {
+            val saved = dataStore.getString(ListenTogetherPrefs.DISPLAY_NAME).first().orEmpty()
+            if (_displayName.value.isBlank() && saved.isNotBlank()) {
+                _displayName.value = saved.take(MAX_USERNAME_LENGTH)
+            }
+        }
         viewModelScope.launch {
             dataStore.getString(ListenTogetherPrefs.AUTO_APPROVE_JOINS).collect {
                 repository.autoApproveJoins = it == ListenTogetherPrefs.TRUE
@@ -70,12 +78,23 @@ class ListenTogetherViewModel(
 
     fun disconnect() = repository.disconnect()
 
+    /**
+     * El nombre que se manda al servidor: el escrito, o uno por defecto si se dejó vacío. Se muestra
+     * en el campo y se recuerda para la próxima sala.
+     */
+    private fun effectiveName(): String {
+        val name = _displayName.value.trim().ifBlank { DEFAULT_USERNAME }
+        _displayName.value = name
+        viewModelScope.launch { dataStore.putString(ListenTogetherPrefs.DISPLAY_NAME, name) }
+        return name
+    }
+
     fun createRoom() {
-        repository.createRoom(_displayName.value)
+        repository.createRoom(effectiveName())
     }
 
     fun joinRoom() {
-        repository.joinRoom(_roomCodeInput.value, _displayName.value)
+        repository.joinRoom(_roomCodeInput.value, effectiveName())
     }
 
     fun leaveRoom() {
@@ -144,5 +163,6 @@ class ListenTogetherViewModel(
     companion object {
         const val ROOM_CODE_LENGTH = 8
         private const val MAX_USERNAME_LENGTH = 50
+        private const val DEFAULT_USERNAME = "MaKaDiMi"
     }
 }

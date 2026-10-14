@@ -225,3 +225,7 @@
 -dontwarn io.sentry.instrumentation.file.SentryFileOutputStream$Factory
 -dontwarn io.sentry.okhttp.SentryOkHttpEventListener
 -dontwarn io.sentry.okhttp.SentryOkHttpInterceptor
+
+# Escuchar juntos: los mensajes del protocolo (protobuf) se codifican con serializadores generados;
+# no se ofuscan ni se recortan, para que la versión release hable igual que la debug.
+-keep class org.simpmusic.listentogether.** { *; }

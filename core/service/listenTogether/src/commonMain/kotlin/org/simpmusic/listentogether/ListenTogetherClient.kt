@@ -138,6 +138,13 @@ class ListenTogetherClient(
     /** Set when the server tells us retrying cannot help — see [MessageTypes.ERROR] handling. */
     private var fatal = false
 
+    /**
+     * Por qué falló el último intento (sin DNS, 403 en el upgrade, modo offline, handshake sin
+     * respuesta...). Antes solo iba al log, y el usuario veía un "no se pudo reconectar" sin saber si
+     * era su red, el servidor o la app.
+     */
+    private var lastFailure: String? = null
+
     /** True between a completed handshake and the socket going down. */
     val isConnected: Boolean
         get() = session?.isActive == true && handshake?.isCompleted == true
@@ -181,6 +188,7 @@ class ListenTogetherClient(
                     throw e
                 } catch (e: Exception) {
                     Logger.e(TAG, "Connection error: ${e.stackTraceToString()}")
+                    lastFailure = e.message?.takeIf { it.isNotBlank() } ?: e::class.simpleName
                 }
                 // Reached on every close, clean or not — openAndRun returns when the reader stops.
                 scheduleReconnect()
@@ -272,6 +280,7 @@ class ListenTogetherClient(
                 // must not buy itself unlimited retries.
                 reconnectDelay = INITIAL_RECONNECT_DELAY
                 reconnectAttempts = 0
+                lastFailure = null
                 _events.emit(
                     ListenTogetherEvent.Connected(
                         serverVersion = caps.serverVersion,
@@ -404,7 +413,9 @@ class ListenTogetherClient(
             sessionToken = null
             _events.emit(
                 ListenTogetherEvent.Disconnected(
-                    reason = "Could not reconnect after $MAX_RECONNECT_ATTEMPTS attempts",
+                    reason =
+                        "Could not reconnect after $MAX_RECONNECT_ATTEMPTS attempts" +
+                            (lastFailure?.let { ": $it" } ?: ""),
                     willRetry = false,
                 ),
             )

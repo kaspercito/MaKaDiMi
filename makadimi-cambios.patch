@@ -1,0 +1,615 @@
+diff --git a/androidApp/proguard-rules.pro b/androidApp/proguard-rules.pro
+index a1952e8..f5ccd70 100644
+--- a/androidApp/proguard-rules.pro
++++ b/androidApp/proguard-rules.pro
+@@ -224,4 +224,8 @@
+ -dontwarn io.sentry.instrumentation.file.SentryFileInputStream$Factory
+ -dontwarn io.sentry.instrumentation.file.SentryFileOutputStream$Factory
+ -dontwarn io.sentry.okhttp.SentryOkHttpEventListener
+--dontwarn io.sentry.okhttp.SentryOkHttpInterceptor
+\ No newline at end of file
++-dontwarn io.sentry.okhttp.SentryOkHttpInterceptor
++
++# Escuchar juntos: los mensajes del protocolo (protobuf) se codifican con serializadores generados;
++# no se ofuscan ni se recortan, para que la versión release hable igual que la debug.
++-keep class org.simpmusic.listentogether.** { *; }
+diff --git a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/home/HomeScreen.kt b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/home/HomeScreen.kt
+index 03ca6ba..5371323 100644
+--- a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/home/HomeScreen.kt
++++ b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/home/HomeScreen.kt
+@@ -408,18 +408,14 @@ fun HomeScreen(
+     }
+     LaunchedEffect(openAppTime, shareLyricsPermissions) {
+         Logger.w("HomeScreen", "openAppTime: $openAppTime, shareLyricsPermissions: $shareLyricsPermissions")
+-        if (openAppTime >= 10 && openAppTime % 10 == 0 && openAppTime <= 50) {
+-            showReviewDialog = true
+-        } else if ((openAppTime == 1 || openAppTime % 15 == 0) && openAppTime <= 60 && !shareLyricsPermissions) {
+-            showRequestShareLyricsPermissions = true
+-        } else if (openAppTime == 5) {
+-            // Blog promo: one-shot after 5 app opens, bump key suffix to re-promote later
+-            // MaKaDiMi: promo del blog del autor original desactivado.
+-        } else {
+-            showReviewDialog = false
+-            showFootgunsDialog = false
+-            showRequestShareLyricsPermissions = false
+-        }
++        // MaKaDiMi: sin anuncios. Antes aquí salían, según cuántas veces se abría la app, el aviso de
++        // "dale una estrella en GitHub" (reseña y footguns), la petición de compartir letras con la base
++        // de datos del autor original y la promo de su blog. Ya no aparece ninguno; los avisos que sí
++        // importan (actualización de la app, permiso de notificaciones, iniciar sesión) siguen aparte.
++        showReviewDialog = false
++        showFootgunsDialog = false
++        showRequestShareLyricsPermissions = false
++        showBlogPromoDialog = false
+     }
+ 
+     val shouldStartPaginate =
+diff --git a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/home/ListenTogetherScreen.kt b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/home/ListenTogetherScreen.kt
+index a717bf4..2dcb9b8 100644
+--- a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/home/ListenTogetherScreen.kt
++++ b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/home/ListenTogetherScreen.kt
+@@ -343,9 +343,12 @@ private fun ColumnScope.WorkArea(
+     var lastError by remember { mutableStateOf("") }
+     LaunchedEffect(state.error) { state.error?.let { lastError = it } }
+     // Sin conexión no se puede crear ni unirse a una sala, y antes solo se conectaba al tocar la barra de
+-    // estado: el botón se quedaba gris sin explicación. Ahora se conecta al abrir la pantalla.
++    // estado: el botón se quedaba gris sin explicación. Ahora se conecta al abrir la pantalla, también
++    // si la última vez se rindió (Failed): volver a entrar es un reintento.
+     LaunchedEffect(Unit) {
+-        if (state.connection is RoomConnection.Disconnected) viewModel.connect()
++        if (state.connection is RoomConnection.Disconnected || state.connection is RoomConnection.Failed) {
++            viewModel.connect()
++        }
+     }
+     AnimatedVisibility(visible = state.error != null) {
+         ErrorCard(message = lastError, onDismiss = viewModel::clearError)
+@@ -385,9 +388,10 @@ private fun ColumnScope.WorkArea(
+ 
+             PrimaryButton(
+                 text = stringResource(Res.string.lt_create_room),
+-                enabled = displayName.isNotBlank(),
+-                // Si la conexión se cayó, el toque la reintenta en vez de no hacer nada.
+-                onClick = { if (state.isConnected) viewModel.createRoom() else viewModel.connect() },
++                // Siempre activo: sin nombre se usa el de la última vez o uno por defecto, y sin conexión
++                // la sala se crea en cuanto el socket esté listo (si no se logra, la tarjeta roja dice por qué).
++                enabled = true,
++                onClick = viewModel::createRoom,
+             )
+ 
+             DividerLabel(stringResource(Res.string.lt_or_join_with_code))
+@@ -396,7 +400,7 @@ private fun ColumnScope.WorkArea(
+ 
+             SecondaryButton(
+                 text = stringResource(Res.string.lt_join_room),
+-                enabled = displayName.isNotBlank() && codeInput.length == ROOM_CODE_LENGTH && state.isConnected,
++                enabled = codeInput.length == ROOM_CODE_LENGTH,
+                 onClick = viewModel::joinRoom,
+             )
+ 
+diff --git a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/viewModel/ListenTogetherViewModel.kt b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/viewModel/ListenTogetherViewModel.kt
+index 8d320ce..84617d5 100644
+--- a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/viewModel/ListenTogetherViewModel.kt
++++ b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/viewModel/ListenTogetherViewModel.kt
+@@ -35,6 +35,14 @@ class ListenTogetherViewModel(
+ 
+         // Host conveniences live in settings but are applied by the session, so they are mirrored
+         // onto it for as long as this screen exists.
++        // El nombre de la última vez. Antes el campo arrancaba vacío y "Crear sala" seguía gris hasta
++        // escribir uno, sin ninguna pista de por qué; parecía que la sala no se dejaba crear.
++        viewModelScope.launch {
++            val saved = dataStore.getString(ListenTogetherPrefs.DISPLAY_NAME).first().orEmpty()
++            if (_displayName.value.isBlank() && saved.isNotBlank()) {
++                _displayName.value = saved.take(MAX_USERNAME_LENGTH)
++            }
++        }
+         viewModelScope.launch {
+             dataStore.getString(ListenTogetherPrefs.AUTO_APPROVE_JOINS).collect {
+                 repository.autoApproveJoins = it == ListenTogetherPrefs.TRUE
+@@ -70,12 +78,23 @@ class ListenTogetherViewModel(
+ 
+     fun disconnect() = repository.disconnect()
+ 
++    /**
++     * El nombre que se manda al servidor: el escrito, o uno por defecto si se dejó vacío. Se muestra
++     * en el campo y se recuerda para la próxima sala.
++     */
++    private fun effectiveName(): String {
++        val name = _displayName.value.trim().ifBlank { DEFAULT_USERNAME }
++        _displayName.value = name
++        viewModelScope.launch { dataStore.putString(ListenTogetherPrefs.DISPLAY_NAME, name) }
++        return name
++    }
++
+     fun createRoom() {
+-        repository.createRoom(_displayName.value)
++        repository.createRoom(effectiveName())
+     }
+ 
+     fun joinRoom() {
+-        repository.joinRoom(_roomCodeInput.value, _displayName.value)
++        repository.joinRoom(_roomCodeInput.value, effectiveName())
+     }
+ 
+     fun leaveRoom() {
+@@ -144,5 +163,6 @@ class ListenTogetherViewModel(
+     companion object {
+         const val ROOM_CODE_LENGTH = 8
+         private const val MAX_USERNAME_LENGTH = 50
++        private const val DEFAULT_USERNAME = "MaKaDiMi"
+     }
+ }
+diff --git a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/viewModel/NotificationViewModel.kt b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/viewModel/NotificationViewModel.kt
+index 597bf61..384d2d0 100644
+--- a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/viewModel/NotificationViewModel.kt
++++ b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/viewModel/NotificationViewModel.kt
+@@ -19,9 +19,13 @@ class NotificationViewModel(
+         viewModelScope.launch {
+             commonRepository.getAllNotifications().collect { notificationEntities ->
+                 _listNotification.value =
+-                    notificationEntities?.sortedByDescending {
+-                        it.time
+-                    }
++                    notificationEntities
++                        // MaKaDiMi: las entradas del blog del autor original (guardadas por versiones
++                        // anteriores) son publicidad; aquí solo van los lanzamientos de tus artistas.
++                        ?.filterNot { it.type == NotificationEntity.TYPE_BLOG }
++                        ?.sortedByDescending {
++                            it.time
++                        }
+             }
+         }
+     }
+diff --git a/core/data/src/commonMain/kotlin/com/maxrave/data/listentogether/ListenTogetherPrefs.kt b/core/data/src/commonMain/kotlin/com/maxrave/data/listentogether/ListenTogetherPrefs.kt
+index e1b7b47..08694ec 100644
+--- a/core/data/src/commonMain/kotlin/com/maxrave/data/listentogether/ListenTogetherPrefs.kt
++++ b/core/data/src/commonMain/kotlin/com/maxrave/data/listentogether/ListenTogetherPrefs.kt
+@@ -15,6 +15,9 @@ object ListenTogetherPrefs {
+     const val FOLLOW_HOST_VOLUME = "lt_follow_host_volume"
+     const val BLOCKLIST = "lt_blocklist"
+ 
++    /** Último nombre usado en una sala, para no volver a escribirlo cada vez. */
++    const val DISPLAY_NAME = "lt_display_name"
++
+     const val TRUE = "TRUE"
+     const val FALSE = "FALSE"
+ 
+diff --git a/core/media/media3/src/main/java/com/maxrave/media3/service/download/DownloadUtils.kt b/core/media/media3/src/main/java/com/maxrave/media3/service/download/DownloadUtils.kt
+index e5fdbc9..93ae928 100644
+--- a/core/media/media3/src/main/java/com/maxrave/media3/service/download/DownloadUtils.kt
++++ b/core/media/media3/src/main/java/com/maxrave/media3/service/download/DownloadUtils.kt
+@@ -42,6 +42,7 @@ import kotlinx.coroutines.launch
+ import kotlinx.coroutines.runBlocking
+ import okhttp3.OkHttpClient
+ import java.io.ByteArrayInputStream
++import java.util.concurrent.ConcurrentHashMap
+ import java.util.concurrent.Executor
+ 
+ @UnstableApi
+@@ -180,10 +181,45 @@ internal class DownloadUtils(
+                 MusicDownloadService.TerminalStateNotificationHelper(
+                     context = context,
+                     notificationHelper = downloadNotificationHelper,
+-                    nextNotificationId = MusicDownloadService.NOTIFICATION_ID + 1,
+                 ),
+             )
+         }
++
++    /**
++     * Último estado combinado que se escribió en la base de datos por canción. Lo lee el colector de
++     * [downloads] para no volver a escribir lo que no cambió, y lo vacía [onDownloadRemoved] al quitar.
++     * Concurrente porque el colector corre en IO y los callbacks de DownloadManager en otro hilo.
++     */
++    private val lastWrittenState = ConcurrentHashMap<String, Int>()
++
++    /**
++     * Audio + video -> un solo estado por canción.
++     *
++     * Quitar una descarga pasa por REMOVING, que antes caía en el `else` (= "descargando") y se
++     * escribía así en la base de datos justo después de que la interfaz hubiera puesto "no descargada":
++     * la canción se quedaba "descargando" para siempre tras cancelar o borrar una descarga.
++     */
++    private fun mergedState(
++        audio: Int?,
++        video: Int?,
++    ): Int {
++        if (audio == Download.STATE_REMOVING || video == Download.STATE_REMOVING) {
++            return DownloadState.STATE_NOT_DOWNLOADED
++        }
++        return when (audio to video) {
++            Download.STATE_COMPLETED to Download.STATE_COMPLETED -> DownloadState.STATE_DOWNLOADED
++            Download.STATE_FAILED to Download.STATE_FAILED -> DownloadState.STATE_NOT_DOWNLOADED
++            Download.STATE_QUEUED to Download.STATE_QUEUED -> DownloadState.STATE_PREPARING
++            Download.STATE_COMPLETED to null -> DownloadState.STATE_DOWNLOADED
++            Download.STATE_FAILED to null -> DownloadState.STATE_NOT_DOWNLOADED
++            Download.STATE_QUEUED to null -> DownloadState.STATE_PREPARING
++            null to Download.STATE_COMPLETED -> DownloadState.STATE_DOWNLOADING
++            null to Download.STATE_QUEUED -> DownloadState.STATE_PREPARING
++            null to Download.STATE_FAILED -> DownloadState.STATE_NOT_DOWNLOADED
++            else -> DownloadState.STATE_DOWNLOADING
++        }
++    }
++
+     private var _downloads = MutableStateFlow<Map<String, Pair<DownloadHandler.Download?, DownloadHandler.Download?>>>(emptyMap())
+ 
+     // Audio / Video
+@@ -264,6 +300,7 @@ internal class DownloadUtils(
+         _downloads.value = emptyMap()
+         _downloadTask.value = emptyMap()
+         downloadingVideoIds.value = mutableSetOf()
++        lastWrittenState.clear()
+         downloadManager.removeAllDownloads()
+     }
+ 
+@@ -274,19 +311,11 @@ internal class DownloadUtils(
+                     val videoId = it.key
+                     val audio = it.value.first?.state
+                     val video = it.value.second?.state
+-                    val combineState =
+-                        when (audio to video) {
+-                            Download.STATE_COMPLETED to Download.STATE_COMPLETED -> DownloadState.STATE_DOWNLOADED
+-                            Download.STATE_FAILED to Download.STATE_FAILED -> DownloadState.STATE_NOT_DOWNLOADED
+-                            Download.STATE_QUEUED to Download.STATE_QUEUED -> DownloadState.STATE_PREPARING
+-                            Download.STATE_COMPLETED to null -> DownloadState.STATE_DOWNLOADED
+-                            Download.STATE_FAILED to null -> DownloadState.STATE_NOT_DOWNLOADED
+-                            Download.STATE_QUEUED to null -> DownloadState.STATE_PREPARING
+-                            null to Download.STATE_COMPLETED -> DownloadState.STATE_DOWNLOADING
+-                            null to Download.STATE_QUEUED -> DownloadState.STATE_PREPARING
+-                            null to Download.STATE_FAILED -> DownloadState.STATE_NOT_DOWNLOADED
+-                            else -> DownloadState.STATE_DOWNLOADING
+-                        }
++                    val combineState = mergedState(audio, video)
++                    // Este flujo emite el mapa ENTERO en cada cambio de cualquier descarga: con una lista
++                    // de 100 canciones eso eran 100 escrituras en la base de datos por cambio (y cada una
++                    // refresca las pantallas que observan canciones). Solo se escribe lo que cambió.
++                    if (lastWrittenState.put(videoId, combineState) == combineState) return@forEach
+                     _downloadTask.update {
+                         it.toMutableMap().apply {
+                             set(videoId, combineState)
+@@ -344,6 +373,35 @@ internal class DownloadUtils(
+         _downloads.value = result
+         downloadManager.addListener(
+             object : DownloadManager.Listener {
++                override fun onDownloadRemoved(
++                    downloadManager: DownloadManager,
++                    download: Download,
++                ) {
++                    // Sin esto la descarga quitada se quedaba para siempre en el mapa con su último
++                    // estado (REMOVING), y el colector seguía releyéndola.
++                    val id = download.request.id
++                    val isVideo = id.startsWith(MERGING_DATA_TYPE.VIDEO)
++                    val songId = if (isVideo) id.removePrefix(MERGING_DATA_TYPE.VIDEO) else id
++                    var gone = false
++                    _downloads.update { map ->
++                        // El bloque puede repetirse si otro hilo cambió el mapa a la vez.
++                        gone = false
++                        val current = map[songId] ?: return@update map
++                        val updated = if (isVideo) current.copy(second = null) else current.copy(first = null)
++                        if (updated.first == null && updated.second == null) {
++                            gone = true
++                            map - songId
++                        } else {
++                            map + (songId to updated)
++                        }
++                    }
++                    if (gone) {
++                        lastWrittenState.remove(songId)
++                        _downloadTask.update { it - songId }
++                        downloadingVideoIds.update { it.apply { remove(songId) } }
++                    }
++                }
++
+                 override fun onDownloadChanged(
+                     downloadManager: DownloadManager,
+                     download: Download,
+diff --git a/core/media/media3/src/main/java/com/maxrave/media3/service/download/MusicDownloadService.kt b/core/media/media3/src/main/java/com/maxrave/media3/service/download/MusicDownloadService.kt
+index eaffcfc..0ddfbc4 100644
+--- a/core/media/media3/src/main/java/com/maxrave/media3/service/download/MusicDownloadService.kt
++++ b/core/media/media3/src/main/java/com/maxrave/media3/service/download/MusicDownloadService.kt
+@@ -11,6 +11,7 @@ import androidx.media3.exoplayer.offline.DownloadNotificationHelper
+ import androidx.media3.exoplayer.offline.DownloadService
+ import androidx.media3.exoplayer.scheduler.PlatformScheduler
+ import androidx.media3.exoplayer.scheduler.Scheduler
++import com.maxrave.common.MERGING_DATA_TYPE
+ import com.maxrave.media3.R
+ import com.maxrave.domain.mediaservice.handler.DownloadHandler
+ import org.koin.android.ext.android.inject
+@@ -47,35 +48,91 @@ internal class MusicDownloadService :
+             notMetRequirements,
+         )
+ 
++    /**
++     * Avisa del resultado de las descargas UNA sola vez por tanda.
++     *
++     * Antes cada canción publicaba su propia notificación ("descarga completada" o "falló") con un id
++     * nuevo cada vez: bajar una lista de 50 canciones dejaba 50 avisos apilados en la barra, y como la
++     * canción y su video son dos descargas distintas, las que traían video avisaban dos veces. Ahora se
++     * van contando y, cuando ya no queda nada activo (`onIdle`), se publica un resumen de completadas y
++     * otro de fallidas, con id fijo para que una tanda nueva reemplace al aviso de la anterior en vez de
++     * sumarse a él.
++     *
++     * Los callbacks de [DownloadManager] llegan todos por el mismo hilo (el de la aplicación), así que
++     * los contadores no necesitan sincronización.
++     */
+     class TerminalStateNotificationHelper(
+         private val context: Context,
+         private val notificationHelper: DownloadNotificationHelper,
+-        private var nextNotificationId: Int,
+     ) : DownloadManager.Listener {
++        private var completedCount = 0
++        private var lastCompletedTitle: String? = null
++        private var failedCount = 0
++        private var lastFailedTitle: String? = null
++
+         override fun onDownloadChanged(
+             downloadManager: DownloadManager,
+             download: Download,
+             finalException: Exception?,
+         ) {
+-            if (download.state == Download.STATE_FAILED) {
+-                val notification =
+-                    notificationHelper.buildDownloadFailedNotification(
+-                        context,
+-                        R.drawable.baseline_error_outline_24,
+-                        null,
+-                        Util.fromUtf8Bytes(download.request.data),
+-                    )
+-                NotificationUtil.setNotification(context, nextNotificationId++, notification)
+-            } else if (download.state == Download.STATE_COMPLETED) {
+-                val notification =
++            // La parte de video de una canción es una descarga aparte; el aviso es por canción, así que
++            // solo cuenta la de audio. (Si falla solo el video, el audio sigue sirviendo.)
++            if (download.request.id.startsWith(MERGING_DATA_TYPE.VIDEO)) return
++            val title = Util.fromUtf8Bytes(download.request.data)
++            when (download.state) {
++                Download.STATE_COMPLETED -> {
++                    completedCount++
++                    lastCompletedTitle = title
++                }
++
++                Download.STATE_FAILED -> {
++                    failedCount++
++                    lastFailedTitle = title
++                }
++            }
++        }
++
++        override fun onIdle(downloadManager: DownloadManager) {
++            if (completedCount > 0) {
++                val text =
++                    if (completedCount == 1 && !lastCompletedTitle.isNullOrBlank()) {
++                        lastCompletedTitle
++                    } else {
++                        context.resources.getQuantityString(R.plurals.n_song, completedCount, completedCount)
++                    }
++                NotificationUtil.setNotification(
++                    context,
++                    COMPLETED_NOTIFICATION_ID,
+                     notificationHelper.buildDownloadCompletedNotification(
+                         context,
+                         R.drawable.baseline_downloaded,
+                         null,
+-                        Util.fromUtf8Bytes(download.request.data),
+-                    )
+-                NotificationUtil.setNotification(context, nextNotificationId++, notification)
++                        text,
++                    ),
++                )
++            }
++            if (failedCount > 0) {
++                val text =
++                    if (failedCount == 1 && !lastFailedTitle.isNullOrBlank()) {
++                        lastFailedTitle
++                    } else {
++                        context.resources.getQuantityString(R.plurals.n_song, failedCount, failedCount)
++                    }
++                NotificationUtil.setNotification(
++                    context,
++                    FAILED_NOTIFICATION_ID,
++                    notificationHelper.buildDownloadFailedNotification(
++                        context,
++                        R.drawable.baseline_error_outline_24,
++                        null,
++                        text,
++                    ),
++                )
+             }
++            completedCount = 0
++            lastCompletedTitle = null
++            failedCount = 0
++            lastFailedTitle = null
+         }
+ 
+         override fun onDownloadsPausedChanged(
+@@ -91,6 +148,8 @@ internal class MusicDownloadService :
+     companion object {
+         const val CHANNEL_ID = "download"
+         const val NOTIFICATION_ID = 1000
++        const val COMPLETED_NOTIFICATION_ID = NOTIFICATION_ID + 1
++        const val FAILED_NOTIFICATION_ID = NOTIFICATION_ID + 2
+         const val JOB_ID = 1000
+     }
+ }
+\ No newline at end of file
+diff --git a/core/service/listenTogether/src/commonMain/kotlin/org/simpmusic/listentogether/ListenTogetherClient.kt b/core/service/listenTogether/src/commonMain/kotlin/org/simpmusic/listentogether/ListenTogetherClient.kt
+index 9139890..f5ae274 100644
+--- a/core/service/listenTogether/src/commonMain/kotlin/org/simpmusic/listentogether/ListenTogetherClient.kt
++++ b/core/service/listenTogether/src/commonMain/kotlin/org/simpmusic/listentogether/ListenTogetherClient.kt
+@@ -138,6 +138,13 @@ class ListenTogetherClient(
+     /** Set when the server tells us retrying cannot help — see [MessageTypes.ERROR] handling. */
+     private var fatal = false
+ 
++    /**
++     * Por qué falló el último intento (sin DNS, 403 en el upgrade, modo offline, handshake sin
++     * respuesta...). Antes solo iba al log, y el usuario veía un "no se pudo reconectar" sin saber si
++     * era su red, el servidor o la app.
++     */
++    private var lastFailure: String? = null
++
+     /** True between a completed handshake and the socket going down. */
+     val isConnected: Boolean
+         get() = session?.isActive == true && handshake?.isCompleted == true
+@@ -181,6 +188,7 @@ class ListenTogetherClient(
+                     throw e
+                 } catch (e: Exception) {
+                     Logger.e(TAG, "Connection error: ${e.stackTraceToString()}")
++                    lastFailure = e.message?.takeIf { it.isNotBlank() } ?: e::class.simpleName
+                 }
+                 // Reached on every close, clean or not — openAndRun returns when the reader stops.
+                 scheduleReconnect()
+@@ -272,6 +280,7 @@ class ListenTogetherClient(
+                 // must not buy itself unlimited retries.
+                 reconnectDelay = INITIAL_RECONNECT_DELAY
+                 reconnectAttempts = 0
++                lastFailure = null
+                 _events.emit(
+                     ListenTogetherEvent.Connected(
+                         serverVersion = caps.serverVersion,
+@@ -404,7 +413,9 @@ class ListenTogetherClient(
+             sessionToken = null
+             _events.emit(
+                 ListenTogetherEvent.Disconnected(
+-                    reason = "Could not reconnect after $MAX_RECONNECT_ATTEMPTS attempts",
++                    reason =
++                        "Could not reconnect after $MAX_RECONNECT_ATTEMPTS attempts" +
++                            (lastFailure?.let { ": $it" } ?: ""),
+                     willRetry = false,
+                 ),
+             )
+diff --git a/core/service/listenTogether/src/commonMain/kotlin/org/simpmusic/listentogether/ListenTogetherSession.kt b/core/service/listenTogether/src/commonMain/kotlin/org/simpmusic/listentogether/ListenTogetherSession.kt
+index d57fcf8..d932852 100644
+--- a/core/service/listenTogether/src/commonMain/kotlin/org/simpmusic/listentogether/ListenTogetherSession.kt
++++ b/core/service/listenTogether/src/commonMain/kotlin/org/simpmusic/listentogether/ListenTogetherSession.kt
+@@ -1,7 +1,10 @@
+ package org.simpmusic.listentogether
+ 
+ import com.maxrave.logger.Logger
++import kotlinx.atomicfu.locks.SynchronizedObject
++import kotlinx.atomicfu.locks.synchronized
+ import kotlinx.coroutines.CoroutineScope
++import kotlinx.coroutines.CoroutineStart
+ import kotlinx.coroutines.Dispatchers
+ import kotlinx.coroutines.Job
+ import kotlinx.coroutines.SupervisorJob
+@@ -114,40 +117,82 @@ class ListenTogetherSession(
+     var autoApproveJoins: Boolean = false
+     var autoApproveSuggestions: Boolean = false
+ 
++    /**
++     * Lo que el usuario pidió antes de que el socket estuviera listo (crear sala, unirse). Se ejecuta
++     * cuando llega `Connected` y se descarta si la conexión se rinde. Antes, tocar "Crear sala" sin
++     * conexión solo conectaba y había que volver a tocar; con el servidor lento parecía que el botón
++     * no hacía nada.
++     */
++    private var afterConnect: (suspend () -> Unit)? = null
++
++    // La UI (hilo principal) y los eventos del socket (Default) tocan `afterConnect` a la vez; todo
++    // acceso pasa por aquí, y `takeAfterConnect` lo entrega una sola vez.
++    private val afterConnectLock = SynchronizedObject()
++
++    private fun takeAfterConnect(): (suspend () -> Unit)? =
++        synchronized(afterConnectLock) {
++            val pending = afterConnect
++            afterConnect = null
++            pending
++        }
++
+     /** Opens the socket. Joining a room is a separate, later step. */
+     fun connect() {
+         if (pump == null) {
+-            pump = launch { client.events.collect(::onEvent) }
++            // UNDISPATCHED: la suscripción a los eventos queda hecha antes de abrir el socket. Los
++            // eventos no se reenvían (sin replay), y con el dispatcher normal el colector podía
++            // suscribirse tarde y perderse el `Connected` de una conexión rápida.
++            pump = launch(start = CoroutineStart.UNDISPATCHED) { client.events.collect(::onEvent) }
+         }
+         _state.update { it.copy(connection = ConnectionState.Connecting, error = null) }
+         client.connect()
+     }
+ 
+     fun disconnect() {
++        takeAfterConnect()
+         client.disconnect()
+         _state.value = ListenTogetherState()
+     }
+ 
+-    fun createRoom(username: String) =
+-        launch {
+-            pendingUsername = username.trim()
++    /** Ejecuta [action] ya, o en cuanto la conexión esté lista (abriéndola si hace falta). */
++    private fun whenConnected(action: suspend () -> Unit) {
++        if (client.isConnected) {
++            launch { action() }
++        } else {
++            synchronized(afterConnectLock) { afterConnect = action }
++            connect()
++            // Si el handshake terminó justo entre la comprobación de arriba y aquí, el evento
++            // `Connected` ya pasó y nadie ejecutaría la acción: se recoge aquí. Exactamente una de las
++            // dos rutas la toma.
++            if (client.isConnected) takeAfterConnect()?.let { launch { it() } }
++        }
++    }
++
++    fun createRoom(username: String) {
++        pendingUsername = username.trim()
++        whenConnected {
+             val sent = client.send(MessageTypes.CREATE_ROOM, CreateRoomPayload(username = pendingUsername))
+             if (!sent) {
+                 // Antes el fallo era silencioso y el botón parecía no hacer nada.
+                 _state.update { it.copy(error = "Not connected") }
+             }
+         }
++    }
+ 
+     fun joinRoom(
+         roomCode: String,
+         username: String,
+-    ) = launch {
++    ) {
+         pendingUsername = username.trim()
+         val code = roomCode.trim().uppercase()
++        // Se marca ya, no al enviar: la pantalla muestra "esperando al anfitrión" desde el toque aunque
++        // el socket todavía se esté abriendo.
+         _state.update { it.copy(pendingJoinCode = code, error = null) }
+-        val sent = client.send(MessageTypes.JOIN_ROOM, JoinRoomPayload(roomCode = code, username = pendingUsername))
+-        if (!sent) {
+-            _state.update { it.copy(pendingJoinCode = null, error = "Not connected") }
++        whenConnected {
++            val sent = client.send(MessageTypes.JOIN_ROOM, JoinRoomPayload(roomCode = code, username = pendingUsername))
++            if (!sent) {
++                _state.update { it.copy(pendingJoinCode = null, error = "Not connected") }
++            }
+         }
+     }
+ 
+@@ -289,21 +334,27 @@ class ListenTogetherSession(
+ 
+     private fun onEvent(event: ListenTogetherEvent) {
+         when (event) {
+-            is ListenTogetherEvent.Connected ->
++            is ListenTogetherEvent.Connected -> {
+                 _state.update { it.copy(connection = ConnectionState.Connected(event.serverVersion)) }
++                takeAfterConnect()?.let { pending -> launch { pending() } }
++            }
+ 
+             is ListenTogetherEvent.ClockReady -> Unit
+ 
+-            is ListenTogetherEvent.Disconnected ->
++            is ListenTogetherEvent.Disconnected -> {
+                 _state.update {
+                     if (event.willRetry) {
+                         it.copy(connection = ConnectionState.Connecting)
+                     } else {
+                         // Losing the socket loses the room with it; leaving the room UI up would
+-                        // offer controls that silently do nothing.
+-                        ListenTogetherState(connection = ConnectionState.Failed(event.reason ?: "Disconnected"))
++                        // offer controls that silently do nothing. El motivo también va como error
++                        // para que se vea en la tarjeta roja y no solo en la barra de estado.
++                        val reason = event.reason ?: "Disconnected"
++                        ListenTogetherState(connection = ConnectionState.Failed(reason), error = reason)
+                     }
+                 }
++                if (!event.willRetry) takeAfterConnect()
++            }
+ 
+             is ListenTogetherEvent.Message -> onMessage(event.type, event.payload)
+         }

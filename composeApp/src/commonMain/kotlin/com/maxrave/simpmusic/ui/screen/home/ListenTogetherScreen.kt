@@ -343,9 +343,12 @@ private fun ColumnScope.WorkArea(
     var lastError by remember { mutableStateOf("") }
     LaunchedEffect(state.error) { state.error?.let { lastError = it } }
     // Sin conexión no se puede crear ni unirse a una sala, y antes solo se conectaba al tocar la barra de
-    // estado: el botón se quedaba gris sin explicación. Ahora se conecta al abrir la pantalla.
+    // estado: el botón se quedaba gris sin explicación. Ahora se conecta al abrir la pantalla, también
+    // si la última vez se rindió (Failed): volver a entrar es un reintento.
     LaunchedEffect(Unit) {
-        if (state.connection is RoomConnection.Disconnected) viewModel.connect()
+        if (state.connection is RoomConnection.Disconnected || state.connection is RoomConnection.Failed) {
+            viewModel.connect()
+        }
     }
     AnimatedVisibility(visible = state.error != null) {
         ErrorCard(message = lastError, onDismiss = viewModel::clearError)
@@ -385,9 +388,10 @@ private fun ColumnScope.WorkArea(
 
             PrimaryButton(
                 text = stringResource(Res.string.lt_create_room),
-                enabled = displayName.isNotBlank(),
-                // Si la conexión se cayó, el toque la reintenta en vez de no hacer nada.
-                onClick = { if (state.isConnected) viewModel.createRoom() else viewModel.connect() },
+                // Siempre activo: sin nombre se usa el de la última vez o uno por defecto, y sin conexión
+                // la sala se crea en cuanto el socket esté listo (si no se logra, la tarjeta roja dice por qué).
+                enabled = true,
+                onClick = viewModel::createRoom,
             )
 
             DividerLabel(stringResource(Res.string.lt_or_join_with_code))
@@ -396,7 +400,7 @@ private fun ColumnScope.WorkArea(
 
             SecondaryButton(
                 text = stringResource(Res.string.lt_join_room),
-                enabled = displayName.isNotBlank() && codeInput.length == ROOM_CODE_LENGTH && state.isConnected,
+                enabled = codeInput.length == ROOM_CODE_LENGTH,
                 onClick = viewModel::joinRoom,
             )
 

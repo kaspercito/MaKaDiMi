@@ -408,18 +408,14 @@ fun HomeScreen(
     }
     LaunchedEffect(openAppTime, shareLyricsPermissions) {
         Logger.w("HomeScreen", "openAppTime: $openAppTime, shareLyricsPermissions: $shareLyricsPermissions")
-        if (openAppTime >= 10 && openAppTime % 10 == 0 && openAppTime <= 50) {
-            showReviewDialog = true
-        } else if ((openAppTime == 1 || openAppTime % 15 == 0) && openAppTime <= 60 && !shareLyricsPermissions) {
-            showRequestShareLyricsPermissions = true
-        } else if (openAppTime == 5) {
-            // Blog promo: one-shot after 5 app opens, bump key suffix to re-promote later
-            // MaKaDiMi: promo del blog del autor original desactivado.
-        } else {
-            showReviewDialog = false
-            showFootgunsDialog = false
-            showRequestShareLyricsPermissions = false
-        }
+        // MaKaDiMi: sin anuncios. Antes aquí salían, según cuántas veces se abría la app, el aviso de
+        // "dale una estrella en GitHub" (reseña y footguns), la petición de compartir letras con la base
+        // de datos del autor original y la promo de su blog. Ya no aparece ninguno; los avisos que sí
+        // importan (actualización de la app, permiso de notificaciones, iniciar sesión) siguen aparte.
+        showReviewDialog = false
+        showFootgunsDialog = false
+        showRequestShareLyricsPermissions = false
+        showBlogPromoDialog = false
     }
 
     val shouldStartPaginate =

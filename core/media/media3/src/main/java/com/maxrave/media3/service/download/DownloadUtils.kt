@@ -42,6 +42,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import okhttp3.OkHttpClient
 import java.io.ByteArrayInputStream
+import java.util.concurrent.ConcurrentHashMap
 import java.util.concurrent.Executor
 
 @UnstableApi
@@ -180,10 +181,45 @@ internal class DownloadUtils(
                 MusicDownloadService.TerminalStateNotificationHelper(
                     context = context,
                     notificationHelper = downloadNotificationHelper,
-                    nextNotificationId = MusicDownloadService.NOTIFICATION_ID + 1,
                 ),
             )
         }
+
+    /**
+     * Último estado combinado que se escribió en la base de datos por canción. Lo lee el colector de
+     * [downloads] para no volver a escribir lo que no cambió, y lo vacía [onDownloadRemoved] al quitar.
+     * Concurrente porque el colector corre en IO y los callbacks de DownloadManager en otro hilo.
+     */
+    private val lastWrittenState = ConcurrentHashMap<String, Int>()
+
+    /**
+     * Audio + video -> un solo estado por canción.
+     *
+     * Quitar una descarga pasa por REMOVING, que antes caía en el `else` (= "descargando") y se
+     * escribía así en la base de datos justo después de que la interfaz hubiera puesto "no descargada":
+     * la canción se quedaba "descargando" para siempre tras cancelar o borrar una descarga.
+     */
+    private fun mergedState(
+        audio: Int?,
+        video: Int?,
+    ): Int {
+        if (audio == Download.STATE_REMOVING || video == Download.STATE_REMOVING) {
+            return DownloadState.STATE_NOT_DOWNLOADED
+        }
+        return when (audio to video) {
+            Download.STATE_COMPLETED to Download.STATE_COMPLETED -> DownloadState.STATE_DOWNLOADED
+            Download.STATE_FAILED to Download.STATE_FAILED -> DownloadState.STATE_NOT_DOWNLOADED
+            Download.STATE_QUEUED to Download.STATE_QUEUED -> DownloadState.STATE_PREPARING
+            Download.STATE_COMPLETED to null -> DownloadState.STATE_DOWNLOADED
+            Download.STATE_FAILED to null -> DownloadState.STATE_NOT_DOWNLOADED
+            Download.STATE_QUEUED to null -> DownloadState.STATE_PREPARING
+            null to Download.STATE_COMPLETED -> DownloadState.STATE_DOWNLOADING
+            null to Download.STATE_QUEUED -> DownloadState.STATE_PREPARING
+            null to Download.STATE_FAILED -> DownloadState.STATE_NOT_DOWNLOADED
+            else -> DownloadState.STATE_DOWNLOADING
+        }
+    }
+
     private var _downloads = MutableStateFlow<Map<String, Pair<DownloadHandler.Download?, DownloadHandler.Download?>>>(emptyMap())
 
     // Audio / Video
@@ -264,6 +300,7 @@ internal class DownloadUtils(
         _downloads.value = emptyMap()
         _downloadTask.value = emptyMap()
         downloadingVideoIds.value = mutableSetOf()
+        lastWrittenState.clear()
         downloadManager.removeAllDownloads()
     }
 
@@ -274,19 +311,11 @@ internal class DownloadUtils(
                     val videoId = it.key
                     val audio = it.value.first?.state
                     val video = it.value.second?.state
-                    val combineState =
-                        when (audio to video) {
-                            Download.STATE_COMPLETED to Download.STATE_COMPLETED -> DownloadState.STATE_DOWNLOADED
-                            Download.STATE_FAILED to Download.STATE_FAILED -> DownloadState.STATE_NOT_DOWNLOADED
-                            Download.STATE_QUEUED to Download.STATE_QUEUED -> DownloadState.STATE_PREPARING
-                            Download.STATE_COMPLETED to null -> DownloadState.STATE_DOWNLOADED
-                            Download.STATE_FAILED to null -> DownloadState.STATE_NOT_DOWNLOADED
-                            Download.STATE_QUEUED to null -> DownloadState.STATE_PREPARING
-                            null to Download.STATE_COMPLETED -> DownloadState.STATE_DOWNLOADING
-                            null to Download.STATE_QUEUED -> DownloadState.STATE_PREPARING
-                            null to Download.STATE_FAILED -> DownloadState.STATE_NOT_DOWNLOADED
-                            else -> DownloadState.STATE_DOWNLOADING
-                        }
+                    val combineState = mergedState(audio, video)
+                    // Este flujo emite el mapa ENTERO en cada cambio de cualquier descarga: con una lista
+                    // de 100 canciones eso eran 100 escrituras en la base de datos por cambio (y cada una
+                    // refresca las pantallas que observan canciones). Solo se escribe lo que cambió.
+                    if (lastWrittenState.put(videoId, combineState) == combineState) return@forEach
                     _downloadTask.update {
                         it.toMutableMap().apply {
                             set(videoId, combineState)
@@ -344,6 +373,35 @@ internal class DownloadUtils(
         _downloads.value = result
         downloadManager.addListener(
             object : DownloadManager.Listener {
+                override fun onDownloadRemoved(
+                    downloadManager: DownloadManager,
+                    download: Download,
+                ) {
+                    // Sin esto la descarga quitada se quedaba para siempre en el mapa con su último
+                    // estado (REMOVING), y el colector seguía releyéndola.
+                    val id = download.request.id
+                    val isVideo = id.startsWith(MERGING_DATA_TYPE.VIDEO)
+                    val songId = if (isVideo) id.removePrefix(MERGING_DATA_TYPE.VIDEO) else id
+                    var gone = false
+                    _downloads.update { map ->
+                        // El bloque puede repetirse si otro hilo cambió el mapa a la vez.
+                        gone = false
+                        val current = map[songId] ?: return@update map
+                        val updated = if (isVideo) current.copy(second = null) else current.copy(first = null)
+                        if (updated.first == null && updated.second == null) {
+                            gone = true
+                            map - songId
+                        } else {
+                            map + (songId to updated)
+                        }
+                    }
+                    if (gone) {
+                        lastWrittenState.remove(songId)
+                        _downloadTask.update { it - songId }
+                        downloadingVideoIds.update { it.apply { remove(songId) } }
+                    }
+                }
+
                 override fun onDownloadChanged(
                     downloadManager: DownloadManager,
                     download: Download,

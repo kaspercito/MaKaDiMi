@@ -1,7 +1,10 @@
 package org.simpmusic.listentogether
 
 import com.maxrave.logger.Logger
+import kotlinx.atomicfu.locks.SynchronizedObject
+import kotlinx.atomicfu.locks.synchronized
 import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.CoroutineStart
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
@@ -114,40 +117,82 @@ class ListenTogetherSession(
     var autoApproveJoins: Boolean = false
     var autoApproveSuggestions: Boolean = false
 
+    /**
+     * Lo que el usuario pidió antes de que el socket estuviera listo (crear sala, unirse). Se ejecuta
+     * cuando llega `Connected` y se descarta si la conexión se rinde. Antes, tocar "Crear sala" sin
+     * conexión solo conectaba y había que volver a tocar; con el servidor lento parecía que el botón
+     * no hacía nada.
+     */
+    private var afterConnect: (suspend () -> Unit)? = null
+
+    // La UI (hilo principal) y los eventos del socket (Default) tocan `afterConnect` a la vez; todo
+    // acceso pasa por aquí, y `takeAfterConnect` lo entrega una sola vez.
+    private val afterConnectLock = SynchronizedObject()
+
+    private fun takeAfterConnect(): (suspend () -> Unit)? =
+        synchronized(afterConnectLock) {
+            val pending = afterConnect
+            afterConnect = null
+            pending
+        }
+
     /** Opens the socket. Joining a room is a separate, later step. */
     fun connect() {
         if (pump == null) {
-            pump = launch { client.events.collect(::onEvent) }
+            // UNDISPATCHED: la suscripción a los eventos queda hecha antes de abrir el socket. Los
+            // eventos no se reenvían (sin replay), y con el dispatcher normal el colector podía
+            // suscribirse tarde y perderse el `Connected` de una conexión rápida.
+            pump = launch(start = CoroutineStart.UNDISPATCHED) { client.events.collect(::onEvent) }
         }
         _state.update { it.copy(connection = ConnectionState.Connecting, error = null) }
         client.connect()
     }
 
     fun disconnect() {
+        takeAfterConnect()
         client.disconnect()
         _state.value = ListenTogetherState()
     }
 
-    fun createRoom(username: String) =
-        launch {
-            pendingUsername = username.trim()
+    /** Ejecuta [action] ya, o en cuanto la conexión esté lista (abriéndola si hace falta). */
+    private fun whenConnected(action: suspend () -> Unit) {
+        if (client.isConnected) {
+            launch { action() }
+        } else {
+            synchronized(afterConnectLock) { afterConnect = action }
+            connect()
+            // Si el handshake terminó justo entre la comprobación de arriba y aquí, el evento
+            // `Connected` ya pasó y nadie ejecutaría la acción: se recoge aquí. Exactamente una de las
+            // dos rutas la toma.
+            if (client.isConnected) takeAfterConnect()?.let { launch { it() } }
+        }
+    }
+
+    fun createRoom(username: String) {
+        pendingUsername = username.trim()
+        whenConnected {
             val sent = client.send(MessageTypes.CREATE_ROOM, CreateRoomPayload(username = pendingUsername))
             if (!sent) {
                 // Antes el fallo era silencioso y el botón parecía no hacer nada.
                 _state.update { it.copy(error = "Not connected") }
             }
         }
+    }
 
     fun joinRoom(
         roomCode: String,
         username: String,
-    ) = launch {
+    ) {
         pendingUsername = username.trim()
         val code = roomCode.trim().uppercase()
+        // Se marca ya, no al enviar: la pantalla muestra "esperando al anfitrión" desde el toque aunque
+        // el socket todavía se esté abriendo.
         _state.update { it.copy(pendingJoinCode = code, error = null) }
-        val sent = client.send(MessageTypes.JOIN_ROOM, JoinRoomPayload(roomCode = code, username = pendingUsername))
-        if (!sent) {
-            _state.update { it.copy(pendingJoinCode = null, error = "Not connected") }
+        whenConnected {
+            val sent = client.send(MessageTypes.JOIN_ROOM, JoinRoomPayload(roomCode = code, username = pendingUsername))
+            if (!sent) {
+                _state.update { it.copy(pendingJoinCode = null, error = "Not connected") }
+            }
         }
     }
 
@@ -289,21 +334,27 @@ class ListenTogetherSession(
 
     private fun onEvent(event: ListenTogetherEvent) {
         when (event) {
-            is ListenTogetherEvent.Connected ->
+            is ListenTogetherEvent.Connected -> {
                 _state.update { it.copy(connection = ConnectionState.Connected(event.serverVersion)) }
+                takeAfterConnect()?.let { pending -> launch { pending() } }
+            }
 
             is ListenTogetherEvent.ClockReady -> Unit
 
-            is ListenTogetherEvent.Disconnected ->
+            is ListenTogetherEvent.Disconnected -> {
                 _state.update {
                     if (event.willRetry) {
                         it.copy(connection = ConnectionState.Connecting)
                     } else {
                         // Losing the socket loses the room with it; leaving the room UI up would
-                        // offer controls that silently do nothing.
-                        ListenTogetherState(connection = ConnectionState.Failed(event.reason ?: "Disconnected"))
+                        // offer controls that silently do nothing. El motivo también va como error
+                        // para que se vea en la tarjeta roja y no solo en la barra de estado.
+                        val reason = event.reason ?: "Disconnected"
+                        ListenTogetherState(connection = ConnectionState.Failed(reason), error = reason)
                     }
                 }
+                if (!event.willRetry) takeAfterConnect()
+            }
 
             is ListenTogetherEvent.Message -> onMessage(event.type, event.payload)
         }

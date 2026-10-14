@@ -19,9 +19,13 @@ class NotificationViewModel(
         viewModelScope.launch {
             commonRepository.getAllNotifications().collect { notificationEntities ->
                 _listNotification.value =
-                    notificationEntities?.sortedByDescending {
-                        it.time
-                    }
+                    notificationEntities
+                        // MaKaDiMi: las entradas del blog del autor original (guardadas por versiones
+                        // anteriores) son publicidad; aquí solo van los lanzamientos de tus artistas.
+                        ?.filterNot { it.type == NotificationEntity.TYPE_BLOG }
+                        ?.sortedByDescending {
+                            it.time
+                        }
             }
         }
     }

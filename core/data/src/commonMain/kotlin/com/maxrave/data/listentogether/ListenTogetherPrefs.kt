@@ -15,6 +15,9 @@ object ListenTogetherPrefs {
     const val FOLLOW_HOST_VOLUME = "lt_follow_host_volume"
     const val BLOCKLIST = "lt_blocklist"
 
+    /** Último nombre usado en una sala, para no volver a escribirlo cada vez. */
+    const val DISPLAY_NAME = "lt_display_name"
+
     const val TRUE = "TRUE"
     const val FALSE = "FALSE"
 
