@@ -1069,23 +1069,27 @@ class SharedViewModel(
         }
     }
 
+    /**
+     * Limpieza de arranque: lo que quedó "descargando" o "preparando" de la sesión anterior ya no
+     * lo está. Debe mirar UNA vez (`first`). Antes usaba `collect` sobre un flujo de Room, que no
+     * termina nunca: el primer `collect` se quedaba escuchando para siempre (y el segundo no llegaba a
+     * ejecutarse), y cada vez que el servicio de descargas marcaba una canción como "descargando" este
+     * observador la devolvía al instante a "no descargada". La barra avanzaba pero las canciones
+     * aparecían sin descargar. Las que Media3 sí retoma las vuelve a marcar `DownloadUtils`.
+     */
     private fun checkAllDownloadingSongs() {
         viewModelScope.launch {
-            songRepository.getDownloadingSongs().collect { songs ->
-                songs?.forEach { song ->
-                    songRepository.updateDownloadState(
-                        song.videoId,
-                        DownloadState.STATE_NOT_DOWNLOADED,
-                    )
-                }
+            songRepository.getDownloadingSongs().first()?.forEach { song ->
+                songRepository.updateDownloadState(
+                    song.videoId,
+                    DownloadState.STATE_NOT_DOWNLOADED,
+                )
             }
-            songRepository.getPreparingSongs().collect { songs ->
-                songs.forEach { song ->
-                    songRepository.updateDownloadState(
-                        song.videoId,
-                        DownloadState.STATE_NOT_DOWNLOADED,
-                    )
-                }
+            songRepository.getPreparingSongs().first().forEach { song ->
+                songRepository.updateDownloadState(
+                    song.videoId,
+                    DownloadState.STATE_NOT_DOWNLOADED,
+                )
             }
         }
     }

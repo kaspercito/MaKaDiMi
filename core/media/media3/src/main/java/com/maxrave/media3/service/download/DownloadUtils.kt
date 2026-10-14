@@ -32,6 +32,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Runnable
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.first
@@ -162,10 +163,48 @@ internal class DownloadUtils(
             }
             return@Factory dataSpecReturn
         }
+    /**
+     * Reintento automático. Una descarga puede fallar por algo pasajero (URL del stream caducada, corte de
+     * red, un 403 suelto). Cada intento vuelve a resolver una URL nueva, así que repetirla suele bastar.
+     * [failedRetryCount] lleva cuántas veces falló cada canción; [pendingRetry] guarda las que se
+     * reintentarán cuando termine la tanda actual. Se declaran antes del helper de notificaciones, que
+     * llama a [scheduleRetry].
+     */
+    private val failedRetryCount = ConcurrentHashMap<String, Int>()
+    private val pendingRetry = ConcurrentHashMap<String, DownloadRequest>()
+
+    /** true si la canción se reintentará (y entonces no se avisa de fallo todavía). */
+    private fun scheduleRetry(download: Download): Boolean {
+        val id = download.request.id
+        val attempts = (failedRetryCount[id] ?: 0) + 1
+        failedRetryCount[id] = attempts
+        if (attempts > MAX_AUTO_RETRY_ROUNDS) return false
+        pendingRetry[id] = download.request
+        return true
+    }
+
+    private fun requeue(request: DownloadRequest) {
+        try {
+            DownloadService.sendAddDownload(context, MusicDownloadService::class.java, request, false)
+        } catch (e: Exception) {
+            // Con la app en segundo plano Android puede negarse a arrancar el servicio; el gestor
+            // trabaja igual mientras el proceso siga vivo.
+            Logger.e("DownloadService", "No se pudo arrancar el servicio para reintentar ${request.id}: ${e.message}")
+            downloadManager.addDownload(request)
+        }
+    }
+
     val downloadNotificationHelper =
         DownloadNotificationHelper(
             context,
             MusicDownloadService.Companion.CHANNEL_ID,
+        )
+    // Cuenta lo que va terminando cada tanda: la usan el resumen final y la barra de progreso del servicio.
+    val terminalNotificationHelper =
+        MusicDownloadService.TerminalStateNotificationHelper(
+            context = context,
+            notificationHelper = downloadNotificationHelper,
+            willRetry = { scheduleRetry(it) },
         )
     val downloadManager: DownloadManager =
         DownloadManager(
@@ -175,14 +214,12 @@ internal class DownloadUtils(
             dataSourceFactory,
             Executor(Runnable::run),
         ).apply {
-            maxParallelDownloads = 4
-            minRetryCount = 3
-            addListener(
-                MusicDownloadService.TerminalStateNotificationHelper(
-                    context = context,
-                    notificationHelper = downloadNotificationHelper,
-                ),
-            )
+            // Cada intento vuelve a resolver la URL del stream; con 4 a la vez y 3 reintentos algunas
+            // canciones se rendían por un fallo pasajero. Menos en paralelo y más reintentos (ajuste a
+            // ojo: el motivo real de cada fallo queda ahora en el log).
+            maxParallelDownloads = 3
+            minRetryCount = 6
+            addListener(terminalNotificationHelper)
         }
 
     /**
@@ -220,6 +257,20 @@ internal class DownloadUtils(
         }
     }
 
+    /**
+     * Escribe en la base de datos el estado REAL de cada canción, tal como lo ve Media3, sin mirar qué
+     * se escribió antes. Es lo que mantiene "Descargadas" al día pase lo que pase en medio (otro código
+     * que cambie el estado, una escritura que llegó antes que la fila, el arranque de la app...): se
+     * ejecuta al terminar cada tanda y una vez poco después de abrir la app.
+     */
+    private suspend fun reconcileStates() {
+        _downloads.value.forEach { (songId, pair) ->
+            val state = mergedState(pair.first?.state, pair.second?.state)
+            lastWrittenState[songId] = state
+            songRepository.updateDownloadState(songId, state)
+        }
+    }
+
     private var _downloads = MutableStateFlow<Map<String, Pair<DownloadHandler.Download?, DownloadHandler.Download?>>>(emptyMap())
 
     // Audio / Video
@@ -238,6 +289,9 @@ internal class DownloadUtils(
         title: String,
         thumbnail: String,
     ) {
+        // Una descarga pedida a mano empieza con los reintentos automáticos de cero.
+        failedRetryCount.remove(videoId)
+        pendingRetry.remove(videoId)
         var isVideo = false
         if (dataStoreManager.watchVideoInsteadOfPlayingAudio.first() == DataStoreManager.Values.TRUE) {
             val request =
@@ -349,6 +403,13 @@ internal class DownloadUtils(
             }
         }
 
+        // Poco después de abrir la app: la limpieza de arranque de SharedViewModel y esta sincronización
+        // inicial corren a la vez y la primera podía dejar canciones descargadas como "no descargadas".
+        coroutineScope.launch {
+            delay(STARTUP_RECONCILE_DELAY_MS)
+            reconcileStates()
+        }
+
         // Pair Audio and Video
         val result = mutableMapOf<String, Pair<DownloadHandler.Download?, DownloadHandler.Download?>>()
         val cursor = downloadManager.downloadIndex.getDownloads()
@@ -373,6 +434,21 @@ internal class DownloadUtils(
         _downloads.value = result
         downloadManager.addListener(
             object : DownloadManager.Listener {
+                override fun onIdle(downloadManager: DownloadManager) {
+                    // Fin de la tanda: se deja la base de datos igual a lo que de verdad se descargó y se
+                    // reintentan, tras una pausa corta, las que fallaron.
+                    val retry = pendingRetry.values.toList()
+                    pendingRetry.clear()
+                    coroutineScope.launch {
+                        reconcileStates()
+                        if (retry.isNotEmpty()) {
+                            Logger.i("DownloadService", "Reintentando ${retry.size} descarga(s) fallida(s)")
+                            delay(RETRY_DELAY_MS)
+                            retry.forEach { requeue(it) }
+                        }
+                    }
+                }
+
                 override fun onDownloadRemoved(
                     downloadManager: DownloadManager,
                     download: Download,
@@ -436,6 +512,7 @@ internal class DownloadUtils(
                         }
                         when (download.state) {
                             Download.STATE_COMPLETED -> {
+                                failedRetryCount.remove(id)
                                 playerCache.removeResource(id)
                             }
 
@@ -456,5 +533,13 @@ internal class DownloadUtils(
                 }
             },
         )
+    }
+
+    private companion object {
+        const val STARTUP_RECONCILE_DELAY_MS = 15_000L
+
+        /** Rondas de reintento automático por canción antes de darla por fallida. */
+        const val MAX_AUTO_RETRY_ROUNDS = 2
+        const val RETRY_DELAY_MS = 8_000L
     }
 }

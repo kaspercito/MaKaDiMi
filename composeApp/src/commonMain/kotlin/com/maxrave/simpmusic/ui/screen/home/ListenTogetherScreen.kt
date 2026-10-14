@@ -111,6 +111,7 @@ import simpmusic.composeapp.generated.resources.lt_connect
 import simpmusic.composeapp.generated.resources.lt_connected
 import simpmusic.composeapp.generated.resources.lt_connecting
 import simpmusic.composeapp.generated.resources.lt_create_room
+import simpmusic.composeapp.generated.resources.lt_error_allowlist
 import simpmusic.composeapp.generated.resources.lt_credit_compatible
 import simpmusic.composeapp.generated.resources.lt_credit_protocol
 import simpmusic.composeapp.generated.resources.lt_disconnect
@@ -351,7 +352,14 @@ private fun ColumnScope.WorkArea(
         }
     }
     AnimatedVisibility(visible = state.error != null) {
-        ErrorCard(message = lastError, onDismiss = viewModel::clearError)
+        // El servidor responde en inglés y sin pista de qué hacer; esta restricción en concreto tiene salida.
+        val shown =
+            if (lastError.contains("allowlist", ignoreCase = true)) {
+                stringResource(Res.string.lt_error_allowlist)
+            } else {
+                lastError
+            }
+        ErrorCard(message = shown, onDismiss = viewModel::clearError)
     }
 
     when {
