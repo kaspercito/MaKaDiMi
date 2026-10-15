@@ -221,8 +221,8 @@
     <string name="skip_sponsor_part_of_video">Bỏ qua phân đoạn được tài trợ của video</string>
     <string name="customactivityoncrash_error_activity_error_occurred_explanation">Đã xảy ra lỗi không mong muốn. Xin lỗi vì sự bất tiện.</string>
     <string name="customactivityoncrash_error_activity_restart_app">Khởi động lại ứng dụng</string>
-    <string name="help_build_lyrics_database">Giúp đỡ SimpMusic lyrics xây dựng cơ sở dữ liệu lời bài hát</string>
-    <string name="help_build_lyrics_database_description">Gửi lời bài hát đã lưu của bạn tới cơ sở dữ liệu của SimpMusic lyrics</string>
+    <string name="help_build_lyrics_database">Giúp đỡ MaKaDiMi lyrics xây dựng cơ sở dữ liệu lời bài hát</string>
+    <string name="help_build_lyrics_database_description">Gửi lời bài hát đã lưu của bạn tới cơ sở dữ liệu của MaKaDiMi lyrics</string>
     <string name="customactivityoncrash_error_activity_close_app">Đóng ứng dụng</string>
     <string name="customactivityoncrash_error_activity_error_details">Chi tiết lỗi</string>
     <string name="customactivityoncrash_error_activity_error_details_title">Chi tiết lỗi</string>
@@ -564,8 +564,8 @@
     <string name="contributor_name">Tên người đóng góp</string>
     <string name="contributor_email">Email người đóng góp</string>
     <string name="anonymous">Ẩn danh</string>
-    <string name="simpmusic_lyrics">SimpMusic Lyrics</string>
-    <string name="lyrics_provider_simpmusic">Lời bài hát được cung cấp bởi SimpMusic Lyrics</string>
+    <string name="simpmusic_lyrics">MaKaDiMi Lyrics</string>
+    <string name="lyrics_provider_simpmusic">Lời bài hát được cung cấp bởi MaKaDiMi Lyrics</string>
     <string name="backup_in_progress">Đang sao lưu</string>
     <string name="restore_in_progress">Đang tiến hành khôi phục</string>
     <string name="backup_downloaded">Sao lưu dữ liệu đã tải xuống</string>
@@ -693,7 +693,7 @@
     <string name="local_tracking_description">Ghi lại lịch sử nghe nhạc vào cơ sở dữ liệu cục bộ</string>
     <string name="blog_notification_title">Thông báo về các bài blog mới</string>
     <string name="blog_notification_description">Nhận thông báo khi có bài blog mới được phát hành</string>
-    <string name="simpmusic_charts">SimpMusic Charts</string>
+    <string name="simpmusic_charts">MaKaDiMi Charts</string>
     <string name="crossfading">Đang chuyển bài mượt mà</string>
     <string name="your_320kbps_url">Đường dẫn link 320kbps của bạn</string>
     <string name="your_320kbps_url_description">Để trống để tự động chọn một URL hoạt động từ hệ thống kiểm tra.</string>

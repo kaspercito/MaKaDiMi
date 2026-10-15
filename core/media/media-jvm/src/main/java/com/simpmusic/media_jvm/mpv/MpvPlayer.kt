@@ -1,7 +1,7 @@
 package com.simpmusic.media_jvm.mpv
 
-import com.maxrave.domain.data.player.AudioEffects
-import com.maxrave.logger.Logger
+import com.kaspercito.domain.data.player.AudioEffects
+import com.kaspercito.logger.Logger
 import com.sun.jna.Memory
 import com.sun.jna.Pointer
 import java.util.Locale

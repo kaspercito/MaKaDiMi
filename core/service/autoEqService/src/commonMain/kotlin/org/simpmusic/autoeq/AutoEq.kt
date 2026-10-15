@@ -1,7 +1,7 @@
 package org.simpmusic.autoeq
 
-import com.maxrave.ktorext.getEngine
-import com.maxrave.logger.Logger
+import com.kaspercito.ktorext.getEngine
+import com.kaspercito.logger.Logger
 import io.ktor.client.HttpClient
 import io.ktor.client.plugins.compression.ContentEncoding
 import io.ktor.client.request.get

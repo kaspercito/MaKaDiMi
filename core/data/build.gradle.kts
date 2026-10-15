@@ -29,7 +29,7 @@ kotlin {
     // which platforms this KMP module supports.
     // See: https://kotlinlang.org/docs/multiplatform-discover-project.html#targets
     android {
-        namespace = "com.maxrave.data"
+        namespace = "com.kaspercito.data"
         compileSdk = 37
         minSdk = 26
     }

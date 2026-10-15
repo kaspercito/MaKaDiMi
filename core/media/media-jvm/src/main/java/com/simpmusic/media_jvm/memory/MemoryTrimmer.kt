@@ -1,6 +1,6 @@
 package com.simpmusic.media_jvm.memory
 
-import com.maxrave.logger.Logger
+import com.kaspercito.logger.Logger
 import com.sun.jna.Library
 import com.sun.jna.Native
 import com.sun.jna.Pointer

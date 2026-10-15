@@ -204,8 +204,8 @@
     <string name="skip_sponsor_part_of_video">Omet la part del patrocinador del vídeo</string>
     <string name="customactivityoncrash_error_activity_error_occurred_explanation">S'ha produït un error inesperat. Disculpeu les molèsties.</string>
     <string name="customactivityoncrash_error_activity_restart_app">Reinicieu l'aplicació</string>
-    <string name="help_build_lyrics_database">Ajuda a SimpMusic lyrics a omplir la base de dades de lletres de cançons</string>
-    <string name="help_build_lyrics_database_description">Envia les lletres de cançons del dispositiu a la base de dades de SimpMusic lyrics</string>
+    <string name="help_build_lyrics_database">Ajuda a MaKaDiMi lyrics a omplir la base de dades de lletres de cançons</string>
+    <string name="help_build_lyrics_database_description">Envia les lletres de cançons del dispositiu a la base de dades de MaKaDiMi lyrics</string>
     <string name="customactivityoncrash_error_activity_close_app">Tanca l'aplicació</string>
     <string name="customactivityoncrash_error_activity_error_details">Detalls de l'error</string>
     <string name="customactivityoncrash_error_activity_error_details_title">Detalls de l'error</string>
@@ -456,8 +456,8 @@
     <string name="contributor_name">Nom de contribuïdor</string>
     <string name="contributor_email">Email de contribuïdor</string>
     <string name="anonymous">Anònim</string>
-    <string name="simpmusic_lyrics">SimpMusic Lyrics</string>
-    <string name="lyrics_provider_simpmusic">Lletra de cançó proporcionada per SimpMusic Lyrics</string>
+    <string name="simpmusic_lyrics">MaKaDiMi Lyrics</string>
+    <string name="lyrics_provider_simpmusic">Lletra de cançó proporcionada per MaKaDiMi Lyrics</string>
     <string name="backup_in_progress">Còpia de seguretat en progrés</string>
     <string name="restore_in_progress">Restauració en progrés</string>
     <string name="backup_downloaded">Fer una còpia de seguretat de les dades descarregades</string>

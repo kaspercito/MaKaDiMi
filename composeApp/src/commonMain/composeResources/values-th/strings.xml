@@ -204,8 +204,8 @@
     <string name="skip_sponsor_part_of_video">ข้ามส่วนผู้สนับสนุนของวิดีโอ</string>
     <string name="customactivityoncrash_error_activity_error_occurred_explanation">เกิดข้อผิดพลาดที่ไม่คาดคิด ขออภัยในความไม่สะดวก</string>
     <string name="customactivityoncrash_error_activity_restart_app">รีสตาร์ทแอป</string>
-    <string name="help_build_lyrics_database">มีส่วนร่วมในการสร้างฐานข้อมูลเนื้อเพลงกับ SimpMusic Lyrics</string>
-    <string name="help_build_lyrics_database_description">อัปโหลดเนื้อเพลงที่คุณบันทึกไว้ไปยังฐานข้อมูล SimpMusic Lyrics</string>
+    <string name="help_build_lyrics_database">มีส่วนร่วมในการสร้างฐานข้อมูลเนื้อเพลงกับ MaKaDiMi Lyrics</string>
+    <string name="help_build_lyrics_database_description">อัปโหลดเนื้อเพลงที่คุณบันทึกไว้ไปยังฐานข้อมูล MaKaDiMi Lyrics</string>
     <string name="customactivityoncrash_error_activity_close_app">ปิดแอป</string>
     <string name="customactivityoncrash_error_activity_error_details">รายละเอียดข้อผิดพลาด</string>
     <string name="customactivityoncrash_error_activity_error_details_title">รายละเอียดข้อผิดพลาด</string>
@@ -482,8 +482,8 @@
     <string name="contributor_name">ชื่อผู้มีส่วนร่วม</string>
     <string name="contributor_email">อีเมลผู้ร่วมสนับสนุน</string>
     <string name="anonymous">ไม่ระบุชื่อ</string>
-    <string name="simpmusic_lyrics">SimpMusic Lyrics</string>
-    <string name="lyrics_provider_simpmusic">เนื้อเพลงจัดทำโดย SimpMusic Lyrics</string>
+    <string name="simpmusic_lyrics">MaKaDiMi Lyrics</string>
+    <string name="lyrics_provider_simpmusic">เนื้อเพลงจัดทำโดย MaKaDiMi Lyrics</string>
     <string name="backup_in_progress">กำลังสำรองข้อมูล</string>
     <string name="restore_in_progress">การกู้คืนกำลังดำเนินการ</string>
     <string name="backup_downloaded">สำรองข้อมูลที่ดาวน์โหลด</string>

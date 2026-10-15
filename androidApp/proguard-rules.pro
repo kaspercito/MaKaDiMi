@@ -58,10 +58,10 @@
 
 -dontwarn org.slf4j.impl.StaticLoggerBinder
 -dontwarn kotlinx.serialization.internal.ClassValueReferences
--keep class com.maxrave.simpmusic.data.model.** { *; }
--keep class com.maxrave.simpmusic.extension.AllExtKt { *; }
--keep class com.maxrave.simpmusic.extension.AllExtKt$* { *; }
--keep class com.maxrave.kotlinytmusicscraper.extension.MapExtKt$* { *; }
+-keep class com.kaspercito.simpmusic.data.model.** { *; }
+-keep class com.kaspercito.simpmusic.extension.AllExtKt { *; }
+-keep class com.kaspercito.simpmusic.extension.AllExtKt$* { *; }
+-keep class com.kaspercito.kotlinytmusicscraper.extension.MapExtKt$* { *; }
 
 ## Removes all Logs as they cause perfomance issues in prod
 #-assumenosideeffects class android.util.Log {
@@ -148,7 +148,7 @@
 -keep class com.liskovsoft.** { *; }
 -keep interface com.liskovsoft.** { *; }
 -keep class com.eclipsesource.v8.** { *; }
--keep class com.maxrave.kotlinytmusicscraper.** { *; }
+-keep class com.kaspercito.kotlinytmusicscraper.** { *; }
 
 -dontwarn javax.script.AbstractScriptEngine
 -dontwarn javax.script.Bindings
@@ -200,15 +200,15 @@
 -dontwarn java.beans.Introspector
 -dontwarn java.beans.PropertyDescriptor
 
--dontwarn com.maxrave.data.di.loader.LoaderKt
--dontwarn com.maxrave.media3.ui.MediaPlayerViewKt
+-dontwarn com.kaspercito.data.di.loader.LoaderKt
+-dontwarn com.kaspercito.media3.ui.MediaPlayerViewKt
 
--keep class com.maxrave.data.di.loader.LoaderKt { *; }
--keep class com.maxrave.data.mapping.MappingKt { *; }
--keep class com.maxrave.data.extension.** { *; }
--keep class com.maxrave.data.di.** { *; }
+-keep class com.kaspercito.data.di.loader.LoaderKt { *; }
+-keep class com.kaspercito.data.mapping.MappingKt { *; }
+-keep class com.kaspercito.data.extension.** { *; }
+-keep class com.kaspercito.data.di.** { *; }
 
--keep class com.maxrave.kotlinytmusicscraper.** { *; }
+-keep class com.kaspercito.kotlinytmusicscraper.** { *; }
 
 -keep class org.simpmusic.lyrics.parser.** { *; }
 -keep class org.simpmusic.lyrics.models.** { *; }

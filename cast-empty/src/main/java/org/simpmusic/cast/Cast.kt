@@ -5,7 +5,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.media3.common.Player
-import com.maxrave.logger.Logger
+import com.kaspercito.logger.Logger
 
 // NON-CAST build: Google Cast is not available in this build flavor. All
 // functions are safe no-ops so callers never need to branch on build flavor.

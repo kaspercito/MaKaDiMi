@@ -7,7 +7,7 @@ import androidx.mediarouter.media.MediaRouteSelector
 import com.google.android.gms.cast.framework.CastContext
 import com.google.android.gms.common.ConnectionResult
 import com.google.android.gms.common.GoogleApiAvailability
-import com.maxrave.logger.Logger
+import com.kaspercito.logger.Logger
 
 private const val TAG = "Cast"
 

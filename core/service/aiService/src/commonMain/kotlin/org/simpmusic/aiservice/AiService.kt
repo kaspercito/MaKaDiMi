@@ -10,11 +10,11 @@ import com.aallam.openai.client.OpenAI
 import com.aallam.openai.client.OpenAIConfig
 import com.aallam.openai.client.OpenAIHost
 import com.aallam.openai.client.OpenAIHost.Companion.Gemini
-import com.maxrave.domain.data.model.metadata.Line
-import com.maxrave.domain.data.model.metadata.Lyrics
-import com.maxrave.domain.data.model.taste.TasteException
-import com.maxrave.domain.data.model.taste.TasteInput
-import com.maxrave.domain.data.model.taste.TasteReading
+import com.kaspercito.domain.data.model.metadata.Line
+import com.kaspercito.domain.data.model.metadata.Lyrics
+import com.kaspercito.domain.data.model.taste.TasteException
+import com.kaspercito.domain.data.model.taste.TasteInput
+import com.kaspercito.domain.data.model.taste.TasteReading
 import kotlinx.serialization.builtins.MapSerializer
 import kotlinx.serialization.builtins.serializer
 import kotlinx.serialization.json.Json

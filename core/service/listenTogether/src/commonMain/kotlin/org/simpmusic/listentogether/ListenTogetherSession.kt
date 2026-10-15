@@ -1,6 +1,6 @@
 package org.simpmusic.listentogether
 
-import com.maxrave.logger.Logger
+import com.kaspercito.logger.Logger
 import kotlinx.atomicfu.locks.SynchronizedObject
 import kotlinx.atomicfu.locks.synchronized
 import kotlinx.coroutines.CoroutineScope

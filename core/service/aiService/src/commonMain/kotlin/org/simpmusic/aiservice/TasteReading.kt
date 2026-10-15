@@ -1,7 +1,7 @@
 package org.simpmusic.aiservice
 
-import com.maxrave.domain.data.model.taste.TasteInput
-import com.maxrave.domain.data.model.taste.TasteReading
+import com.kaspercito.domain.data.model.taste.TasteInput
+import com.kaspercito.domain.data.model.taste.TasteReading
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.JsonPrimitive

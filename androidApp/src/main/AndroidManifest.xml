@@ -237,7 +237,7 @@
                 android:value="true" />
         </service>
         <service
-            android:name="com.maxrave.media3.service.SimpleMediaService"
+            android:name="com.kaspercito.media3.service.SimpleMediaService"
             android:exported="true"
             android:foregroundServiceType="mediaPlayback"
             android:stopWithTask="false"
@@ -250,7 +250,7 @@
             </intent-filter>
         </service>
         <service
-            android:name="com.maxrave.media3.service.download.MusicDownloadService"
+            android:name="com.kaspercito.media3.service.download.MusicDownloadService"
             android:exported="true"
             android:foregroundServiceType="dataSync">
             <intent-filter>
@@ -277,7 +277,7 @@
             android:value="8" />
 
         <service
-            android:name="com.maxrave.media3.carapp.SimpMusicCarAppService"
+            android:name="com.kaspercito.media3.carapp.SimpMusicCarAppService"
             android:exported="true"
             tools:ignore="ExportedService">
             <intent-filter>

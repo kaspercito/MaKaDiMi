@@ -558,8 +558,8 @@
     <string name="contributor_name">Bidragsgivarens namn</string>
     <string name="contributor_email">Bidragsgivarens e-postadress</string>
     <string name="anonymous">Anonym</string>
-    <string name="simpmusic_lyrics">SimpMusic Lyrics</string>
-    <string name="lyrics_provider_simpmusic">Låttexter tillhandahålls av SimpMusic Lyrics</string>
+    <string name="simpmusic_lyrics">MaKaDiMi Lyrics</string>
+    <string name="lyrics_provider_simpmusic">Låttexter tillhandahålls av MaKaDiMi Lyrics</string>
     <string name="backup_in_progress">Säkerhetskopiering pågår</string>
     <string name="restore_in_progress">Återställning pågår</string>
     <string name="backup_downloaded">Säkerhetskopiera hämtade data</string>

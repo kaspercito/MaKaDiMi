@@ -14,5 +14,5 @@ for f in $FILES; do
   sed -i "s#github.com/TU_USUARIO_GITHUB/MaKaDiMi#github.com/${USER_NAME}/${REPO_NAME}#g; s#repos/TU_USUARIO_GITHUB/MaKaDiMi#repos/${USER_NAME}/${REPO_NAME}#g; s#TU_USUARIO_GITHUB#${USER_NAME}#g" "$f"
 done
 # nombre del repo en BrandLinks
-sed -i "s#const val REPO_NAME = \".*\"#const val REPO_NAME = \"${REPO_NAME}\"#" composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/utils/BrandLinks.kt
+sed -i "s#const val REPO_NAME = \".*\"#const val REPO_NAME = \"${REPO_NAME}\"#" composeApp/src/commonMain/kotlin/com/kaspercito/simpmusic/utils/BrandLinks.kt
 echo "Listo: enlaces apuntando a https://github.com/${USER_NAME}/${REPO_NAME}"

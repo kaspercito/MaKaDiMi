@@ -467,7 +467,7 @@
     <string name="contributor_email">E-mail do colaborador</string>
     <string name="anonymous">Anônimo</string>
     <string name="simpmusic_lyrics">MaKaDiMi Letras</string>
-    <string name="lyrics_provider_simpmusic">Lyrics provided by SimpMusic Lyrics</string>
+    <string name="lyrics_provider_simpmusic">Lyrics provided by MaKaDiMi Lyrics</string>
     <string name="backup_in_progress">Recuperação Em Progresso</string>
     <string name="restore_in_progress">Restauração Em Progresso</string>
     <string name="backup_downloaded">Recuperação dos dados baixados</string>

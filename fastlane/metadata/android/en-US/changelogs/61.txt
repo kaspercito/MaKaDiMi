@@ -1,0 +1,5 @@
+Improved:
+- Spotify playlists keep working when Spotify rotates its login secrets
+- Spotify errors are written to the app log
+Fixed:
+- Open source licenses screen could fail to load

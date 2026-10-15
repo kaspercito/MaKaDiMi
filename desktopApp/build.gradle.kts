@@ -130,7 +130,7 @@ tasks.named<hydraulic.conveyor.gradle.WriteConveyorConfigTask>("writeConveyorCon
             """
             |app.fsname = simpmusic
             |app.display-name = MaKaDiMi
-            |app.rdns-name = com.maxrave.simpmusic
+            |app.rdns-name = com.kaspercito.simpmusic
             |
             |// Override the Gradle-detected classpath with the ProGuard'd
             |// jar directory. Conveyor expands a directory entry to every
@@ -147,7 +147,7 @@ tasks.named<hydraulic.conveyor.gradle.WriteConveyorConfigTask>("writeConveyorCon
 
 compose.desktop {
     application {
-        mainClass = "com.maxrave.simpmusic.MainKt"
+        mainClass = "com.kaspercito.simpmusic.MainKt"
         jvmArgs += "--add-opens=java.base/java.nio=ALL-UNNAMED"
 
         nativeDistributions {
@@ -195,7 +195,7 @@ compose.desktop {
                             <key>CFBundleTypeRole</key>
                             <string>Viewer</string>
                             <key>CFBundleURLName</key>
-                            <string>com.maxrave.simpmusic.deeplink</string>
+                            <string>com.kaspercito.simpmusic.deeplink</string>
                             <key>CFBundleURLSchemes</key>
                             <array>
                                 <string>simpmusic</string>
@@ -400,7 +400,7 @@ tasks.register("packageConveyorAppImage") {
             |Type=Application
             |Version=1.0
             |Name=SimpMusic
-            |Comment=SimpMusic v$versionName - FOSS YouTube Music Client
+            |Comment=MaKaDiMi v$versionName - YouTube Music Client
             |Exec=bin/simpmusic %u
             |Icon=simpmusic
             |Terminal=false
@@ -430,7 +430,7 @@ tasks.register("packageConveyorAppImage") {
             |DESKTOP_DIR="${'$'}HOME/.local/share/applications"
             |mkdir -p "${'$'}DESKTOP_DIR"
             |APPIMAGE_PATH="${'$'}{APPIMAGE:-${'$'}SELF}"
-            |sed "s|Exec=bin/simpmusic|Exec=${'$'}APPIMAGE_PATH|" "${'$'}HERE/simpmusic.desktop" > "${'$'}DESKTOP_DIR/com-maxrave-simpmusic-MainKt.desktop"
+            |sed "s|Exec=bin/simpmusic|Exec=${'$'}APPIMAGE_PATH|" "${'$'}HERE/simpmusic.desktop" > "${'$'}DESKTOP_DIR/com-kaspercito-simpmusic-MainKt.desktop"
             |update-desktop-database "${'$'}DESKTOP_DIR" 2>/dev/null || true
             |
             |# Cap glibc's per-thread malloc arenas.

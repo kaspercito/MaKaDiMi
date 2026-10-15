@@ -1,8 +1,8 @@
 package org.simpmusic.lyrics
 
-import com.maxrave.ktorext.crypto.Hmac
-import com.maxrave.ktorext.crypto.HmacUri
-import com.maxrave.logger.Logger
+import com.kaspercito.ktorext.crypto.Hmac
+import com.kaspercito.ktorext.crypto.HmacUri
+import com.kaspercito.logger.Logger
 import io.ktor.client.call.body
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
@@ -25,7 +25,7 @@ import kotlin.math.abs
 
 private const val TAG = "SimpMusicLyricsClient"
 
-/** An error the SimpMusic Lyrics API answered with; [code] 404 means nobody has added that song yet. */
+/** An error the MaKaDiMi Lyrics API answered with; [code] 404 means nobody has added that song yet. */
 class SimpMusicLyricsApiException(
     val code: Int,
     message: String,

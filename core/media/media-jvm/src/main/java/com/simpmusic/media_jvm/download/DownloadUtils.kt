@@ -1,14 +1,14 @@
 package com.simpmusic.media_jvm.download
 
-import com.maxrave.common.MERGING_DATA_TYPE
-import com.maxrave.domain.data.entities.DownloadState
-import com.maxrave.domain.manager.DataStoreManager
-import com.maxrave.domain.mediaservice.handler.DownloadHandler
-import com.maxrave.domain.notification.DesktopNotificationManager
-import com.maxrave.domain.repository.SongRepository
-import com.maxrave.domain.repository.StreamRepository
-import com.maxrave.domain.utils.toTrack
-import com.maxrave.logger.Logger
+import com.kaspercito.common.MERGING_DATA_TYPE
+import com.kaspercito.domain.data.entities.DownloadState
+import com.kaspercito.domain.manager.DataStoreManager
+import com.kaspercito.domain.mediaservice.handler.DownloadHandler
+import com.kaspercito.domain.notification.DesktopNotificationManager
+import com.kaspercito.domain.repository.SongRepository
+import com.kaspercito.domain.repository.StreamRepository
+import com.kaspercito.domain.utils.toTrack
+import com.kaspercito.logger.Logger
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob

@@ -470,7 +470,7 @@
     <string name="contributor_email">Email kontributor</string>
     <string name="anonymous">Anonim</string>
     <string name="simpmusic_lyrics">Lirik MaKaDiMi</string>
-    <string name="lyrics_provider_simpmusic">Lirik disediakan oleh SimpMusic Lyrics</string>
+    <string name="lyrics_provider_simpmusic">Lirik disediakan oleh MaKaDiMi Lyrics</string>
     <string name="backup_in_progress">Pencadangan sedang berlangsung</string>
     <string name="restore_in_progress">Pemulihan sedang berlangsung</string>
     <string name="backup_downloaded">Cadangkan data yang diunduh</string>

@@ -1,10 +1,10 @@
 package org.simpmusic.aiservice
 
 import com.aallam.openai.api.exception.OpenAIAPIException
-import com.maxrave.domain.data.model.metadata.Lyrics
-import com.maxrave.domain.data.model.taste.TasteException
-import com.maxrave.domain.data.model.taste.TasteInput
-import com.maxrave.domain.data.model.taste.TasteReading
+import com.kaspercito.domain.data.model.metadata.Lyrics
+import com.kaspercito.domain.data.model.taste.TasteException
+import com.kaspercito.domain.data.model.taste.TasteInput
+import com.kaspercito.domain.data.model.taste.TasteReading
 import kotlin.coroutines.cancellation.CancellationException
 
 class AiClient {

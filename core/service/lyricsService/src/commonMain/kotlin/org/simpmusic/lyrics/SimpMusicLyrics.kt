@@ -1,9 +1,9 @@
 package org.simpmusic.lyrics
 
-import com.maxrave.ktorext.curl.CurlLogger
-import com.maxrave.ktorext.encoding.brotli
-import com.maxrave.ktorext.getEngine
-import com.maxrave.logger.Logger
+import com.kaspercito.ktorext.curl.CurlLogger
+import com.kaspercito.ktorext.encoding.brotli
+import com.kaspercito.ktorext.getEngine
+import com.kaspercito.logger.Logger
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.ProxyConfig
 import io.ktor.client.plugins.HttpSend

@@ -1,6 +1,6 @@
 package org.simpmusic.lyrics.romanization
 
-import com.maxrave.domain.data.model.lyrics.RomanizationLanguage
+import com.kaspercito.domain.data.model.lyrics.RomanizationLanguage
 
 /**
  * Turns one lyric line into a Latin-script reading of itself.

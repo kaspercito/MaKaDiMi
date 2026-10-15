@@ -225,8 +225,8 @@
     <string name="skip_sponsor_part_of_video">Skip sponsor part of video</string>
     <string name="customactivityoncrash_error_activity_error_occurred_explanation">An unexpected error occurred. Sorry for the inconvenience.</string>
     <string name="customactivityoncrash_error_activity_restart_app">Restart app</string>
-    <string name="help_build_lyrics_database">Help SimpMusic lyrics build the lyrics database</string>
-    <string name="help_build_lyrics_database_description">Send your saved lyrics to SimpMusic lyrics's database</string>
+    <string name="help_build_lyrics_database">Help MaKaDiMi lyrics build the lyrics database</string>
+    <string name="help_build_lyrics_database_description">Send your saved lyrics to MaKaDiMi lyrics's database</string>
     <string name="customactivityoncrash_error_activity_close_app">Close app</string>
     <string name="customactivityoncrash_error_activity_error_details">Error details</string>
     <string name="customactivityoncrash_error_activity_error_details_title">Error details</string>
@@ -606,8 +606,8 @@ Built with ❤️ on top of the open source project SimpMusic by Tuan Minh Nguye
     <string name="contributor_name">Contributor name</string>
     <string name="contributor_email">Contributor email</string>
     <string name="anonymous">Anonymous</string>
-    <string name="simpmusic_lyrics">SimpMusic Lyrics</string>
-    <string name="lyrics_provider_simpmusic">Lyrics provided by SimpMusic Lyrics</string>
+    <string name="simpmusic_lyrics">MaKaDiMi Lyrics</string>
+    <string name="lyrics_provider_simpmusic">Lyrics provided by MaKaDiMi Lyrics</string>
     <string name="backup_in_progress">Backup in progress</string>
     <string name="restore_in_progress">Restore in progress</string>
     <string name="backup_downloaded">Backup downloaded data</string>
@@ -736,7 +736,7 @@ Built with ❤️ on top of the open source project SimpMusic by Tuan Minh Nguye
     <string name="local_tracking_description">Log your listening history to local database</string>
     <string name="blog_notification_title">Blog post notifications</string>
     <string name="blog_notification_description">Get notified when a new blog post is published</string>
-    <string name="simpmusic_charts">SimpMusic Charts</string>
+    <string name="simpmusic_charts">MaKaDiMi Charts</string>
     <string name="crossfading">Crossfading</string>
     <string name="your_320kbps_url">Your 320kbps URL</string>
     <string name="your_320kbps_url_description">Leave empty to auto-choose a working URL from the uptime checker.</string>

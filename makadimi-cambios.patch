@@ -13,10 +13,10 @@ index a1952e8..f5ccd70 100644
 +# Escuchar juntos: los mensajes del protocolo (protobuf) se codifican con serializadores generados;
 +# no se ofuscan ni se recortan, para que la versión release hable igual que la debug.
 +-keep class org.simpmusic.listentogether.** { *; }
-diff --git a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/home/HomeScreen.kt b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/home/HomeScreen.kt
+diff --git a/composeApp/src/commonMain/kotlin/com/kaspercito/simpmusic/ui/screen/home/HomeScreen.kt b/composeApp/src/commonMain/kotlin/com/kaspercito/simpmusic/ui/screen/home/HomeScreen.kt
 index 03ca6ba..5371323 100644
---- a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/home/HomeScreen.kt
-+++ b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/home/HomeScreen.kt
+--- a/composeApp/src/commonMain/kotlin/com/kaspercito/simpmusic/ui/screen/home/HomeScreen.kt
++++ b/composeApp/src/commonMain/kotlin/com/kaspercito/simpmusic/ui/screen/home/HomeScreen.kt
 @@ -408,18 +408,14 @@ fun HomeScreen(
      }
      LaunchedEffect(openAppTime, shareLyricsPermissions) {
@@ -44,10 +44,10 @@ index 03ca6ba..5371323 100644
      }
  
      val shouldStartPaginate =
-diff --git a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/home/ListenTogetherScreen.kt b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/home/ListenTogetherScreen.kt
+diff --git a/composeApp/src/commonMain/kotlin/com/kaspercito/simpmusic/ui/screen/home/ListenTogetherScreen.kt b/composeApp/src/commonMain/kotlin/com/kaspercito/simpmusic/ui/screen/home/ListenTogetherScreen.kt
 index a717bf4..2dcb9b8 100644
---- a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/home/ListenTogetherScreen.kt
-+++ b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/ui/screen/home/ListenTogetherScreen.kt
+--- a/composeApp/src/commonMain/kotlin/com/kaspercito/simpmusic/ui/screen/home/ListenTogetherScreen.kt
++++ b/composeApp/src/commonMain/kotlin/com/kaspercito/simpmusic/ui/screen/home/ListenTogetherScreen.kt
 @@ -343,9 +343,12 @@ private fun ColumnScope.WorkArea(
      var lastError by remember { mutableStateOf("") }
      LaunchedEffect(state.error) { state.error?.let { lastError = it } }
@@ -86,10 +86,10 @@ index a717bf4..2dcb9b8 100644
                  onClick = viewModel::joinRoom,
              )
  
-diff --git a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/viewModel/ListenTogetherViewModel.kt b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/viewModel/ListenTogetherViewModel.kt
+diff --git a/composeApp/src/commonMain/kotlin/com/kaspercito/simpmusic/viewModel/ListenTogetherViewModel.kt b/composeApp/src/commonMain/kotlin/com/kaspercito/simpmusic/viewModel/ListenTogetherViewModel.kt
 index 8d320ce..84617d5 100644
---- a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/viewModel/ListenTogetherViewModel.kt
-+++ b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/viewModel/ListenTogetherViewModel.kt
+--- a/composeApp/src/commonMain/kotlin/com/kaspercito/simpmusic/viewModel/ListenTogetherViewModel.kt
++++ b/composeApp/src/commonMain/kotlin/com/kaspercito/simpmusic/viewModel/ListenTogetherViewModel.kt
 @@ -35,6 +35,14 @@ class ListenTogetherViewModel(
  
          // Host conveniences live in settings but are applied by the session, so they are mirrored
@@ -138,10 +138,10 @@ index 8d320ce..84617d5 100644
 +        private const val DEFAULT_USERNAME = "MaKaDiMi"
      }
  }
-diff --git a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/viewModel/NotificationViewModel.kt b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/viewModel/NotificationViewModel.kt
+diff --git a/composeApp/src/commonMain/kotlin/com/kaspercito/simpmusic/viewModel/NotificationViewModel.kt b/composeApp/src/commonMain/kotlin/com/kaspercito/simpmusic/viewModel/NotificationViewModel.kt
 index 597bf61..384d2d0 100644
---- a/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/viewModel/NotificationViewModel.kt
-+++ b/composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/viewModel/NotificationViewModel.kt
+--- a/composeApp/src/commonMain/kotlin/com/kaspercito/simpmusic/viewModel/NotificationViewModel.kt
++++ b/composeApp/src/commonMain/kotlin/com/kaspercito/simpmusic/viewModel/NotificationViewModel.kt
 @@ -19,9 +19,13 @@ class NotificationViewModel(
          viewModelScope.launch {
              commonRepository.getAllNotifications().collect { notificationEntities ->
@@ -159,10 +159,10 @@ index 597bf61..384d2d0 100644
              }
          }
      }
-diff --git a/core/data/src/commonMain/kotlin/com/maxrave/data/listentogether/ListenTogetherPrefs.kt b/core/data/src/commonMain/kotlin/com/maxrave/data/listentogether/ListenTogetherPrefs.kt
+diff --git a/core/data/src/commonMain/kotlin/com/kaspercito/data/listentogether/ListenTogetherPrefs.kt b/core/data/src/commonMain/kotlin/com/kaspercito/data/listentogether/ListenTogetherPrefs.kt
 index e1b7b47..08694ec 100644
---- a/core/data/src/commonMain/kotlin/com/maxrave/data/listentogether/ListenTogetherPrefs.kt
-+++ b/core/data/src/commonMain/kotlin/com/maxrave/data/listentogether/ListenTogetherPrefs.kt
+--- a/core/data/src/commonMain/kotlin/com/kaspercito/data/listentogether/ListenTogetherPrefs.kt
++++ b/core/data/src/commonMain/kotlin/com/kaspercito/data/listentogether/ListenTogetherPrefs.kt
 @@ -15,6 +15,9 @@ object ListenTogetherPrefs {
      const val FOLLOW_HOST_VOLUME = "lt_follow_host_volume"
      const val BLOCKLIST = "lt_blocklist"
@@ -173,10 +173,10 @@ index e1b7b47..08694ec 100644
      const val TRUE = "TRUE"
      const val FALSE = "FALSE"
  
-diff --git a/core/media/media3/src/main/java/com/maxrave/media3/service/download/DownloadUtils.kt b/core/media/media3/src/main/java/com/maxrave/media3/service/download/DownloadUtils.kt
+diff --git a/core/media/media3/src/main/java/com/kaspercito/media3/service/download/DownloadUtils.kt b/core/media/media3/src/main/java/com/kaspercito/media3/service/download/DownloadUtils.kt
 index e5fdbc9..93ae928 100644
---- a/core/media/media3/src/main/java/com/maxrave/media3/service/download/DownloadUtils.kt
-+++ b/core/media/media3/src/main/java/com/maxrave/media3/service/download/DownloadUtils.kt
+--- a/core/media/media3/src/main/java/com/kaspercito/media3/service/download/DownloadUtils.kt
++++ b/core/media/media3/src/main/java/com/kaspercito/media3/service/download/DownloadUtils.kt
 @@ -42,6 +42,7 @@ import kotlinx.coroutines.launch
  import kotlinx.coroutines.runBlocking
  import okhttp3.OkHttpClient
@@ -301,17 +301,17 @@ index e5fdbc9..93ae928 100644
                  override fun onDownloadChanged(
                      downloadManager: DownloadManager,
                      download: Download,
-diff --git a/core/media/media3/src/main/java/com/maxrave/media3/service/download/MusicDownloadService.kt b/core/media/media3/src/main/java/com/maxrave/media3/service/download/MusicDownloadService.kt
+diff --git a/core/media/media3/src/main/java/com/kaspercito/media3/service/download/MusicDownloadService.kt b/core/media/media3/src/main/java/com/kaspercito/media3/service/download/MusicDownloadService.kt
 index eaffcfc..0ddfbc4 100644
---- a/core/media/media3/src/main/java/com/maxrave/media3/service/download/MusicDownloadService.kt
-+++ b/core/media/media3/src/main/java/com/maxrave/media3/service/download/MusicDownloadService.kt
+--- a/core/media/media3/src/main/java/com/kaspercito/media3/service/download/MusicDownloadService.kt
++++ b/core/media/media3/src/main/java/com/kaspercito/media3/service/download/MusicDownloadService.kt
 @@ -11,6 +11,7 @@ import androidx.media3.exoplayer.offline.DownloadNotificationHelper
  import androidx.media3.exoplayer.offline.DownloadService
  import androidx.media3.exoplayer.scheduler.PlatformScheduler
  import androidx.media3.exoplayer.scheduler.Scheduler
-+import com.maxrave.common.MERGING_DATA_TYPE
- import com.maxrave.media3.R
- import com.maxrave.domain.mediaservice.handler.DownloadHandler
++import com.kaspercito.common.MERGING_DATA_TYPE
+ import com.kaspercito.media3.R
+ import com.kaspercito.domain.mediaservice.handler.DownloadHandler
  import org.koin.android.ext.android.inject
 @@ -47,35 +48,91 @@ internal class MusicDownloadService :
              notMetRequirements,
@@ -482,7 +482,7 @@ index d57fcf8..d932852 100644
 @@ -1,7 +1,10 @@
  package org.simpmusic.listentogether
  
- import com.maxrave.logger.Logger
+ import com.kaspercito.logger.Logger
 +import kotlinx.atomicfu.locks.SynchronizedObject
 +import kotlinx.atomicfu.locks.synchronized
  import kotlinx.coroutines.CoroutineScope

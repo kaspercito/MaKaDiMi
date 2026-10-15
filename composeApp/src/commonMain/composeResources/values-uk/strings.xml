@@ -564,7 +564,7 @@
     <string name="contributor_email">Електронна пошта учасника</string>
     <string name="anonymous">Анонімно</string>
     <string name="simpmusic_lyrics">Тексти пісень MaKaDiMi</string>
-    <string name="lyrics_provider_simpmusic">Тексти пісень надано SimpMusic Lyrics</string>
+    <string name="lyrics_provider_simpmusic">Тексти пісень надано MaKaDiMi Lyrics</string>
     <string name="backup_in_progress">Виконується резервне копіювання</string>
     <string name="restore_in_progress">Виконується відновлення</string>
     <string name="backup_downloaded">Резервне копіювання завантажених даних</string>

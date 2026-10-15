@@ -32,7 +32,7 @@ Requisitos: JDK 21 y Android SDK (compileSdk 37). Para un APK firmado de release
 ## Personalización
 - **Tu usuario de GitHub**: ejecuta `./scripts/set-github-user.sh TU_USUARIO` y se actualizan todos los enlaces
   (Acerca de, Ajustes, actualizaciones, Discord Rich Presence, plantillas de issues). El punto único en código es
-  [`BrandLinks.kt`](composeApp/src/commonMain/kotlin/com/maxrave/simpmusic/utils/BrandLinks.kt).
+  [`BrandLinks.kt`](composeApp/src/commonMain/kotlin/com/kaspercito/simpmusic/utils/BrandLinks.kt).
 - **Actualizaciones**: la app consulta `https://api.github.com/repos/<usuario>/MaKaDiMi/releases/latest`;
   publica tus APK como *Releases* con una etiqueta tipo `v1.0.0`.
 - **Logo**: `asset/makadimi_logo.png` y los iconos de `androidApp/src/main/res`.
@@ -72,4 +72,4 @@ Because we do not host any media files, we cannot process DMCA takedown requests
 
 ## Créditos y licencia
 - Proyecto original: [SimpMusic](https://github.com/maxrave-dev/SimpMusic) © 2023 Tuan Minh Nguyen Duc (maxrave-dev), GPL-3.0.
-- MaKaDiMi © MaKaDiMi, distribuido bajo **GPL-3.0**: si distribuyes la app, debes ofrecer también su código fuente.
+- MaKaDiMi: creado y mantenido por **Miguel (Kaspercito)**. © Miguel (Kaspercito) por sus modificaciones y código nuevo, distribuido bajo **GPL-3.0**: si distribuyes la app, debes ofrecer también su código fuente.

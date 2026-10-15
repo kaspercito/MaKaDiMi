@@ -1,0 +1,13 @@
+MaKaDiMi
+Creado y mantenido por Miguel (Kaspercito).
+Copyright (c) Miguel (Kaspercito): modificaciones, código nuevo y rebranding de MaKaDiMi.
+
+MaKaDiMi es una obra derivada de SimpMusic
+  Copyright (c) 2023 Tuan Minh Nguyen Duc (maxrave-dev)
+  https://github.com/maxrave-dev/SimpMusic
+  Licencia GPL-3.0 (ver LICENSE)
+
+Incluye además código con avisos de otros autores (por ejemplo core/service/kizzy y
+BetterShuffleOrder), cuyos encabezados de copyright se conservan en cada archivo.
+
+Distribuido bajo GNU GPL v3. Quien distribuya la app debe ofrecer también su código fuente.

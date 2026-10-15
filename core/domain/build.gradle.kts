@@ -12,7 +12,7 @@ plugins {
 kotlin {
     jvmToolchain(21)
     android {
-        namespace = "com.maxrave.domain"
+        namespace = "com.kaspercito.domain"
         compileSdk = 37
         minSdk = 26
     }

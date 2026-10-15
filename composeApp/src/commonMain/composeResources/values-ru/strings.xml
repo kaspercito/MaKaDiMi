@@ -227,8 +227,8 @@
     <string name="skip_sponsor_part_of_video">Пропустить спонсорскую часть видео</string>
     <string name="customactivityoncrash_error_activity_error_occurred_explanation">Неизвестная ошибка. Извините за неудобства.</string>
     <string name="customactivityoncrash_error_activity_restart_app">Перезапустить приложение</string>
-    <string name="help_build_lyrics_database">Помогите SimpMusic Lyrics создать базу данных текстов песен</string>
-    <string name="help_build_lyrics_database_description">Отправить сохраненные тексты песен в базу данных SimpMusic lyrics</string>
+    <string name="help_build_lyrics_database">Помогите MaKaDiMi Lyrics создать базу данных текстов песен</string>
+    <string name="help_build_lyrics_database_description">Отправить сохраненные тексты песен в базу данных MaKaDiMi lyrics</string>
     <string name="customactivityoncrash_error_activity_close_app">Закрыть приложение</string>
     <string name="customactivityoncrash_error_activity_error_details">Подробные сведения об ошибке</string>
     <string name="customactivityoncrash_error_activity_error_details_title">Подробные сведения об ошибке</string>
@@ -571,8 +571,8 @@
     <string name="contributor_name">Имя участника</string>
     <string name="contributor_email">Почта участника</string>
     <string name="anonymous">Анонимно</string>
-    <string name="simpmusic_lyrics">SimpMusic Lyrics</string>
-    <string name="lyrics_provider_simpmusic">Текст песни предоставлен SimpMusic Lyrics</string>
+    <string name="simpmusic_lyrics">MaKaDiMi Lyrics</string>
+    <string name="lyrics_provider_simpmusic">Текст песни предоставлен MaKaDiMi Lyrics</string>
     <string name="backup_in_progress">Выполняется резервное копирование</string>
     <string name="restore_in_progress">Выполняется восстановление</string>
     <string name="backup_downloaded">Резервное копирование загруженных данных</string>

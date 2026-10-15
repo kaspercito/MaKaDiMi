@@ -45,7 +45,7 @@ kotlin {
         freeCompilerArgs.add("-Xexpect-actual-classes")
     }
     android {
-        namespace = "com.maxrave.simpmusic.composeapp"
+        namespace = "com.kaspercito.simpmusic.composeapp"
         compileSdk = 37
         minSdk = 26
         withJava()
@@ -824,7 +824,7 @@ val mpvSetupAll by tasks.registering {
 }
 
 buildkonfig {
-    packageName = "com.maxrave.simpmusic"
+    packageName = "com.kaspercito.simpmusic"
     exposeObjectWithName = "BuildKonfig"
     defaultConfigs {
         val versionName =

@@ -562,8 +562,8 @@
     <string name="contributor_name">貢献者名</string>
     <string name="contributor_email">貢献者のメールアドレス</string>
     <string name="anonymous">匿名</string>
-    <string name="simpmusic_lyrics">SimpMusic Lyrics</string>
-    <string name="lyrics_provider_simpmusic">SimpMusic Lyricsが提供する歌詞</string>
+    <string name="simpmusic_lyrics">MaKaDiMi Lyrics</string>
+    <string name="lyrics_provider_simpmusic">MaKaDiMi Lyricsが提供する歌詞</string>
     <string name="backup_in_progress">バックアップ中</string>
     <string name="restore_in_progress">復元中</string>
     <string name="backup_downloaded">ダウンロードしたデータをバックアップする</string>

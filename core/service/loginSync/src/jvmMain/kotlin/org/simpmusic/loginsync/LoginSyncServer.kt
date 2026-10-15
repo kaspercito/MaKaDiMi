@@ -1,6 +1,6 @@
 package org.simpmusic.loginsync
 
-import com.maxrave.logger.Logger
+import com.kaspercito.logger.Logger
 import io.ktor.http.ContentType
 import io.ktor.http.HttpStatusCode
 import io.ktor.server.application.ApplicationCall

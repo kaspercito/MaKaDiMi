@@ -688,7 +688,7 @@
     <string name="local_tracking_description">Zeichne den Wiedergabeverlauf in der lokalen Datenbank auf</string>
     <string name="blog_notification_title">Benachrichtigungen zu Blogbeiträgen</string>
     <string name="blog_notification_description">Werde benachrichtigt wenn ein neuer Blog-Beitrag veröffentlicht wird</string>
-    <string name="simpmusic_charts">SimpMusic Charts</string>
+    <string name="simpmusic_charts">MaKaDiMi Charts</string>
     <string name="crossfading">Crossfading (überblenden)</string>
     <string name="your_320kbps_url">Deine 320kbps URL</string>
     <string name="your_320kbps_url_description">Lassen Sie das Feld leer, damit automatisch eine funktionierende URL aus dem Verfügbarkeitsprüfer ausgewählt wird.</string>

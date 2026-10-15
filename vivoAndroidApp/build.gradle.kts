@@ -23,7 +23,7 @@ plugins {
 val androidAppDir = rootProject.file("androidApp")
 
 android {
-    namespace = "com.maxrave.simpmusic"
+    namespace = "com.kaspercito.simpmusic"
     compileSdk = 37
 
     defaultConfig {

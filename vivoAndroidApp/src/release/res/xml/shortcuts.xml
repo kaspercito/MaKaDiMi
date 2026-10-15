@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- vivo build: the same shortcuts, pointed at this build's own package (androidApp's copy targets com.maxrave.simpmusic). -->
+<!-- vivo build: the same shortcuts, pointed at this build's own package (androidApp's copy targets com.kaspercito.simpmusic). -->
 <shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
     <shortcut
         android:shortcutId="home"
@@ -7,9 +7,9 @@
         android:icon="@drawable/round_home_24"
         android:shortcutShortLabel="@string/home">
         <intent
-            android:targetClass="com.maxrave.simpmusic.MainActivity"
+            android:targetClass="com.kaspercito.simpmusic.MainActivity"
             android:targetPackage="com.spotify.music"
-            android:action="com.maxrave.simpmusic.action.HOME" />
+            android:action="com.kaspercito.simpmusic.action.HOME" />
     </shortcut>
     <shortcut
         android:shortcutId="search"
@@ -17,9 +17,9 @@
         android:icon="@drawable/round_search_24"
         android:shortcutShortLabel="@string/search">
         <intent
-            android:targetClass="com.maxrave.simpmusic.MainActivity"
+            android:targetClass="com.kaspercito.simpmusic.MainActivity"
             android:targetPackage="com.spotify.music"
-            android:action="com.maxrave.simpmusic.action.SEARCH" />
+            android:action="com.kaspercito.simpmusic.action.SEARCH" />
     </shortcut>
     <shortcut
         android:shortcutId="library"
@@ -27,8 +27,8 @@
         android:icon="@drawable/round_library_music_24"
         android:shortcutShortLabel="@string/library">
         <intent
-            android:targetClass="com.maxrave.simpmusic.MainActivity"
+            android:targetClass="com.kaspercito.simpmusic.MainActivity"
             android:targetPackage="com.spotify.music"
-            android:action="com.maxrave.simpmusic.action.LIBRARY" />
+            android:action="com.kaspercito.simpmusic.action.LIBRARY" />
     </shortcut>
 </shortcuts>
