@@ -9,6 +9,7 @@ import com.maxrave.simpmusic.viewModel.ArtistViewModel
 import com.maxrave.simpmusic.viewModel.BrowseViewModel
 import com.maxrave.simpmusic.viewModel.HomeViewModel
 import com.maxrave.simpmusic.viewModel.ImportViewModel
+import com.maxrave.simpmusic.viewModel.SpotifyLibraryViewModel
 import com.maxrave.simpmusic.viewModel.LibraryDynamicPlaylistViewModel
 import com.maxrave.simpmusic.viewModel.LibraryViewModel
 import com.maxrave.simpmusic.viewModel.LocalPlaylistViewModel
@@ -87,6 +88,12 @@ val viewModelModule =
         viewModel {
             LibraryDynamicPlaylistViewModel(
                 get(),
+                get(),
+                get(),
+            )
+        }
+        viewModel {
+            SpotifyLibraryViewModel(
                 get(),
                 get(),
             )

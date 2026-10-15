@@ -118,37 +118,83 @@ class SimpMusicLyricsClient {
             lyricsService.voteTranslatedLyrics(translatedLyricsId, upvote, hmacTimestamp).bodyOrThrow<TranslatedLyricsResponse>()
         }
 
+    /**
+     * Looks the track up on LRCLIB, most precise strategy first, and stops at the first that answers:
+     *  1. the exact lookup (artist + title + length), when the length is known;
+     *  2. a search by fields;
+     *  3. the free-text search.
+     * Only a record whose length is within 10 seconds of [duration] is accepted — lyrics timed for a
+     * different cut drift out of sync — and among those the synced one closest in length wins, rather
+     * than the first the server happened to list.
+     *
+     * Succeeds with null when LRCLIB simply has nothing; fails only when it could not be reached.
+     */
     suspend fun searchLrclibLyrics(
         q_track: String,
         q_artist: String,
         duration: Int?,
     ) = runCatching {
-        val rs =
-            lyricsService
-                .searchLrclibLyrics(
-                    q_track = q_track,
-                    q_artist = q_artist,
-                ).body<List<LrclibObject>>()
-        val lrclibObject: LrclibObject? =
-            if (duration != null) {
-                rs.find { abs(it.duration.toInt() - duration) <= 10 }
-            } else {
-                rs.firstOrNull()
+        val hasDuration = duration != null && duration > 0
+        var reachedServer = false
+
+        if (hasDuration) {
+            val exact =
+                runCatching { lyricsService.getLrclibLyrics(q_track, q_artist, duration!!) }
+                    .getOrNull()
+            if (exact != null) {
+                reachedServer = true
+                if (exact.status.value in 200..299) {
+                    runCatching { exact.body<LrclibObject>() }
+                        .getOrNull()
+                        ?.let { pickLrclib(listOf(it), duration) }
+                        ?.let { toLyrics(it) }
+                        ?.let { return@runCatching it }
+                }
             }
-        if (lrclibObject != null) {
-            val syncedLyrics = lrclibObject.syncedLyrics
-            val plainLyrics = lrclibObject.plainLyrics
-            if (!syncedLyrics.isNullOrEmpty()) {
-                parseSyncedLyrics(syncedLyrics)
-            } else if (!plainLyrics.isNullOrEmpty()) {
-                parseUnsyncedLyrics(plainLyrics)
-            } else {
-                null
-            }
-        } else {
-            null
         }
+
+        val searches: List<suspend () -> io.ktor.client.statement.HttpResponse> =
+            listOf(
+                { lyricsService.searchLrclibLyricsByFields(q_track, q_artist) },
+                { lyricsService.searchLrclibLyrics(q_track = q_track, q_artist = q_artist) },
+            )
+        for (search in searches) {
+            val response = runCatching { search() }.getOrNull() ?: continue
+            reachedServer = true
+            if (response.status.value !in 200..299) continue
+            val records = runCatching { response.body<List<LrclibObject>>() }.getOrNull().orEmpty()
+            pickLrclib(records, duration)?.let { toLyrics(it) }?.let { return@runCatching it }
+        }
+        if (!reachedServer) throw Exception("LRCLIB could not be reached")
+        null
     }
+
+    private fun pickLrclib(
+        records: List<LrclibObject>,
+        duration: Int?,
+    ): LrclibObject? {
+        val hasDuration = duration != null && duration > 0
+        val usable =
+            records.filter {
+                !it.instrumental && (!it.syncedLyrics.isNullOrBlank() || !it.plainLyrics.isNullOrBlank())
+            }
+        val inRange = if (hasDuration) usable.filter { abs(it.duration - duration!!) <= 10f } else usable
+        return inRange.minWithOrNull(
+            compareBy<LrclibObject>(
+                // A length match within 3 s beats a synced record that is further off.
+                { hasDuration && abs(it.duration - duration!!) > 3f },
+                { it.syncedLyrics.isNullOrBlank() },
+                { if (hasDuration) abs(it.duration - duration!!) else 0f },
+            ),
+        )
+    }
+
+    private fun toLyrics(record: LrclibObject) =
+        when {
+            !record.syncedLyrics.isNullOrEmpty() -> parseSyncedLyrics(record.syncedLyrics)
+            !record.plainLyrics.isNullOrEmpty() -> parseUnsyncedLyrics(record.plainLyrics)
+            else -> null
+        }
 
     suspend fun searchBetterLyrics(
         q_track: String,

@@ -188,6 +188,28 @@ class SimpMusicLyrics {
         parameter("q", "$q_artist $q_track")
     }
 
+    /** LRCLIB's exact lookup: answers one record whose length is within 2 seconds of [duration], or a 404. */
+    suspend fun getLrclibLyrics(
+        q_track: String,
+        q_artist: String,
+        duration: Int,
+    ) = httpClient.get("https://lrclib.net/api/get") {
+        buildDefaultHeaders()
+        parameter("track_name", q_track)
+        parameter("artist_name", q_artist)
+        parameter("duration", duration)
+    }
+
+    /** Search by field rather than free text, so "Artist Title" cannot match a title that merely contains the artist. */
+    suspend fun searchLrclibLyricsByFields(
+        q_track: String,
+        q_artist: String,
+    ) = httpClient.get("https://lrclib.net/api/search") {
+        buildDefaultHeaders()
+        parameter("track_name", q_track)
+        parameter("artist_name", q_artist)
+    }
+
     suspend fun searchBetterLyrics(
         q_track: String,
         q_artist: String,

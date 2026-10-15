@@ -1015,4 +1015,20 @@ Built with ❤️ on top of the open source project SimpMusic by Tuan Minh Nguye
     <string name="update_now">Update now</string>
     <string name="update_downloading">Downloading update…</string>
     <string name="update_allow_install">Allow this app to install updates, then go back and tap Update now again.</string>
+    <string name="spotify_playlists">Spotify</string>
+    <string name="spotify_liked_songs">Liked Songs</string>
+    <string name="spotify_tracks_count">%1$d tracks</string>
+    <string name="spotify_import">Import</string>
+    <string name="spotify_import_all">Import all</string>
+    <string name="spotify_no_playlists">No Spotify playlists found</string>
+    <string name="spotify_login_needed">Log in to Spotify to see your playlists here.</string>
+    <string name="spotify_session_expired">Your Spotify session expired. Log in to Spotify again.</string>
+    <string name="spotify_error">Could not load your Spotify playlists. Check your connection and try again.</string>
+    <string name="spotify_importing_title">Importing “%1$s”</string>
+    <string name="spotify_reading_tracks">Reading tracks from Spotify…</string>
+    <string name="spotify_matching_tracks">Finding songs: %1$d of %2$d (%3$d found)</string>
+    <string name="spotify_import_done">Imported %1$d of %2$d songs into “%3$s”.</string>
+    <string name="spotify_import_none">None of the songs could be found.</string>
+    <string name="spotify_not_found_list">Not found:</string>
+    <string name="spotify_import_hint">Songs are matched on YouTube Music, which is where they play from. They are saved as a local playlist.</string>
 </resources>

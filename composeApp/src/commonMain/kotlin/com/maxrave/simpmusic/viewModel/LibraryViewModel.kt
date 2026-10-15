@@ -130,6 +130,10 @@ class LibraryViewModel(
     @OptIn(ExperimentalCoroutinesApi::class)
     val youtubeLoggedIn = dataStoreManager.loggedIn.mapLatest { it == DataStoreManager.TRUE }
 
+    /** A Spotify account is linked: the Library offers the Spotify chip only then. */
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val spotifyLoggedIn = dataStoreManager.spdc.mapLatest { it.isNotEmpty() }
+
     /**
      * Whether the Wrapped chip has anything behind it.
      *

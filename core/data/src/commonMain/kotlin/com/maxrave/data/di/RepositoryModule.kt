@@ -12,6 +12,8 @@ import com.maxrave.data.lyrics.LyricsRomanizerRepositoryImpl
 import com.maxrave.data.repository.CommonRepositoryImpl
 import com.maxrave.data.repository.HomeRepositoryImpl
 import com.maxrave.data.repository.ImportRepositoryImpl
+import com.maxrave.data.spotify.SpotifyLibraryRepositoryImpl
+import com.maxrave.data.spotify.SpotifyTokenProvider
 import com.maxrave.data.repository.LocalPlaylistRepositoryImpl
 import com.maxrave.data.repository.LyricsCanvasRepositoryImpl
 import com.maxrave.data.repository.PlaylistRepositoryImpl
@@ -30,6 +32,7 @@ import com.maxrave.domain.repository.LyricsRomanizerRepository
 import com.maxrave.domain.repository.CommonRepository
 import com.maxrave.domain.repository.HomeRepository
 import com.maxrave.domain.repository.ImportRepository
+import com.maxrave.domain.repository.SpotifyLibraryRepository
 import com.maxrave.domain.repository.LocalPlaylistRepository
 import com.maxrave.domain.repository.LyricsCanvasRepository
 import com.maxrave.domain.repository.PlaylistRepository
@@ -81,6 +84,13 @@ val repositoryModule =
             HomeRepositoryImpl(get(), get())
         }
 
+        // Lazy: nothing needs Spotify until a lyrics or library request actually asks for a token.
+        single { SpotifyTokenProvider(get(), get()) }
+
+        single<SpotifyLibraryRepository> {
+            SpotifyLibraryRepositoryImpl(get(), get(), get(), get())
+        }
+
         single<ImportRepository>(createdAtStart = true) {
             ImportRepositoryImpl(get())
         }
@@ -90,7 +100,7 @@ val repositoryModule =
         }
 
         single<LyricsCanvasRepository>(createdAtStart = true) {
-            LyricsCanvasRepositoryImpl(get(), get(), get(), get(), get())
+            LyricsCanvasRepositoryImpl(get(), get(), get(), get(), get(), get())
         }
 
         single<PlaylistRepository>(createdAtStart = true) {

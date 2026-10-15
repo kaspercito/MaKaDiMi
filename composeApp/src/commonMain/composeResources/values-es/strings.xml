@@ -975,4 +975,20 @@
     <string name="update_now">Actualizar ahora</string>
     <string name="update_downloading">Descargando actualización…</string>
     <string name="update_allow_install">Permite que esta app instale actualizaciones, vuelve y pulsa Actualizar ahora otra vez.</string>
+    <string name="spotify_playlists">Spotify</string>
+    <string name="spotify_liked_songs">Canciones que te gustan</string>
+    <string name="spotify_tracks_count">%1$d canciones</string>
+    <string name="spotify_import">Importar</string>
+    <string name="spotify_import_all">Importar todas</string>
+    <string name="spotify_no_playlists">No se encontraron playlists de Spotify</string>
+    <string name="spotify_login_needed">Inicia sesión en Spotify para ver aquí tus playlists.</string>
+    <string name="spotify_session_expired">Tu sesión de Spotify expiró. Inicia sesión en Spotify otra vez.</string>
+    <string name="spotify_error">No se pudieron cargar tus playlists de Spotify. Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="spotify_importing_title">Importando “%1$s”</string>
+    <string name="spotify_reading_tracks">Leyendo canciones de Spotify…</string>
+    <string name="spotify_matching_tracks">Buscando canciones: %1$d de %2$d (%3$d encontradas)</string>
+    <string name="spotify_import_done">Se importaron %1$d de %2$d canciones en “%3$s”.</string>
+    <string name="spotify_import_none">No se pudo encontrar ninguna canción.</string>
+    <string name="spotify_not_found_list">No encontradas:</string>
+    <string name="spotify_import_hint">Las canciones se buscan en YouTube Music, que es de donde se reproducen. Se guardan como una playlist local.</string>
 </resources>

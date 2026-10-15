@@ -1,6 +1,13 @@
 package com.maxrave.spotify
 
 import com.maxrave.spotify.auth.SpotifyAuth
+import com.maxrave.spotify.model.library.SpotifyHttpException
+import com.maxrave.spotify.model.library.SpotifyPage
+import com.maxrave.spotify.model.library.SpotifyPlaylistDto
+import com.maxrave.spotify.model.library.SpotifyPlaylistSummary
+import com.maxrave.spotify.model.library.SpotifyTrack
+import com.maxrave.spotify.model.library.SpotifyTrackDto
+import com.maxrave.spotify.model.library.SpotifyTrackEntryDto
 import com.maxrave.spotify.model.response.spotify.CanvasResponse
 import com.maxrave.spotify.model.response.spotify.ClientTokenResponse
 import com.maxrave.spotify.model.response.spotify.PersonalTokenResponse
@@ -9,6 +16,8 @@ import com.maxrave.spotify.model.response.spotify.search.SpotifySearchResponse
 import io.ktor.client.call.body
 import io.ktor.client.engine.ProxyBuilder
 import io.ktor.client.engine.http
+import io.ktor.client.statement.HttpResponse
+import io.ktor.http.isSuccess
 
 class Spotify {
     private val spotifyClient = SpotifyClient()
@@ -94,5 +103,137 @@ class Spotify {
         clientToken: String,
     ) = runCatching {
         spotifyClient.getSpotifyCanvas(trackId, token, clientToken).body<CanvasResponse>()
+    }
+
+    // ---------------------------------------------------------------- Library (playlists)
+
+    /**
+     * Every playlist the user owns or follows, plus their saved tracks as a pseudo-playlist
+     * ([SpotifyPlaylistSummary.LIKED_SONGS_ID]) placed first, like the Spotify app does.
+     */
+    suspend fun getMyPlaylists(token: String): Result<List<SpotifyPlaylistSummary>> =
+        runCatching {
+            val playlists = mutableListOf<SpotifyPlaylistSummary>()
+            var offset = 0
+            var pages = 0
+            while (pages < MAX_PAGES) {
+                val response = spotifyClient.getMyPlaylists(token, offset, PLAYLIST_PAGE_SIZE)
+                val page = response.requireSuccess("playlists").body<SpotifyPage<SpotifyPlaylistDto>>()
+                page.items.filterNotNull().forEach { dto ->
+                    val id = dto.id ?: return@forEach
+                    playlists +=
+                        SpotifyPlaylistSummary(
+                            id = id,
+                            name = dto.name?.takeIf { it.isNotBlank() } ?: "Playlist",
+                            imageUrl = dto.images.bestImage(),
+                            trackCount = dto.tracks?.total ?: dto.items?.total ?: 0,
+                            ownerName = dto.owner?.displayName ?: dto.owner?.id,
+                        )
+                }
+                pages++
+                offset += PLAYLIST_PAGE_SIZE
+                if (page.next == null || page.items.isEmpty()) break
+            }
+            // The saved-tracks count costs one tiny request; failing to get it must not hide the
+            // playlists, so it falls back to "unknown" (0) instead of failing the whole call.
+            val liked =
+                runCatching {
+                    spotifyClient
+                        .getSavedTracks(token, 0, 1)
+                        .requireSuccess("saved tracks")
+                        .body<SpotifyPage<SpotifyTrackEntryDto>>()
+                        .total
+                }.getOrNull()
+            if (liked != null && liked > 0) {
+                playlists.add(
+                    0,
+                    SpotifyPlaylistSummary(
+                        id = SpotifyPlaylistSummary.LIKED_SONGS_ID,
+                        name = "",
+                        imageUrl = null,
+                        trackCount = liked,
+                        ownerName = null,
+                    ),
+                )
+            }
+            playlists
+        }
+
+    /**
+     * Every playable track of a playlist, in order. Podcast episodes and local files (which have
+     * no Spotify id and nothing to look up) are left out.
+     *
+     * [onProgress] receives (tracks read so far, total) after each page.
+     */
+    suspend fun getPlaylistTracks(
+        token: String,
+        playlistId: String,
+        onProgress: (Int, Int) -> Unit = { _, _ -> },
+    ): Result<List<SpotifyTrack>> =
+        runCatching {
+            val tracks = mutableListOf<SpotifyTrack>()
+            val isLiked = playlistId == SpotifyPlaylistSummary.LIKED_SONGS_ID
+            // `tracks` is the long-standing path; `items` is what newer API versions call it. Try
+            // the first and only fall to the second when it is refused or missing.
+            var path = "tracks"
+            var offset = 0
+            var pages = 0
+            while (pages < MAX_PAGES) {
+                val response: HttpResponse =
+                    when {
+                        isLiked -> spotifyClient.getSavedTracks(token, offset, TRACK_PAGE_SIZE)
+                        else -> spotifyClient.getPlaylistTracks(token, playlistId, path, offset, TRACK_PAGE_SIZE)
+                    }
+                if (!isLiked && pages == 0 && !response.status.isSuccess() && path == "tracks") {
+                    path = "items"
+                    continue
+                }
+                val page = response.requireSuccess("playlist tracks").body<SpotifyPage<SpotifyTrackEntryDto>>()
+                page.items.filterNotNull().forEach { entry ->
+                    (entry.track ?: entry.item)?.toSpotifyTrack()?.let { tracks += it }
+                }
+                pages++
+                offset += TRACK_PAGE_SIZE
+                onProgress(tracks.size, page.total)
+                if (page.next == null || page.items.isEmpty()) break
+            }
+            tracks
+        }
+
+    private fun HttpResponse.requireSuccess(what: String): HttpResponse {
+        if (!status.isSuccess()) {
+            throw SpotifyHttpException(status.value, what)
+        }
+        return this
+    }
+
+    private fun List<com.maxrave.spotify.model.library.SpotifyImageDto>?.bestImage(): String? =
+        this
+            ?.filter { !it.url.isNullOrEmpty() }
+            // Large enough for a grid tile, without pulling the 640px original for every card.
+            ?.sortedBy { kotlin.math.abs((it.width ?: 300) - 300) }
+            ?.firstOrNull()
+            ?.url
+
+    private fun SpotifyTrackDto.toSpotifyTrack(): SpotifyTrack? {
+        if (isLocal == true) return null
+        if (type != null && type != "track") return null
+        val title = name?.takeIf { it.isNotBlank() } ?: return null
+        return SpotifyTrack(
+            id = id,
+            title = title,
+            artists = artists.orEmpty().mapNotNull { it.name?.takeIf { n -> n.isNotBlank() } },
+            album = album?.name,
+            durationMs = durationMs ?: 0L,
+            imageUrl = album?.images.bestImage(),
+        )
+    }
+
+    private companion object {
+        const val PLAYLIST_PAGE_SIZE = 50
+        const val TRACK_PAGE_SIZE = 100
+
+        /** 100 pages of 100 is 10,000 tracks — Spotify's own cap for a playlist. */
+        const val MAX_PAGES = 100
     }
 }

@@ -253,6 +253,50 @@ class SpotifyClient {
         )
     }
 
+    /** One page of the playlists the signed-in user owns or follows. */
+    suspend fun getMyPlaylists(
+        token: String,
+        offset: Int,
+        limit: Int,
+    ) = spotifyClient.get("/v1/me/playlists") {
+        userAgent(USER_AGENT)
+        header("Authorization", "Bearer $token")
+        header("Accept", "application/json")
+        parameter("offset", offset)
+        parameter("limit", limit)
+    }
+
+    /** One page of the tracks a playlist holds. [path] is `tracks`, or `items` in newer API versions. */
+    suspend fun getPlaylistTracks(
+        token: String,
+        playlistId: String,
+        path: String,
+        offset: Int,
+        limit: Int,
+    ) = spotifyClient.get("/v1/playlists/$playlistId/$path") {
+        userAgent(USER_AGENT)
+        header("Authorization", "Bearer $token")
+        header("Accept", "application/json")
+        parameter("offset", offset)
+        parameter("limit", limit)
+        parameter("market", "from_token")
+        parameter("additional_types", "track")
+    }
+
+    /** One page of the user's saved ("liked") tracks. */
+    suspend fun getSavedTracks(
+        token: String,
+        offset: Int,
+        limit: Int,
+    ) = spotifyClient.get("/v1/me/tracks") {
+        userAgent(USER_AGENT)
+        header("Authorization", "Bearer $token")
+        header("Accept", "application/json")
+        parameter("offset", offset)
+        parameter("limit", limit)
+        parameter("market", "from_token")
+    }
+
     suspend fun getSpotifyClientToken() =
         jsonClient.post("https://clienttoken.spotify.com/v1/clienttoken") {
             headers {

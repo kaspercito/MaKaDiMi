@@ -130,6 +130,7 @@ import simpmusic.composeapp.generated.resources.no_playlists_downloaded
 import simpmusic.composeapp.generated.resources.playlist_name
 import simpmusic.composeapp.generated.resources.playlist_name_cannot_be_empty
 import simpmusic.composeapp.generated.resources.simpmusic_charts
+import simpmusic.composeapp.generated.resources.spotify_playlists
 import simpmusic.composeapp.generated.resources.wrapped
 import simpmusic.composeapp.generated.resources.your_library
 import simpmusic.composeapp.generated.resources.your_playlists
@@ -147,6 +148,7 @@ fun LibraryScreen(
     val density = LocalDensity.current
 
     val loggedIn by viewModel.youtubeLoggedIn.collectAsStateWithLifecycle(initialValue = false)
+    val spotifyLoggedIn by viewModel.spotifyLoggedIn.collectAsStateWithLifecycle(initialValue = false)
     // Wrapped and its recaps are built entirely from playback_event, so the chip follows the same
     // setting the Analytics tab does.
     val localTrackingEnabled by viewModel.localTrackingEnabled.collectAsStateWithLifecycle(initialValue = false)
@@ -202,6 +204,9 @@ fun LibraryScreen(
                     viewModel.getYouTubePlaylist()
                 }
             }
+
+            // SpotifyPlaylistsTab loads its own data when it enters composition.
+            LibraryChipType.SPOTIFY_PLAYLIST -> Unit
 
             // Mix for you has its own nav tab now. The filter is persisted, so a build upgraded
             // while it was selected would land here with no chip to match — send it back to the
@@ -351,6 +356,13 @@ fun LibraryScreen(
                 ) {
                     viewModel.getYouTubePlaylist()
                 }
+            }
+
+            LibraryChipType.SPOTIFY_PLAYLIST -> {
+                SpotifyPlaylistsTab(
+                    navController = navController,
+                    contentPadding = innerPadding.copy(top = topAppBarHeight),
+                )
             }
 
             // Nothing to draw: MixForYouScreen owns this content now, and the effect above bounces
@@ -600,6 +612,10 @@ fun LibraryScreen(
                 if (type == LibraryChipType.YOUTUBE_MUSIC_PLAYLIST && !loggedIn) {
                     return@forEach
                 }
+                // Like the YouTube chip, only offered once there is an account behind it.
+                if (type == LibraryChipType.SPOTIFY_PLAYLIST && !spotifyLoggedIn) {
+                    return@forEach
+                }
                 // Nothing to recap without the plays — gated exactly as the YouTube chip above
                 // is gated on being logged in.
                 if (type == LibraryChipType.WRAPPED && !localTrackingEnabled) {
@@ -612,6 +628,7 @@ fun LibraryScreen(
                         when (type) {
                             LibraryChipType.YOUR_LIBRARY -> stringResource(Res.string.your_library)
                             LibraryChipType.YOUTUBE_MUSIC_PLAYLIST -> stringResource(Res.string.your_youtube_playlists)
+                            LibraryChipType.SPOTIFY_PLAYLIST -> stringResource(Res.string.spotify_playlists)
                             LibraryChipType.YOUTUBE_MIX_FOR_YOU -> stringResource(Res.string.mix_for_you)
                             LibraryChipType.LOCAL_PLAYLIST -> stringResource(Res.string.your_playlists)
                             LibraryChipType.FAVORITE_PLAYLIST -> stringResource(Res.string.favorite_playlists)
