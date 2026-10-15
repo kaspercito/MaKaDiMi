@@ -1,4 +1,4 @@
-# MaKaDiMi 1.1.8
+# MaKaDiMi 1.0.8
 
 ## Improved
 - **Spotify playlists**: the Spotify login now tries every known secret (newest first, plus ones bundled in the app) and refreshes the list every hour, so it keeps working when Spotify rotates them.

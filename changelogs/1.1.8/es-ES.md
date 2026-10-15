@@ -1,4 +1,4 @@
-# MaKaDiMi 1.1.8
+# MaKaDiMi 1.0.8
 
 ## Mejorado
 - **Playlists de Spotify**: el inicio de sesión con Spotify ahora prueba todos los secretos conocidos (del más nuevo al más viejo, más los incluidos en la app) y los actualiza cada hora, para seguir funcionando cuando Spotify los cambie.
