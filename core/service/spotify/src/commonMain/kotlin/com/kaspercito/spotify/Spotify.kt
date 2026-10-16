@@ -21,10 +21,19 @@ import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.CancellationException
 import com.kaspercito.logger.Logger
 import io.ktor.http.isSuccess
+import kotlinx.serialization.json.Json
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeMark
+import kotlin.time.TimeSource
 
 class Spotify {
     private val spotifyClient = SpotifyClient()
     private val spotifyAuth = SpotifyAuth(spotifyClient)
+    private val webPlayerHashes = WebPlayerHashes(spotifyClient)
+
+    // api.spotify.com/v1 answers the web player's token with a 429 that can last 24 hours, and every
+    // further request while it lasts only keeps the block alive. After one, that route is left alone.
+    private var publicApiBlockedUntil: TimeMark? = null
 
     /**
      * Remove proxy for client
@@ -92,12 +101,22 @@ class Spotify {
         token: String,
         clientToken: String,
     ) = runCatching {
-        spotifyClient
-            .getSpotifyLyrics(
+        val response =
+            spotifyClient.getSpotifyLyrics(
                 token = token,
                 clientToken = clientToken,
                 trackId,
-            ).body<SpotifyLyricsResponse>()
+            )
+        // A track without lyrics answers 404 with a body that is not the lyrics shape: reading it
+        // through content negotiation threw "Expected response body of the type ... but was ...".
+        // Check the status first and decode the text ourselves, whatever Content-Type came back.
+        if (!response.status.isSuccess()) {
+            throw SpotifyHttpException(response.status.value, "lyrics", response.headers["Retry-After"]?.trim()?.toLongOrNull())
+        }
+        val decoded = lyricsJson.decodeFromString(SpotifyLyricsResponse.serializer(), response.bodyAsText())
+        // An answer with no lines is "no lyrics", not an empty lyrics screen.
+        if (decoded.lyrics.lines.isEmpty()) throw SpotifyHttpException(404, "lyrics")
+        decoded
     }
 
     suspend fun getSpotifyCanvas(
@@ -128,7 +147,19 @@ class Spotify {
         } catch (e: Exception) {
             Logger.w("SpotifyLibrary", "libraryV3 failed (${e.message}), trying the public API")
         }
-        return getMyPlaylistsViaWebApi(token)
+        val blocked = publicApiBlockedUntil
+        if (blocked != null && blocked.hasNotPassedNow()) {
+            // Asking again only keeps the 429 alive (the log showed three in two seconds).
+            return Result.failure(SpotifyHttpException(429, "playlists", (-blocked.elapsedNow()).inWholeSeconds))
+        }
+        publicApiBlockedUntil = null
+        val result = getMyPlaylistsViaWebApi(token)
+        val error = result.exceptionOrNull()
+        if (error is SpotifyHttpException && error.code == 429) {
+            val wait = (error.retryAfterSeconds ?: 60L).coerceIn(10L, 3600L)
+            publicApiBlockedUntil = TimeSource.Monotonic.markNow() + wait.seconds
+        }
+        return result
     }
 
     private suspend fun fetchLibraryPlaylists(
@@ -144,7 +175,7 @@ class Spotify {
             val page = parseLibraryV3(body)
             if (pages == 0 && page.playlists.isEmpty()) {
                 // Nothing recognised: keep the start of the reply in the log so the shape can be fixed.
-                Logger.e("SpotifyLibrary", "libraryV3 gave no playlists: ${body.take(600)}")
+                Logger.e("SpotifyLibrary", "libraryV3 gave no playlists: ${describeLibraryV3(body)}")
             }
             page.playlists.forEach { found.putIfAbsent(it.id, it) }
             pages++
@@ -216,42 +247,188 @@ class Spotify {
      * Every playable track of a playlist, in order. Podcast episodes and local files (which have
      * no Spotify id and nothing to look up) are left out.
      *
+     * Three routes are tried, in this order, and the first that answers wins:
+     *  1. the web player's own GraphQL query (what open.spotify.com uses to draw the playlist);
+     *  2. the public Web API, unless it recently answered 429 (it can ask for 24 hours);
+     *  3. the playlist's public embed page, which needs no token but lists only 100 tracks.
+     *
      * [onProgress] receives (tracks read so far, total) after each page.
      */
     suspend fun getPlaylistTracks(
         token: String,
         playlistId: String,
+        clientToken: String? = null,
         onProgress: (Int, Int) -> Unit = { _, _ -> },
-    ): Result<List<SpotifyTrack>> =
-        runCatching {
-            val tracks = mutableListOf<SpotifyTrack>()
-            val isLiked = playlistId == SpotifyPlaylistSummary.LIKED_SONGS_ID
-            // `tracks` is the long-standing path; `items` is what newer API versions call it. Try
-            // the first and only fall to the second when it is refused or missing.
-            var path = "tracks"
-            var offset = 0
-            var pages = 0
-            while (pages < MAX_PAGES) {
-                val response: HttpResponse =
-                    when {
-                        isLiked -> spotifyClient.getSavedTracks(token, offset, TRACK_PAGE_SIZE)
-                        else -> spotifyClient.getPlaylistTracks(token, playlistId, path, offset, TRACK_PAGE_SIZE)
-                    }
-                if (!isLiked && pages == 0 && !response.status.isSuccess() && response.status.value != 429 && path == "tracks") {
-                    path = "items"
-                    continue
-                }
-                val page = response.requireSuccess("playlist tracks").body<SpotifyPage<SpotifyTrackEntryDto>>()
-                page.items.filterNotNull().forEach { entry ->
-                    (entry.track ?: entry.item)?.toSpotifyTrack()?.let { tracks += it }
-                }
-                pages++
-                offset += TRACK_PAGE_SIZE
-                onProgress(tracks.size, page.total)
-                if (page.next == null || page.items.isEmpty()) break
-            }
-            tracks
+    ): Result<List<SpotifyTrack>> {
+        val isLiked = playlistId == SpotifyPlaylistSummary.LIKED_SONGS_ID
+        var failure: Throwable? = null
+
+        // 1. The web player's own route.
+        try {
+            fetchTracksViaPathfinder(token, clientToken, playlistId, isLiked, onProgress)?.let { return Result.success(it) }
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: SpotifyHttpException) {
+            // An expired token is for the caller to refresh; anything else moves on to the next route.
+            if (e.code == 401) return Result.failure(e)
+            failure = e
+        } catch (e: Exception) {
+            Logger.w("SpotifyLibrary", "web player route failed: ${e.message}")
+            failure = e
         }
+
+        // 2. The public Web API, unless it is known to be refusing this token.
+        val blocked = publicApiBlockedUntil
+        if (blocked == null || !blocked.hasNotPassedNow()) {
+            publicApiBlockedUntil = null
+            try {
+                return Result.success(fetchTracksViaPublicApi(token, playlistId, isLiked, onProgress))
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: SpotifyHttpException) {
+                if (e.code == 401) return Result.failure(e)
+                if (e.code == 429) {
+                    val wait = (e.retryAfterSeconds ?: 60L).coerceIn(10L, 3600L)
+                    publicApiBlockedUntil = TimeSource.Monotonic.markNow() + wait.seconds
+                }
+                failure = e
+            } catch (e: Exception) {
+                failure = failure ?: e
+            }
+        } else {
+            Logger.w("SpotifyLibrary", "public Web API is rate-limited, not asking it for the playlist")
+        }
+
+        // 3. The public embed page: no token, no rate limit of the account's, first 100 tracks only.
+        if (!isLiked) {
+            try {
+                val embedded = fetchTracksViaEmbed(playlistId)
+                if (embedded.isNotEmpty()) {
+                    Logger.w("SpotifyLibrary", "playlist read from its embed page: at most 100 tracks (${embedded.size} found)")
+                    onProgress(embedded.size, embedded.size)
+                    return Result.success(embedded)
+                }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: Exception) {
+                Logger.w("SpotifyLibrary", "embed route failed: ${e.message}")
+                failure = failure ?: e
+            }
+        }
+        return Result.failure(failure ?: IllegalStateException("No route could read the playlist"))
+    }
+
+    /** The playlist read through the web player's GraphQL query, or null when that route cannot be used. */
+    private suspend fun fetchTracksViaPathfinder(
+        token: String,
+        clientToken: String?,
+        playlistId: String,
+        isLiked: Boolean,
+        onProgress: (Int, Int) -> Unit,
+    ): List<SpotifyTrack>? {
+        val operations = if (isLiked) listOf("fetchLibraryTracks") else listOf("fetchPlaylistContents", "fetchPlaylist")
+        for (operation in operations) {
+            val hash = webPlayerHashes.hashFor(operation) ?: continue
+            try {
+                readPathfinderPages(token, clientToken, operation, hash, playlistId, isLiked, onProgress)?.let { return it }
+            } catch (e: CancellationException) {
+                throw e
+            } catch (e: SpotifyHttpException) {
+                if (e.code == 401 || e.code == 429) throw e
+                Logger.w("SpotifyLibrary", "$operation failed: ${e.message}")
+            } catch (e: Exception) {
+                Logger.w("SpotifyLibrary", "$operation failed: ${e.message}")
+            }
+        }
+        return null
+    }
+
+    private suspend fun readPathfinderPages(
+        token: String,
+        clientToken: String?,
+        operation: String,
+        hash: String,
+        playlistId: String,
+        isLiked: Boolean,
+        onProgress: (Int, Int) -> Unit,
+    ): List<SpotifyTrack>? {
+        val tracks = mutableListOf<SpotifyTrack>()
+        var offset = 0
+        var pages = 0
+        while (pages < MAX_PAGES) {
+            val variables =
+                when {
+                    isLiked -> "{\"offset\":$offset,\"limit\":$PATHFINDER_PAGE_SIZE}"
+                    operation == "fetchPlaylist" ->
+                        "{\"uri\":\"spotify:playlist:$playlistId\",\"offset\":$offset,\"limit\":$PATHFINDER_PAGE_SIZE," +
+                            "\"enableWatchFeedEntrypoint\":false}"
+                    else -> "{\"uri\":\"spotify:playlist:$playlistId\",\"offset\":$offset,\"limit\":$PATHFINDER_PAGE_SIZE}"
+                }
+            val response = spotifyClient.getPathfinder(token, clientToken, operation, hash, variables)
+            val body = response.requireSuccess("playlist tracks (web player)").bodyAsText()
+            val page = parsePathfinderTracks(body)
+            if (pages == 0 && page.tracks.isEmpty()) {
+                // Spotify says the playlist is empty: that is an answer. Otherwise the reply was not
+                // understood, so let the next route try.
+                if (page.total == 0) return emptyList()
+                Logger.w("SpotifyLibrary", "$operation answered but no tracks were recognised: ${body.take(300)}")
+                return null
+            }
+            tracks += page.tracks
+            pages++
+            offset += page.rawCount
+            val total = page.total
+            onProgress(tracks.size, total ?: tracks.size)
+            val done =
+                page.rawCount == 0 ||
+                    (total != null && offset >= total) ||
+                    (total == null && page.rawCount < PATHFINDER_PAGE_SIZE)
+            if (done) break
+        }
+        return tracks
+    }
+
+    /** The playlist read through api.spotify.com/v1: complete, but its 429 can last a day. */
+    private suspend fun fetchTracksViaPublicApi(
+        token: String,
+        playlistId: String,
+        isLiked: Boolean,
+        onProgress: (Int, Int) -> Unit,
+    ): List<SpotifyTrack> {
+        val tracks = mutableListOf<SpotifyTrack>()
+        // `tracks` is the long-standing path; `items` is what newer API versions call it. Try
+        // the first and only fall to the second when it is refused or missing.
+        var path = "tracks"
+        var offset = 0
+        var pages = 0
+        while (pages < MAX_PAGES) {
+            val response: HttpResponse =
+                when {
+                    isLiked -> spotifyClient.getSavedTracks(token, offset, TRACK_PAGE_SIZE)
+                    else -> spotifyClient.getPlaylistTracks(token, playlistId, path, offset, TRACK_PAGE_SIZE)
+                }
+            if (!isLiked && pages == 0 && !response.status.isSuccess() && response.status.value != 429 && path == "tracks") {
+                path = "items"
+                continue
+            }
+            val page = response.requireSuccess("playlist tracks").body<SpotifyPage<SpotifyTrackEntryDto>>()
+            page.items.filterNotNull().forEach { entry ->
+                (entry.track ?: entry.item)?.toSpotifyTrack()?.let { tracks += it }
+            }
+            pages++
+            offset += TRACK_PAGE_SIZE
+            onProgress(tracks.size, page.total)
+            if (page.next == null || page.items.isEmpty()) break
+        }
+        return tracks
+    }
+
+    /** The first 100 tracks of a public playlist, read from its embed page. */
+    private suspend fun fetchTracksViaEmbed(playlistId: String): List<SpotifyTrack> {
+        val response = spotifyClient.getWebText("https://open.spotify.com/embed/playlist/$playlistId")
+        val html = response.requireSuccess("playlist embed").bodyAsText()
+        return parseEmbedTracks(html)
+    }
 
     private fun HttpResponse.requireSuccess(what: String): HttpResponse {
         if (!status.isSuccess()) {
@@ -285,6 +462,15 @@ class Spotify {
     private companion object {
         const val PLAYLIST_PAGE_SIZE = 50
         const val TRACK_PAGE_SIZE = 100
+        const val PATHFINDER_PAGE_SIZE = 100
+
+        /** Lyrics replies come with whatever Content-Type Spotify picks, so they are decoded by hand. */
+        val lyricsJson =
+            Json {
+                ignoreUnknownKeys = true
+                isLenient = true
+                coerceInputValues = true
+            }
 
         /** 100 pages of 100 is 10,000 tracks — Spotify's own cap for a playlist. */
         const val MAX_PAGES = 100

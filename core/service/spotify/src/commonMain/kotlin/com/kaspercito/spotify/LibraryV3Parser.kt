@@ -37,8 +37,10 @@ internal fun parseLibraryV3(text: String): LibraryV3Page {
     for (entry in items) {
         val wrapper = entry as? JsonObject ?: continue
         val item = wrapper["item"] as? JsonObject ?: wrapper
-        val uri = item.stringOf("_uri") ?: item.stringOf("uri") ?: continue
         val data = item["data"] as? JsonObject
+        val uri =
+            item.stringOf("_uri") ?: item.stringOf("uri") ?: data?.stringOf("uri")
+                ?: wrapper.stringOf("_uri") ?: wrapper.stringOf("uri") ?: continue
         when {
             uri == LIKED_SONGS_URI ->
                 playlists +=
@@ -90,3 +92,18 @@ private fun JsonElement.firstString(key: String): String? {
     }
     return null
 }
+
+/**
+ * A short description of a libraryV3 reply that yielded no playlists: its keys, how many items it
+ * held and the start of the first one. The raw start of the body is mostly filter and sort names,
+ * which hid the part that matters.
+ */
+internal fun describeLibraryV3(text: String): String =
+    runCatching {
+        val root = Json.parseToJsonElement(text)
+        val library = root.findObject("libraryV3")
+            ?: return@runCatching "no libraryV3 object; errors=${(root as? JsonObject)?.get("errors")?.toString()?.take(400)}"
+        val items = library["items"] as? JsonArray
+        "keys=${library.keys}, items=${items?.size}, totalCount=${library["totalCount"]}, " +
+            "first=${items?.firstOrNull()?.toString()?.take(500)}"
+    }.getOrElse { "unparseable: ${text.take(300)}" }

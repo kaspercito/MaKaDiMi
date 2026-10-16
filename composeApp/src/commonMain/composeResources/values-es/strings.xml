@@ -991,5 +991,6 @@
     <string name="spotify_import_done">Se importaron %1$d de %2$d canciones en “%3$s”.</string>
     <string name="spotify_import_none">No se pudo encontrar ninguna canción.</string>
     <string name="spotify_not_found_list">No encontradas:</string>
+    <string name="spotify_import_error">No se pudo leer esa playlist de Spotify. Revisa tu conexión e inténtalo de nuevo.</string>
     <string name="spotify_import_hint">Las canciones se buscan en YouTube Music, que es de donde se reproducen. Se guardan como una playlist local.</string>
 </resources>

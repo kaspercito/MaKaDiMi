@@ -66,7 +66,7 @@ internal class SpotifyLibraryRepositoryImpl(
                 emit(Resource.Success(cached))
                 return@flow
             }
-            withSpotifyToken { token ->
+            withSpotifyToken(playlistsGate) { token ->
                 spotify.getMyPlaylists(token, tokens.clientToken().getOrNull())
             }
                 .onSuccess { list ->
@@ -101,8 +101,12 @@ internal class SpotifyLibraryRepositoryImpl(
         channelFlow {
             send(SpotifyImportProgress.ReadingTracks(0, playlist.trackCount))
             val tracks =
-                withSpotifyToken { token ->
-                    spotify.getPlaylistTracks(token, playlist.id) { read, total ->
+                // No rate-limit memory here: Spotify.getPlaylistTracks already falls back from the web
+                // player's route to the public API and the embed page, and remembers by itself when
+                // the public API is refusing. A shared gate would also have kept the (working)
+                // playlist listing waiting for an hour after one failed import.
+                withSpotifyToken(null) { token ->
+                    spotify.getPlaylistTracks(token, playlist.id, tokens.clientToken().getOrNull()) { read, total ->
                         trySend(SpotifyImportProgress.ReadingTracks(read, total))
                     }
                 }.getOrElse {
@@ -195,12 +199,18 @@ internal class SpotifyLibraryRepositoryImpl(
     }
 
     /** Runs [block] with a token; if Spotify refuses it as expired, once more with a freshly minted one. */
-    private suspend fun <T> withSpotifyToken(block: suspend (String) -> Result<T>): Result<T> {
+    private suspend fun <T> withSpotifyToken(
+        gate: RateLimitGate?,
+        block: suspend (String) -> Result<T>,
+    ): Result<T> {
         // Spotify has asked for a long pause: do not knock again until it is over. Every retry of a
         // limited account only extended the block (10 failed playlist loads in one log).
-        rateLimitedUntil?.let { limit ->
-            if (limit.hasNotPassedNow()) return Result.failure(rateLimitError ?: SpotifyHttpException(429, "rate limited"))
-            rateLimitedUntil = null
+        if (gate != null) {
+            val limit = gate.until
+            if (limit != null) {
+                if (limit.hasNotPassedNow()) return Result.failure(gate.error ?: SpotifyHttpException(429, "rate limited"))
+                gate.until = null
+            }
         }
         val first = tokens.personalToken().getOrElse { return Result.failure(it) }
         var result = block(first)
@@ -217,8 +227,10 @@ internal class SpotifyLibraryRepositoryImpl(
             val waitSeconds = error.retryAfterSeconds ?: (3L * (attempt + 1))
             if (waitSeconds > MAX_RATE_LIMIT_WAIT_SECONDS) {
                 Logger.w(TAG, "Spotify asked to wait ${waitSeconds}s (429), not waiting")
-                rateLimitError = error
-                rateLimitedUntil = TimeSource.Monotonic.markNow() + waitSeconds.coerceAtMost(MAX_REMEMBERED_WAIT_SECONDS).seconds
+                if (gate != null) {
+                    gate.error = error
+                    gate.until = TimeSource.Monotonic.markNow() + waitSeconds.coerceAtMost(MAX_REMEMBERED_WAIT_SECONDS).seconds
+                }
                 break
             }
             Logger.w(TAG, "Spotify answered 429, retrying in ${waitSeconds}s")
@@ -231,8 +243,13 @@ internal class SpotifyLibraryRepositoryImpl(
         return result
     }
 
-    private var rateLimitedUntil: TimeMark? = null
-    private var rateLimitError: SpotifyHttpException? = null
+    /** Remembers that Spotify asked for a long pause on one family of requests. */
+    private class RateLimitGate {
+        var until: TimeMark? = null
+        var error: SpotifyHttpException? = null
+    }
+
+    private val playlistsGate = RateLimitGate()
 
     private fun Throwable.toFailure(): SpotifyFailure =
         when {

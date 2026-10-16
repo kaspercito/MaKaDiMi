@@ -300,6 +300,60 @@ class SpotifyClient {
         }
     }
 
+    /**
+     * A page or script of open.spotify.com fetched the way a browser would, with no credentials.
+     * Used to read the web player's own bundle (to learn the current persisted-query hashes) and
+     * the public embed page of a playlist.
+     */
+    suspend fun getWebText(url: String): HttpResponse =
+        spotifyClient.get(url) {
+            userAgent(USER_AGENT)
+            header("Accept", "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8")
+            header("Accept-Language", "en-US,en;q=0.9")
+        }
+
+    /**
+     * One page of a playlist's tracks (or of the saved tracks) asked the way the web player asks:
+     * a pathfinder persisted query. Unlike api.spotify.com/v1, which answers this token with a 429
+     * that can last 24 hours, this is the route the Spotify web player itself uses to draw a playlist.
+     *
+     * [operation] and [hash] come from [com.kaspercito.spotify.WebPlayerHashes]; [variables] is the
+     * JSON object the operation expects.
+     */
+    suspend fun getPathfinder(
+        token: String,
+        clientToken: String?,
+        operation: String,
+        hash: String,
+        variables: String,
+    ): HttpResponse {
+        val extensions = "{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"$hash\"}}"
+        val posted =
+            spotifyClient.post("https://api-partner.spotify.com/pathfinder/v2/query") {
+                userAgent(USER_AGENT)
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
+                if (clientToken != null) header("Client-Token", clientToken)
+                header("App-platform", "WebPlayer")
+                header("Accept", "application/json")
+                setBody("{\"variables\":$variables,\"operationName\":\"$operation\",\"extensions\":$extensions}")
+            }
+        // 401 (token) and 429 (rate limit) mean the endpoint is right; anything else may just be the
+        // older GET form of the same query, which the web player also still answers.
+        val code = posted.status.value
+        if (code in 200..299 || code == 401 || code == 429) return posted
+        return spotifyClient.get("https://api-partner.spotify.com/pathfinder/v1/query?operationName=$operation") {
+            userAgent(USER_AGENT)
+            contentType(ContentType.Application.Json)
+            header("Authorization", "Bearer $token")
+            if (clientToken != null) header("Client-Token", clientToken)
+            header("App-platform", "WebPlayer")
+            header("Accept", "application/json")
+            parameter("variables", variables)
+            parameter("extensions", extensions)
+        }
+    }
+
     /** One page of the playlists the signed-in user owns or follows. */
     suspend fun getMyPlaylists(
         token: String,

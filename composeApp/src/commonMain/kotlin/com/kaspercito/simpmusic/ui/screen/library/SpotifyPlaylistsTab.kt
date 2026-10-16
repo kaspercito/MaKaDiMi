@@ -51,6 +51,7 @@ import simpmusic.composeapp.generated.resources.cancel
 import simpmusic.composeapp.generated.resources.spotify_error
 import simpmusic.composeapp.generated.resources.spotify_import
 import simpmusic.composeapp.generated.resources.spotify_import_done
+import simpmusic.composeapp.generated.resources.spotify_import_error
 import simpmusic.composeapp.generated.resources.spotify_import_hint
 import simpmusic.composeapp.generated.resources.spotify_import_none
 import simpmusic.composeapp.generated.resources.spotify_importing_title
@@ -59,6 +60,7 @@ import simpmusic.composeapp.generated.resources.spotify_login_needed
 import simpmusic.composeapp.generated.resources.spotify_matching_tracks
 import simpmusic.composeapp.generated.resources.spotify_no_playlists
 import simpmusic.composeapp.generated.resources.spotify_not_found_list
+import simpmusic.composeapp.generated.resources.spotify_rate_limited
 import simpmusic.composeapp.generated.resources.spotify_reading_tracks
 import simpmusic.composeapp.generated.resources.spotify_session_expired
 import simpmusic.composeapp.generated.resources.spotify_tracks_count
@@ -113,7 +115,13 @@ fun SpotifyPlaylistsTab(
                         } else {
                             Message(
                                 contentPadding,
-                                stringResource(Res.string.spotify_error),
+                                stringResource(
+                                    if (current.reason == SpotifyFailure.RATE_LIMITED) {
+                                        Res.string.spotify_rate_limited
+                                    } else {
+                                        Res.string.spotify_error
+                                    },
+                                ),
                                 stringResource(Res.string.retry),
                             ) { viewModel.load(force = true) }
                         }
@@ -255,7 +263,8 @@ private fun ImportDialog(
                         Text(
                             stringResource(
                                 when (progress.reason) {
-                                    SpotifyFailure.UNKNOWN, SpotifyFailure.RATE_LIMITED -> Res.string.spotify_error
+                                    SpotifyFailure.RATE_LIMITED -> Res.string.spotify_rate_limited
+                                    SpotifyFailure.UNKNOWN -> Res.string.spotify_import_error
                                     else -> Res.string.spotify_session_expired
                                 },
                             ),
