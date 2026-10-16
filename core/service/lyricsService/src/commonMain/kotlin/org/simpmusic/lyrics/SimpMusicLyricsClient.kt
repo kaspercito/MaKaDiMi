@@ -93,11 +93,17 @@ class SimpMusicLyricsClient {
                 throw IllegalStateException("Already inserting lyrics, please wait until the current operation is complete.")
             }
             insertingLyrics = lyricsBody.videoId to true
-            val hmacTimestamp =
-                hmacService.getMacTimestampPair(
-                    HmacUri.BASE_HMAC_URI,
-                )
-            lyricsService.insertLyrics(lyricsBody, hmacTimestamp).bodyOrThrow<LyricsResponse>()
+            // The flag must be released whatever happens: it used to stay set after a failure, so
+            // every later insert for the same video failed with "Already inserting lyrics".
+            try {
+                val hmacTimestamp =
+                    hmacService.getMacTimestampPair(
+                        HmacUri.BASE_HMAC_URI,
+                    )
+                lyricsService.insertLyrics(lyricsBody, hmacTimestamp).bodyOrThrow<LyricsResponse>()
+            } finally {
+                insertingLyrics = lyricsBody.videoId to false
+            }
         }
 
     suspend fun insertTranslatedLyrics(translatedLyricsBody: TranslatedLyricsBody): Result<TranslatedLyricsResponse> =
@@ -109,11 +115,15 @@ class SimpMusicLyricsClient {
                 throw IllegalStateException("Already inserting translated lyrics, please wait until the current operation is complete.")
             }
             insertingTranslatedLyrics = translatedLyricsBody.videoId to true
-            val hmacTimestamp =
-                hmacService.getMacTimestampPair(
-                    HmacUri.TRANSLATED_HMAC_URI,
-                )
-            lyricsService.insertTranslatedLyrics(translatedLyricsBody, hmacTimestamp).bodyOrThrow<TranslatedLyricsResponse>()
+            try {
+                val hmacTimestamp =
+                    hmacService.getMacTimestampPair(
+                        HmacUri.TRANSLATED_HMAC_URI,
+                    )
+                lyricsService.insertTranslatedLyrics(translatedLyricsBody, hmacTimestamp).bodyOrThrow<TranslatedLyricsResponse>()
+            } finally {
+                insertingTranslatedLyrics = translatedLyricsBody.videoId to false
+            }
         }
 
     suspend fun voteLyrics(

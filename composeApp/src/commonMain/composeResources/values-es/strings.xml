@@ -984,6 +984,7 @@
     <string name="spotify_login_needed">Inicia sesión en Spotify para ver aquí tus playlists.</string>
     <string name="spotify_session_expired">Tu sesión de Spotify expiró. Inicia sesión en Spotify otra vez.</string>
     <string name="spotify_error">No se pudieron cargar tus playlists de Spotify. Revisa tu conexión e inténtalo de nuevo.</string>
+    <string name="spotify_rate_limited">Spotify está limitando temporalmente las solicitudes de tu cuenta. Inténtalo más tarde.</string>
     <string name="spotify_importing_title">Importando “%1$s”</string>
     <string name="spotify_reading_tracks">Leyendo canciones de Spotify…</string>
     <string name="spotify_matching_tracks">Buscando canciones: %1$d de %2$d (%3$d encontradas)</string>

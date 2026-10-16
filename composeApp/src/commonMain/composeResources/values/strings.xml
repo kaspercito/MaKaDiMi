@@ -1024,6 +1024,7 @@ Built with ❤️ on top of the open source project SimpMusic by Tuan Minh Nguye
     <string name="spotify_login_needed">Log in to Spotify to see your playlists here.</string>
     <string name="spotify_session_expired">Your Spotify session expired. Log in to Spotify again.</string>
     <string name="spotify_error">Could not load your Spotify playlists. Check your connection and try again.</string>
+    <string name="spotify_rate_limited">Spotify is temporarily limiting requests from your account. Try again later.</string>
     <string name="spotify_importing_title">Importing “%1$s”</string>
     <string name="spotify_reading_tracks">Reading tracks from Spotify…</string>
     <string name="spotify_matching_tracks">Finding songs: %1$d of %2$d (%3$d found)</string>

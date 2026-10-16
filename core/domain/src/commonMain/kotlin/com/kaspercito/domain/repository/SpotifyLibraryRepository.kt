@@ -29,6 +29,9 @@ enum class SpotifyFailure {
     /** The saved session (sp_dc cookie) was refused: the user has to log in to Spotify again. */
     SESSION_EXPIRED,
 
+    /** Spotify answered 429 and asked for a wait too long to sit through (it has asked for 24 h). */
+    RATE_LIMITED,
+
     /** Anything else — most often the network. */
     UNKNOWN,
 }

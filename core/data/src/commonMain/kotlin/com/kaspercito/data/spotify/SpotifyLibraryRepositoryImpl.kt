@@ -32,6 +32,7 @@ import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
 import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.TimeMark
 import kotlin.time.TimeSource
 
@@ -43,6 +44,7 @@ private const val SONG_BATCH_SIZE = 500
 
 private const val MAX_RATE_LIMIT_RETRIES = 3
 private const val MAX_RATE_LIMIT_WAIT_SECONDS = 20L
+private const val MAX_REMEMBERED_WAIT_SECONDS = 3600L
 private val CACHE_TTL = 5.minutes
 
 internal class SpotifyLibraryRepositoryImpl(
@@ -194,6 +196,12 @@ internal class SpotifyLibraryRepositoryImpl(
 
     /** Runs [block] with a token; if Spotify refuses it as expired, once more with a freshly minted one. */
     private suspend fun <T> withSpotifyToken(block: suspend (String) -> Result<T>): Result<T> {
+        // Spotify has asked for a long pause: do not knock again until it is over. Every retry of a
+        // limited account only extended the block (10 failed playlist loads in one log).
+        rateLimitedUntil?.let { limit ->
+            if (limit.hasNotPassedNow()) return Result.failure(rateLimitError ?: SpotifyHttpException(429, "rate limited"))
+            rateLimitedUntil = null
+        }
         val first = tokens.personalToken().getOrElse { return Result.failure(it) }
         var result = block(first)
         var error = result.exceptionOrNull()
@@ -209,6 +217,8 @@ internal class SpotifyLibraryRepositoryImpl(
             val waitSeconds = error.retryAfterSeconds ?: (3L * (attempt + 1))
             if (waitSeconds > MAX_RATE_LIMIT_WAIT_SECONDS) {
                 Logger.w(TAG, "Spotify asked to wait ${waitSeconds}s (429), not waiting")
+                rateLimitError = error
+                rateLimitedUntil = TimeSource.Monotonic.markNow() + waitSeconds.coerceAtMost(MAX_REMEMBERED_WAIT_SECONDS).seconds
                 break
             }
             Logger.w(TAG, "Spotify answered 429, retrying in ${waitSeconds}s")
@@ -221,8 +231,12 @@ internal class SpotifyLibraryRepositoryImpl(
         return result
     }
 
+    private var rateLimitedUntil: TimeMark? = null
+    private var rateLimitError: SpotifyHttpException? = null
+
     private fun Throwable.toFailure(): SpotifyFailure =
         when {
+            this is SpotifyHttpException && code == 429 -> SpotifyFailure.RATE_LIMITED
             this is SpotifyNotLoggedInException -> SpotifyFailure.NOT_LOGGED_IN
             this is SpotifySessionExpiredException -> SpotifyFailure.SESSION_EXPIRED
             this is SpotifyHttpException && code == 401 -> SpotifyFailure.SESSION_EXPIRED

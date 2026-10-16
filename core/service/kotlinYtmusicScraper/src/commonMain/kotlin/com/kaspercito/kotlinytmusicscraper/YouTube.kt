@@ -1596,7 +1596,9 @@ class YouTube {
             } else {
                 Logger.d(TAG, "YouTube Player no URL found")
             }
-            if (decodedSigResponse == null) throw RuntimeException("No URL found")
+            if (decodedSigResponse == null) {
+                throw RuntimeException("No URL found (playability=${tempRes.playabilityStatus.status}, reason=${tempRes.playabilityStatus.reason})")
+            }
             val firstThumb =
                 decodedSigResponse.videoDetails
                     ?.thumbnail
