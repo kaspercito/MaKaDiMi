@@ -1031,5 +1031,6 @@ Built with ❤️ on top of the open source project SimpMusic by Tuan Minh Nguye
     <string name="spotify_import_done">Imported %1$d of %2$d songs into “%3$s”.</string>
     <string name="spotify_import_none">None of the songs could be found.</string>
     <string name="spotify_not_found_list">Not found:</string>
+    <string name="spotify_import_error">Could not read that playlist from Spotify. Check your connection and try again.</string>
     <string name="spotify_import_hint">Songs are matched on YouTube Music, which is where they play from. They are saved as a local playlist.</string>
 </resources>
