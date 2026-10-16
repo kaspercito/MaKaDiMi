@@ -21,6 +21,28 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 
+/**
+ * Tracks whose video half just failed to load. For a short while they are played as audio only, so a
+ * video that cannot be fetched no longer takes the (possibly downloaded) audio down with it.
+ */
+internal object VideoFallback {
+    private const val HOLD_MS = 2 * 60_000L
+    private val marked = java.util.concurrent.ConcurrentHashMap<String, Long>()
+
+    fun mark(videoId: String) {
+        marked[videoId] = System.currentTimeMillis()
+    }
+
+    fun isMarked(videoId: String): Boolean {
+        val at = marked[videoId] ?: return false
+        if (System.currentTimeMillis() - at > HOLD_MS) {
+            marked.remove(videoId)
+            return false
+        }
+        return true
+    }
+}
+
 @UnstableApi
 internal class MergingMediaSourceFactory(
     private val defaultMediaSourceFactory: DefaultMediaSourceFactory,
@@ -60,7 +82,7 @@ internal class MergingMediaSourceFactory(
         Logger.w("Merging Media Source", mediaItem.mediaMetadata.description.toString())
         val getVideo = runBlocking(Dispatchers.IO) { dataStoreManager.watchVideoInsteadOfPlayingAudio.first() } == DataStoreManager.Values.TRUE
         Logger.w("Merging Media Source", getVideo.toString())
-        if (mediaItem.mediaMetadata.description == MERGING_DATA_TYPE.VIDEO && getVideo && !isVideoUnreachable(mediaItem.mediaId)) {
+        if (mediaItem.mediaMetadata.description == MERGING_DATA_TYPE.VIDEO && getVideo && !isVideoUnreachable(mediaItem.mediaId) && !VideoFallback.isMarked(mediaItem.mediaId)) {
             val videoItem =
                 mediaItem
                     .buildUpon()
@@ -87,8 +109,11 @@ internal class MergingMediaSourceFactory(
 
     private fun isOnline(): Boolean {
         val connectivityManager = context.getSystemService(ConnectivityManager::class.java) ?: return true
-        return connectivityManager
-            .getNetworkCapabilities(connectivityManager.activeNetwork)
-            ?.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) == true
+        val capabilities = connectivityManager.getNetworkCapabilities(connectivityManager.activeNetwork) ?: return false
+        // INTERNET alone is true for a Wi-Fi or data connection that is up but goes nowhere (no
+        // balance, a dead router, DNS failing), which is exactly when downloaded songs have to play.
+        // VALIDATED means Android actually reached the internet through it.
+        return capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET) &&
+            capabilities.hasCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED)
     }
 }

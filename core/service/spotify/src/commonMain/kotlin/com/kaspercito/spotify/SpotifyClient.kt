@@ -25,6 +25,7 @@ import io.ktor.client.request.headers
 import io.ktor.client.request.parameter
 import io.ktor.client.request.post
 import io.ktor.client.request.setBody
+import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.request
 import io.ktor.http.ContentType
 import io.ktor.http.HttpHeaders
@@ -253,6 +254,52 @@ class SpotifyClient {
         )
     }
 
+    /**
+     * One page of the user's library, asked the way the web player asks for it (pathfinder
+     * `libraryV3`, flattened so playlists inside folders are included).
+     *
+     * api.spotify.com/v1/me/playlists answers the web player's token with 429, which is why this
+     * exists. The hash names the query on Spotify's side and rotates when the web player is rebuilt:
+     * if this stops answering, capture a fresh one from open.spotify.com (DevTools > Network).
+     */
+    suspend fun getLibraryV3(
+        token: String,
+        clientToken: String?,
+        offset: Int,
+        limit: Int,
+    ): HttpResponse {
+        val hash = "390c78e5b951029bad359785e69b07b536a509c581cbcd0aded5e5067f187455"
+        val variables =
+            "{\"order\":null,\"textFilter\":\"\",\"features\":[\"LIKED_SONGS\",\"YOUR_EPISODES_V2\"," +
+                "\"PRERELEASES\",\"PRERELEASES_V2\",\"CLIPS\",\"EVENTS\"],\"limit\":$limit,\"offset\":$offset," +
+                "\"flatten\":true,\"expandedFolders\":[],\"folderUri\":null,\"includeFoldersWhenFlattening\":true}"
+        val extensions = "{\"persistedQuery\":{\"version\":1,\"sha256Hash\":\"$hash\"}}"
+        val posted =
+            spotifyClient.post("https://api-partner.spotify.com/pathfinder/v2/query") {
+                userAgent(USER_AGENT)
+                contentType(ContentType.Application.Json)
+                header("Authorization", "Bearer $token")
+                if (clientToken != null) header("Client-Token", clientToken)
+                header("App-platform", "WebPlayer")
+                header("Accept", "application/json")
+                setBody("{\"variables\":$variables,\"operationName\":\"libraryV3\",\"extensions\":$extensions}")
+            }
+        // 401 (expired token) and 429 (rate limit) mean the endpoint is right; anything else may
+        // just be the older GET form of the same query, which the web player also still answers.
+        val code = posted.status.value
+        if (code in 200..299 || code == 401 || code == 429) return posted
+        return spotifyClient.get("https://api-partner.spotify.com/pathfinder/v1/query?operationName=libraryV3") {
+            userAgent(USER_AGENT)
+            contentType(ContentType.Application.Json)
+            header("Authorization", "Bearer $token")
+            if (clientToken != null) header("Client-Token", clientToken)
+            header("App-platform", "WebPlayer")
+            header("Accept", "application/json")
+            parameter("variables", variables)
+            parameter("extensions", extensions)
+        }
+    }
+
     /** One page of the playlists the signed-in user owns or follows. */
     suspend fun getMyPlaylists(
         token: String,
@@ -325,6 +372,6 @@ class SpotifyClient {
     }
 
     companion object {
-        const val USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/74.0.3729.157 Safari/537.36"
+        const val USER_AGENT = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/135.0.0.0 Safari/537.36"
     }
 }

@@ -31,6 +31,9 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.Semaphore
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.sync.withPermit
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.TimeMark
+import kotlin.time.TimeSource
 
 private const val TAG = "SpotifyLibrary"
 
@@ -38,32 +41,54 @@ private const val TAG = "SpotifyLibrary"
 private const val MATCH_CONCURRENCY = 4
 private const val SONG_BATCH_SIZE = 500
 
+private const val MAX_RATE_LIMIT_RETRIES = 3
+private const val MAX_RATE_LIMIT_WAIT_SECONDS = 20L
+private val CACHE_TTL = 5.minutes
+
 internal class SpotifyLibraryRepositoryImpl(
     private val spotify: Spotify,
     private val youTube: YouTube,
     private val localDataSource: LocalDataSource,
     private val tokens: SpotifyTokenProvider,
 ) : SpotifyLibraryRepository {
+    // Opening the tab again must not hit Spotify again: its rate limit on the web player's token is
+    // tight and a 429 can last a long while. A fresh list is reused; a stale one still beats an error.
+    private var cachedPlaylists: List<SpotifyPlaylistInfo>? = null
+    private var cachedAt: TimeMark? = null
+
     override fun getPlaylists(): Flow<Resource<List<SpotifyPlaylistInfo>>> =
         flow {
-            withSpotifyToken { token -> spotify.getMyPlaylists(token) }
+            val cached = cachedPlaylists
+            val age = cachedAt
+            if (cached != null && age != null && age.elapsedNow() < CACHE_TTL) {
+                emit(Resource.Success(cached))
+                return@flow
+            }
+            withSpotifyToken { token ->
+                spotify.getMyPlaylists(token, tokens.clientToken().getOrNull())
+            }
                 .onSuccess { list ->
-                    emit(
-                        Resource.Success(
-                            list.map {
-                                SpotifyPlaylistInfo(
-                                    id = it.id,
-                                    name = it.name,
-                                    imageUrl = it.imageUrl,
-                                    trackCount = it.trackCount,
-                                    ownerName = it.ownerName,
-                                )
-                            },
-                        ),
-                    )
+                    val mapped =
+                        list.map {
+                            SpotifyPlaylistInfo(
+                                id = it.id,
+                                name = it.name,
+                                imageUrl = it.imageUrl,
+                                trackCount = it.trackCount,
+                                ownerName = it.ownerName,
+                            )
+                        }
+                    cachedPlaylists = mapped
+                    cachedAt = TimeSource.Monotonic.markNow()
+                    emit(Resource.Success(mapped))
                 }.onFailure {
                     Logger.e(TAG, "loading playlists failed: ${it::class.simpleName}: ${it.message}")
-                    emit(Resource.Error(it.toFailure().asMessage()))
+                    val rateLimited = it is SpotifyHttpException && it.code == 429
+                    if (rateLimited && cached != null) {
+                        emit(Resource.Success(cached))
+                    } else {
+                        emit(Resource.Error(it.toFailure().asMessage()))
+                    }
                 }
         }.flowOn(Dispatchers.IO)
 
@@ -170,11 +195,28 @@ internal class SpotifyLibraryRepositoryImpl(
     /** Runs [block] with a token; if Spotify refuses it as expired, once more with a freshly minted one. */
     private suspend fun <T> withSpotifyToken(block: suspend (String) -> Result<T>): Result<T> {
         val first = tokens.personalToken().getOrElse { return Result.failure(it) }
-        val result = block(first)
-        val error = result.exceptionOrNull()
+        var result = block(first)
+        var error = result.exceptionOrNull()
         if (error is SpotifyHttpException && error.code == 401) {
             val fresh = tokens.personalToken(forceRefresh = true).getOrElse { return Result.failure(it) }
-            return block(fresh)
+            result = block(fresh)
+            error = result.exceptionOrNull()
+        }
+        // 429 Too Many Requests: wait what Spotify asks (or back off 3s, 6s) and try again. When it
+        // asks for longer than is reasonable to wait on a loading screen, give up right away.
+        var attempt = 0
+        while (error is SpotifyHttpException && error.code == 429 && attempt < MAX_RATE_LIMIT_RETRIES) {
+            val waitSeconds = error.retryAfterSeconds ?: (3L * (attempt + 1))
+            if (waitSeconds > MAX_RATE_LIMIT_WAIT_SECONDS) {
+                Logger.w(TAG, "Spotify asked to wait ${waitSeconds}s (429), not waiting")
+                break
+            }
+            Logger.w(TAG, "Spotify answered 429, retrying in ${waitSeconds}s")
+            delay(waitSeconds.coerceAtLeast(1L) * 1000L)
+            attempt++
+            val token = tokens.personalToken().getOrElse { return Result.failure(it) }
+            result = block(token)
+            error = result.exceptionOrNull()
         }
         return result
     }

@@ -17,6 +17,9 @@ import io.ktor.client.call.body
 import io.ktor.client.engine.ProxyBuilder
 import io.ktor.client.engine.http
 import io.ktor.client.statement.HttpResponse
+import io.ktor.client.statement.bodyAsText
+import kotlinx.coroutines.CancellationException
+import com.kaspercito.logger.Logger
 import io.ktor.http.isSuccess
 
 class Spotify {
@@ -111,7 +114,57 @@ class Spotify {
      * Every playlist the user owns or follows, plus their saved tracks as a pseudo-playlist
      * ([SpotifyPlaylistSummary.LIKED_SONGS_ID]) placed first, like the Spotify app does.
      */
-    suspend fun getMyPlaylists(token: String): Result<List<SpotifyPlaylistSummary>> =
+    suspend fun getMyPlaylists(
+        token: String,
+        clientToken: String? = null,
+    ): Result<List<SpotifyPlaylistSummary>> {
+        // The web player's own library query first: the public /v1/me/playlists answers 429 to this
+        // token. If it fails or comes back empty, the public route is still tried.
+        try {
+            val fromLibrary = fetchLibraryPlaylists(token, clientToken)
+            if (fromLibrary.isNotEmpty()) return Result.success(fromLibrary)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Logger.w("SpotifyLibrary", "libraryV3 failed (${e.message}), trying the public API")
+        }
+        return getMyPlaylistsViaWebApi(token)
+    }
+
+    private suspend fun fetchLibraryPlaylists(
+        token: String,
+        clientToken: String?,
+    ): List<SpotifyPlaylistSummary> {
+        val found = LinkedHashMap<String, SpotifyPlaylistSummary>()
+        var offset = 0
+        var pages = 0
+        while (pages < MAX_PAGES) {
+            val response = spotifyClient.getLibraryV3(token, clientToken, offset, PLAYLIST_PAGE_SIZE)
+            val body = response.requireSuccess("library").bodyAsText()
+            val page = parseLibraryV3(body)
+            if (pages == 0 && page.playlists.isEmpty()) {
+                // Nothing recognised: keep the start of the reply in the log so the shape can be fixed.
+                Logger.e("SpotifyLibrary", "libraryV3 gave no playlists: ${body.take(600)}")
+            }
+            page.playlists.forEach { found.putIfAbsent(it.id, it) }
+            pages++
+            offset += page.rawCount
+            val total = page.total
+            val done =
+                page.rawCount == 0 ||
+                    (total != null && offset >= total) ||
+                    (total == null && page.rawCount < PLAYLIST_PAGE_SIZE)
+            if (done) break
+        }
+        // Saved tracks come first, like the Spotify app lists them.
+        val liked = found.remove(SpotifyPlaylistSummary.LIKED_SONGS_ID)
+        return buildList {
+            if (liked != null) add(liked)
+            addAll(found.values)
+        }
+    }
+
+    private suspend fun getMyPlaylistsViaWebApi(token: String): Result<List<SpotifyPlaylistSummary>> =
         runCatching {
             val playlists = mutableListOf<SpotifyPlaylistSummary>()
             var offset = 0
@@ -184,7 +237,7 @@ class Spotify {
                         isLiked -> spotifyClient.getSavedTracks(token, offset, TRACK_PAGE_SIZE)
                         else -> spotifyClient.getPlaylistTracks(token, playlistId, path, offset, TRACK_PAGE_SIZE)
                     }
-                if (!isLiked && pages == 0 && !response.status.isSuccess() && path == "tracks") {
+                if (!isLiked && pages == 0 && !response.status.isSuccess() && response.status.value != 429 && path == "tracks") {
                     path = "items"
                     continue
                 }
@@ -202,7 +255,7 @@ class Spotify {
 
     private fun HttpResponse.requireSuccess(what: String): HttpResponse {
         if (!status.isSuccess()) {
-            throw SpotifyHttpException(status.value, what)
+            throw SpotifyHttpException(status.value, what, headers["Retry-After"]?.trim()?.toLongOrNull())
         }
         return this
     }

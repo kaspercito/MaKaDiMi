@@ -33,6 +33,8 @@ data class SpotifyTrack(
 class SpotifyHttpException(
     val code: Int,
     what: String,
+    /** Seconds Spotify asked us to wait (Retry-After header) when it answered 429, if it said. */
+    val retryAfterSeconds: Long? = null,
 ) : Exception("Spotify $what request answered $code")
 
 // ---- Wire models. Every field is optional on purpose: the web player's token is answered by

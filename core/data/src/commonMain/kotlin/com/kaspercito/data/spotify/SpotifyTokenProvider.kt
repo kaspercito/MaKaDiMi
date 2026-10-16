@@ -9,7 +9,10 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlin.time.Clock
+import kotlin.time.Duration.Companion.seconds
 import kotlin.time.ExperimentalTime
+import kotlin.time.TimeMark
+import kotlin.time.TimeSource
 
 internal class SpotifyNotLoggedInException : Exception("No Spotify account is linked")
 
@@ -28,6 +31,12 @@ internal class SpotifyTokenProvider(
     private val dataStoreManager: DataStoreManager,
 ) {
     private val personalLock = Mutex()
+
+    // A refresh that failed (no network, Spotify refusing) is not repeated for a short while. Lyrics,
+    // Canvas and the library all ask for this token, and while offline each of them used to start its
+    // own refresh: 179 failed attempts in a single log, each one a request and a log line.
+    private var lastFailure: Throwable? = null
+    private var lastFailureAt: TimeMark? = null
     private val clientLock = Mutex()
 
     /**
@@ -46,6 +55,11 @@ internal class SpotifyTokenProvider(
             }
             val spdc = dataStoreManager.spdc.first()
             if (spdc.isEmpty()) return@withLock Result.failure(SpotifyNotLoggedInException())
+            val failure = lastFailure
+            val failedAt = lastFailureAt
+            if (!forceRefresh && failure != null && failedAt != null && failedAt.elapsedNow() < FAILURE_BACKOFF) {
+                return@withLock Result.failure(failure)
+            }
             spotify
                 .getPersonalTokenWithTotp(spdc)
                 .mapCatching { response ->
@@ -57,7 +71,14 @@ internal class SpotifyTokenProvider(
                     dataStoreManager.setSpotifyPersonalToken(response.accessToken)
                     dataStoreManager.setSpotifyPersonalTokenExpires(response.accessTokenExpirationTimestampMs)
                     response.accessToken
-                }.onFailure { Logger.w(TAG, "personal token refresh failed: ${it.message}") }
+                }.onSuccess {
+                    lastFailure = null
+                    lastFailureAt = null
+                }.onFailure {
+                    lastFailure = it
+                    lastFailureAt = TimeSource.Monotonic.markNow()
+                    Logger.w(TAG, "personal token refresh failed: ${it.message}")
+                }
         }
 
     /** The web player's client token, which the lyrics and Canvas endpoints ask for next to the bearer. */
@@ -89,5 +110,8 @@ internal class SpotifyTokenProvider(
 
         /** Refresh a minute early so a token never expires between the check and the request. */
         const val EXPIRY_MARGIN_MS = 60_000L
+
+        /** How long a failed refresh is remembered before another one is attempted. */
+        val FAILURE_BACKOFF = 30.seconds
     }
 }

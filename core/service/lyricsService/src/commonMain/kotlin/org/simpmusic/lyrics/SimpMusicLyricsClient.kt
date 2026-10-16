@@ -22,8 +22,13 @@ import org.simpmusic.lyrics.models.response.TranslatedLyricsResponse
 import org.simpmusic.lyrics.parser.parseSyncedLyrics
 import org.simpmusic.lyrics.parser.parseUnsyncedLyrics
 import kotlin.math.abs
+import kotlin.time.Duration
+import kotlin.time.Duration.Companion.minutes
+import kotlin.time.Duration.Companion.seconds
+import kotlin.time.TimeMark
+import kotlin.time.TimeSource
 
-private const val TAG = "SimpMusicLyricsClient"
+private const val TAG = "MaKaDiMiLyricsClient"
 
 /** An error the MaKaDiMi Lyrics API answered with; [code] 404 means nobody has added that song yet. */
 class SimpMusicLyricsApiException(
@@ -42,12 +47,27 @@ class SimpMusicLyricsClient {
 
     private var tooManyRequest: Boolean = false
 
+    // After a 429 the API is left alone for a while. Before this, only inserts checked the flag, so
+    // every lyrics lookup kept hitting a server that had just said "slow down" (66 times in one log),
+    // which kept the limit on and made lyrics fail for longer.
+    private var cooldownStart: TimeMark? = null
+    private var cooldownLength: Duration = Duration.ZERO
+
+    private fun failIfCoolingDown() {
+        val start = cooldownStart ?: return
+        if (start.elapsedNow() < cooldownLength) {
+            throw SimpMusicLyricsApiException(429, "Too many requests, cooling down")
+        }
+        cooldownStart = null
+    }
+
     private var insertingTranslatedLyrics: Pair<String?, Boolean> = (null to false)
     private val isInsertingTranslatedLyrics: Boolean
         get() = insertingTranslatedLyrics.second
 
     suspend fun getLyrics(videoId: String): Result<List<LyricsResponse>> =
         runCatching {
+            failIfCoolingDown()
             lyricsService.findLyricsByVideoId(videoId).bodyOrThrow<List<LyricsResponse>>()
         }
 
@@ -59,11 +79,13 @@ class SimpMusicLyricsClient {
             if (language.length != 2) {
                 throw IllegalArgumentException("Language code must be a 2-letter code")
             }
+            failIfCoolingDown()
             lyricsService.findTranslatedLyrics(videoId, language).bodyOrThrow<TranslatedLyricsResponse>()
         }
 
     suspend fun insertLyrics(lyricsBody: LyricsBody): Result<LyricsResponse> =
         runCatching {
+            failIfCoolingDown()
             if (tooManyRequest) {
                 throw IllegalStateException("Too many requests, please wait before trying again.")
             }
@@ -340,7 +362,10 @@ class SimpMusicLyricsClient {
     private suspend inline fun <reified T> HttpResponse.bodyOrThrow(): T {
         if (this.status.value == 429) {
             tooManyRequest = true
-            Logger.e(TAG, "Too many requests: ${this.status.value}")
+            val asked = headers["Retry-After"]?.trim()?.toLongOrNull()?.seconds
+            cooldownLength = (asked ?: 60.seconds).coerceIn(10.seconds, 10.minutes)
+            cooldownStart = TimeSource.Monotonic.markNow()
+            Logger.e(TAG, "Too many requests: ${this.status.value}, pausing lyrics requests for $cooldownLength")
         } else {
             tooManyRequest = false
         }

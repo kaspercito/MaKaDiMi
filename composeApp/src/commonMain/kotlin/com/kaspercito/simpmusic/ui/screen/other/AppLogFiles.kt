@@ -226,7 +226,7 @@ internal suspend fun exportLog(chooserTitle: String): Boolean {
         } ?: return false
     val stamp = now()
     val fileName =
-        "simpmusic-log-${stamp.year}${stamp.month.number.pad()}${stamp.day.pad()}-" +
+        "makadimi-log-${stamp.year}${stamp.month.number.pad()}${stamp.day.pad()}-" +
             "${stamp.hour.pad()}${stamp.minute.pad()}${stamp.second.pad()}.txt"
     return shareImage(bytes, fileName, chooserTitle, mimeType = "text/plain")
 }

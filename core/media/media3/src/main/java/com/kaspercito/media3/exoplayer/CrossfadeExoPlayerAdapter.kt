@@ -44,6 +44,7 @@ import com.kaspercito.media3.audio.SleepFadeAudioProcessor
 import com.kaspercito.media3.service.mediasourcefactory.isLiveStreamDetected
 import com.kaspercito.media3.exoplayer.CrossfadeExoPlayerAdapter.Companion.SPEED_PITCH_STEP
 import com.kaspercito.media3.service.mediasourcefactory.MergingMediaSourceFactory
+import com.kaspercito.media3.service.mediasourcefactory.VideoFallback
 import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Job
@@ -392,7 +393,7 @@ internal class CrossfadeExoPlayerAdapter(
     // Track retry attempts per media item to avoid infinite retry loops
     private var retryCount = 0
     private var retryVideoId: String? = null
-    private val maxRetryCount = 2
+    private val maxRetryCount = 4
 
     // ========== AutoMix Metadata Cache ==========
     // videoId -> audio analysis data from Tidal (populated externally when 320kbps stream is fetched)
@@ -1864,12 +1865,34 @@ internal class CrossfadeExoPlayerAdapter(
                     //   lists FileNotFoundException as non-retriable, so this layer is the only chance
                     //   to recover; reloading re-runs the resolver, which now sees an incomplete cache
                     //   and resolves a real URL.
+                    // A dropped connection, a DNS failure or "could not resolve the stream URL" reach
+                    // here as IO_UNSPECIFIED / NETWORK_CONNECTION_FAILED / _TIMEOUT. They used to be
+                    // fatal, which left the player paused after any network blip. They are transient,
+                    // so they are retried too, with a short growing pause between attempts.
+                    val isNetworkError =
+                        error.errorCode == PlaybackException.ERROR_CODE_IO_UNSPECIFIED ||
+                            error.errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_FAILED ||
+                            error.errorCode == PlaybackException.ERROR_CODE_IO_NETWORK_CONNECTION_TIMEOUT
                     val isRetryableSourceError =
-                        error.errorCode == PlaybackException.ERROR_CODE_PARSING_CONTAINER_MALFORMED ||
+                        isNetworkError ||
+                            error.errorCode == PlaybackException.ERROR_CODE_PARSING_CONTAINER_MALFORMED ||
                             error.errorCode == PlaybackException.ERROR_CODE_IO_BAD_HTTP_STATUS ||
                             error.errorCode == PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND
 
                     val currentVideoId = playlist.getOrNull(localCurrentMediaItemIndex)?.mediaId
+                    // When it was the VIDEO half that could not be fetched, the retry below plays the
+                    // track as audio only instead of failing the whole merged source again.
+                    if (currentVideoId != null && isNetworkError) {
+                        val videoKey = "${com.kaspercito.common.MERGING_DATA_TYPE.VIDEO}$currentVideoId"
+                        val videoHalfFailed =
+                            generateSequence<Throwable>(error) { it.cause }
+                                .take(6)
+                                .any { it.message?.contains(videoKey) == true }
+                        if (videoHalfFailed) {
+                            Logger.w(TAG, "Video of $currentVideoId could not be loaded; falling back to audio only")
+                            VideoFallback.mark(currentVideoId)
+                        }
+                    }
                     // The progressive resolver found this track to be a live broadcast. Loading it
                     // again builds an HLS source instead — see LiveStreamDetectedException. Not a
                     // retry, and not counted as one: it is a different source, not the same one again.
@@ -1902,8 +1925,10 @@ internal class CrossfadeExoPlayerAdapter(
                             // Snapshot the current position so the retry resumes where playback
                             // failed instead of restarting the track from the beginning.
                             val resumePositionMs = cachedPosition.coerceAtLeast(0L)
+                            val attemptNumber = retryCount
                             coroutineScope.launch {
                                 try {
+                                    if (isNetworkError) delay(1_000L * attemptNumber)
                                     // Invalidate cached format so ResolvingDataSource fetches a fresh URL
                                     streamRepository.invalidateFormat(currentVideoId)
                                     streamRepository.invalidateFormat("${com.kaspercito.common.MERGING_DATA_TYPE.VIDEO}$currentVideoId")

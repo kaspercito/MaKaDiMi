@@ -48,7 +48,7 @@ class SimpMusicLyrics {
             followRedirects = true
             install(HttpCache)
             install(CurlLogger) {
-                logger = { Logger.d("SimpMusicLyrics", it) }
+                logger = { Logger.d("MaKaDiMiLyrics", it) }
             }
             install(HttpSend) {
                 maxSendCount = 100
