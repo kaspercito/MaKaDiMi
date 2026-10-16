@@ -2,6 +2,7 @@ package com.kaspercito.data.repository
 
 import com.kaspercito.common.ITAG
 import com.kaspercito.common.MERGING_DATA_TYPE
+import com.kaspercito.common.OfflineMode
 import com.kaspercito.common.QUALITY
 import com.kaspercito.common.VIDEO_QUALITY
 import com.kaspercito.data.db.datasource.LocalDataSource
@@ -38,13 +39,14 @@ internal class StreamRepositoryImpl(
             localDataSource.insertNewFormat(newFormat)
         }
 
-    override fun getNewFormat(videoId: String): Flow<NewFormatEntity?> = flow { emit(localDataSource.getNewFormat(videoId)) }.flowOn(Dispatchers.Main)
+    override fun getNewFormat(videoId: String): Flow<NewFormatEntity?> = flow { emit(localDataSource.getNewFormat(videoId)) }.flowOn(Dispatchers.IO)
 
     override suspend fun getFormatFlow(videoId: String) = localDataSource.getNewFormatAsFlow(videoId)
 
     override fun getExtractSource(videoId: String): String? = youTube.getExtractSource(videoId)
 
     override suspend fun updateFormat(videoId: String) {
+        if (OfflineMode.enabled) return
         localDataSource.getNewFormat(videoId)?.let { oldFormat ->
             Logger.d("Stream", "oldFormatExpired: ${oldFormat.expiredTime}")
             Logger.d("Stream", "now: ${now()}")
@@ -91,6 +93,13 @@ internal class StreamRepositoryImpl(
         muxed: Boolean,
     ): Flow<String?> =
         flow {
+            if (OfflineMode.enabled) {
+                // Nothing can be fetched: answer at once instead of running every client through its
+                // timeouts, which kept the player buffering before it failed anyway.
+                Logger.w("Stream", "Offline mode: not resolving a stream URL for $videoId")
+                emit(null)
+                return@flow
+            }
             val itag =
                 if (isDownloading) {
                     QUALITY.itagOf(dataStoreManager.downloadQuality.first())
@@ -299,8 +308,7 @@ internal class StreamRepositoryImpl(
                         )
                     }
                 }.onFailure {
-                    it.printStackTrace()
-                    Logger.e("Stream", "Error: ${it.message}")
+                    Logger.e("Stream", "Error: ${it::class.simpleName}: ${it.message ?: it.cause?.message}")
                     emit(null)
                 }
         }.flowOn(Dispatchers.IO)

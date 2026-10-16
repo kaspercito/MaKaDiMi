@@ -1,7 +1,12 @@
 [versions]
 # App version
-version-name = "1.1.1"
-version-code = "12"
+<<<<<<< HEAD
+version-name = "1.1.2"
+version-code = "13"
+=======
+version-name = "1.1.2"
+version-code = "13"
+>>>>>>> 6dea7e4 (fix: Spotify 429 handling, offline playback and network robustness - v1.1.2)
 
 android = "9.4.1"
 kotlin = "2.4.20"

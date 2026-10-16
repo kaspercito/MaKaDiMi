@@ -1913,7 +1913,8 @@ internal class CrossfadeExoPlayerAdapter(
                                 "as a fully cached bare media id. Retrying to resolve a real URL.",
                         )
                     }
-                    if (isRetryableSourceError && currentVideoId != null) {
+                    // With offline mode on every request is refused by design, so a retry can only fail again.
+                    if (isRetryableSourceError && currentVideoId != null && !com.kaspercito.common.OfflineMode.enabled) {
                         // Reset retry count if this is a different track
                         if (retryVideoId != currentVideoId) {
                             retryVideoId = currentVideoId

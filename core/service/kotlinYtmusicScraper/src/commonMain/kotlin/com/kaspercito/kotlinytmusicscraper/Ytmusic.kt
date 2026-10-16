@@ -1303,10 +1303,19 @@ class Ytmusic {
 
     suspend fun is403Url(url: String): Boolean {
         return try {
-            return httpClient.head(url).status.value in 400..499
-        } catch (e: Exception) {
-            e.printStackTrace()
+            httpClient.head(url).status.value in 400..499
+        } catch (e: kotlin.coroutines.cancellation.CancellationException) {
+            throw e
+        } catch (e: ClientRequestException) {
+            // The server did answer, with a 4xx.
             true
+        } catch (e: Exception) {
+            // A dropped connection, a DNS failure or a timeout says nothing about the URL. Calling it
+            // "403" made every network blip throw away a good stream URL and re-resolve it, which
+            // also fails on a bad network and left playback stuck. If the URL really is dead the
+            // player's own retry gets a fresh one.
+            e.printStackTrace()
+            false
         }
     }
 

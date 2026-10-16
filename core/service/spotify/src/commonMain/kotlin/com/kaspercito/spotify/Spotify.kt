@@ -147,7 +147,19 @@ class Spotify {
         } catch (e: Exception) {
             Logger.w("SpotifyLibrary", "libraryV3 failed (${e.message}), trying the public API")
         }
-        return getMyPlaylistsViaWebApi(token)
+        val blocked = publicApiBlockedUntil
+        if (blocked != null && blocked.hasNotPassedNow()) {
+            // Asking again only keeps the 429 alive (the log showed three in two seconds).
+            return Result.failure(SpotifyHttpException(429, "playlists", (-blocked.elapsedNow()).inWholeSeconds))
+        }
+        publicApiBlockedUntil = null
+        val result = getMyPlaylistsViaWebApi(token)
+        val error = result.exceptionOrNull()
+        if (error is SpotifyHttpException && error.code == 429) {
+            val wait = (error.retryAfterSeconds ?: 60L).coerceIn(10L, 3600L)
+            publicApiBlockedUntil = TimeSource.Monotonic.markNow() + wait.seconds
+        }
+        return result
     }
 
     private suspend fun fetchLibraryPlaylists(
@@ -163,7 +175,7 @@ class Spotify {
             val page = parseLibraryV3(body)
             if (pages == 0 && page.playlists.isEmpty()) {
                 // Nothing recognised: keep the start of the reply in the log so the shape can be fixed.
-                Logger.e("SpotifyLibrary", "libraryV3 gave no playlists: ${body.take(600)}")
+                Logger.e("SpotifyLibrary", "libraryV3 gave no playlists: ${describeLibraryV3(body)}")
             }
             page.playlists.forEach { found.putIfAbsent(it.id, it) }
             pages++
