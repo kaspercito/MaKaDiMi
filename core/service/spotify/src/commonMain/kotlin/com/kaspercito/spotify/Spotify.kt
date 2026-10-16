@@ -19,6 +19,7 @@ import io.ktor.client.engine.http
 import io.ktor.client.statement.HttpResponse
 import io.ktor.client.statement.bodyAsText
 import kotlinx.coroutines.CancellationException
+import kotlinx.coroutines.delay
 import com.kaspercito.logger.Logger
 import io.ktor.http.isSuccess
 import kotlinx.serialization.json.Json
@@ -364,14 +365,27 @@ class Spotify {
                             "\"enableWatchFeedEntrypoint\":false}"
                     else -> "{\"uri\":\"spotify:playlist:$playlistId\",\"offset\":$offset,\"limit\":$PATHFINDER_PAGE_SIZE}"
                 }
-            val response = spotifyClient.getPathfinder(token, clientToken, operation, hash, variables)
-            val body = response.requireSuccess("playlist tracks (web player)").bodyAsText()
-            val page = parsePathfinderTracks(body)
+            // The web player's own 429 is short (seconds), unlike the public API's: wait it out
+            // instead of giving the route up, which used to leave only the embed page's 100 tracks.
+            val page =
+                try {
+                    withRateLimitRetry("playlist tracks (web player)") {
+                        val response = spotifyClient.getPathfinder(token, clientToken, operation, hash, variables)
+                        parsePathfinderTracks(response.requireSuccess("playlist tracks (web player)").bodyAsText())
+                    }
+                } catch (e: CancellationException) {
+                    throw e
+                } catch (e: Exception) {
+                    if (tracks.isEmpty()) throw e
+                    // Later pages failed: keep what was read rather than falling back to a shorter list.
+                    Logger.e("SpotifyLibrary", "$operation stopped at ${tracks.size} tracks: ${e.message}")
+                    break
+                }
             if (pages == 0 && page.tracks.isEmpty()) {
                 // Spotify says the playlist is empty: that is an answer. Otherwise the reply was not
                 // understood, so let the next route try.
                 if (page.total == 0) return emptyList()
-                Logger.w("SpotifyLibrary", "$operation answered but no tracks were recognised: ${body.take(300)}")
+                Logger.w("SpotifyLibrary", "$operation answered but no tracks were recognised (total=${page.total}, raw=${page.rawCount})")
                 return null
             }
             tracks += page.tracks
@@ -384,6 +398,8 @@ class Spotify {
                     (total != null && offset >= total) ||
                     (total == null && page.rawCount < PATHFINDER_PAGE_SIZE)
             if (done) break
+            // A short pause between pages keeps a long playlist from tripping the limit itself.
+            delay(PAGE_PAUSE_MS)
         }
         return tracks
     }
@@ -430,6 +446,30 @@ class Spotify {
         return parseEmbedTracks(html)
     }
 
+    /**
+     * Runs [block], and when Spotify answers 429 waits what it asks (or 2s, 4s, 6s...) and tries
+     * again, a few times. A request asking for more than [MAX_PAGE_WAIT_SECONDS] is a long block,
+     * not a hiccup, so it is not waited for.
+     */
+    private suspend fun <T> withRateLimitRetry(
+        what: String,
+        block: suspend () -> T,
+    ): T {
+        var attempt = 0
+        while (true) {
+            try {
+                return block()
+            } catch (e: SpotifyHttpException) {
+                val asked = e.retryAfterSeconds
+                if (e.code != 429 || attempt >= PAGE_RETRIES || (asked != null && asked > MAX_PAGE_WAIT_SECONDS)) throw e
+                val wait = (asked ?: (2L * (attempt + 1))).coerceIn(1L, MAX_PAGE_WAIT_SECONDS)
+                Logger.w("SpotifyLibrary", "$what answered 429, retrying in ${wait}s (${attempt + 1}/$PAGE_RETRIES)")
+                delay(wait * 1000L)
+                attempt++
+            }
+        }
+    }
+
     private fun HttpResponse.requireSuccess(what: String): HttpResponse {
         if (!status.isSuccess()) {
             throw SpotifyHttpException(status.value, what, headers["Retry-After"]?.trim()?.toLongOrNull())
@@ -463,6 +503,9 @@ class Spotify {
         const val PLAYLIST_PAGE_SIZE = 50
         const val TRACK_PAGE_SIZE = 100
         const val PATHFINDER_PAGE_SIZE = 100
+        const val PAGE_PAUSE_MS = 250L
+        const val PAGE_RETRIES = 5
+        const val MAX_PAGE_WAIT_SECONDS = 20L
 
         /** Lyrics replies come with whatever Content-Type Spotify picks, so they are decoded by hand. */
         val lyricsJson =

@@ -140,8 +140,9 @@ fun AppLogScreen(
     var minLevel by rememberSaveable { mutableStateOf('I') }
     var query by rememberSaveable { mutableStateOf("") }
     var paused by rememberSaveable { mutableStateOf(false) }
-    // Clearing hides what came before instead of deleting it: the writer keeps the file open.
-    var clearedAt by rememberSaveable { mutableLongStateOf(0L) }
+    // Clearing hides what came before instead of deleting it: the writer keeps the file open. The
+    // moment is saved (LogClear), so Restart, leaving the screen or restarting the app keep it cleared.
+    var clearedAt by remember { mutableLongStateOf(LogClear.get()) }
     // Android Studio's "Scroll to the End": a mode that keeps the newest line in view as lines
     // arrive, not a one-off jump. A person scrolling up turns it off, scrolling back to the bottom
     // turns it on again, and the toolbar button does either at will.
@@ -249,12 +250,12 @@ fun AppLogScreen(
                     // Android Studio's Logcat toolbar, in its order: clear, pause, restart, stick.
                     RippleIconButton(SimpIcons.Delete, tint = onSurface) {
                         clearedAt = nowEpochMillis()
+                        LogClear.set(clearedAt)
                     }
                     RippleIconButton(if (paused) SimpIcons.PlayArrow else SimpIcons.Pause, tint = onSurface) {
                         paused = !paused
                     }
                     RippleIconButton(SimpIcons.RestartAlt, tint = onSurface) {
-                        clearedAt = 0L
                         paused = false
                         stickToBottom = true
                         restarts++

@@ -115,13 +115,19 @@ internal class SpotifyLibraryRepositoryImpl(
                     return@channelFlow
                 }.distinctBy { it.id ?: "${it.title}|${it.artists}" }
 
-            val total = tracks.size
-            val matches = arrayOfNulls<SongsResult>(total)
+            // Spotify's own count wins when the read came back short (a rate limit cut it, or only the
+            // embed page's first 100 could be read): the result then says "47 of 250", not "47 of 47".
+            val total = maxOf(tracks.size, playlist.trackCount)
+            val readCount = tracks.size
+            if (readCount < total) {
+                Logger.w(TAG, "'${playlist.name}': read $readCount of $total tracks (the rest could not be fetched)")
+            }
+            val matches = arrayOfNulls<SongsResult>(readCount)
             val semaphore = Semaphore(MATCH_CONCURRENCY)
             val counters = Mutex()
             var processed = 0
             var matched = 0
-            send(SpotifyImportProgress.Matching(0, total, 0))
+            send(SpotifyImportProgress.Matching(0, readCount, 0))
             coroutineScope {
                 tracks
                     .mapIndexed { index, track ->
@@ -131,7 +137,7 @@ internal class SpotifyLibraryRepositoryImpl(
                             counters.withLock {
                                 processed++
                                 if (found != null) matched++
-                                send(SpotifyImportProgress.Matching(processed, total, matched))
+                                send(SpotifyImportProgress.Matching(processed, readCount, matched))
                             }
                         }
                     }.awaitAll()
@@ -180,6 +186,7 @@ internal class SpotifyLibraryRepositoryImpl(
             listOf(
                 "${track.title} $mainArtist",
                 "${SpotifyTrackMatcher.normalizeTitle(track.title)} ${track.artists.joinToString(" ")} ${track.album.orEmpty()}",
+                "${SpotifyTrackMatcher.normalizeTitle(track.title)} $mainArtist",
             ).map { it.replace(Regex("\\s+"), " ").trim() }.distinct()
         for (query in queries) {
             val candidates = searchSongs(query)

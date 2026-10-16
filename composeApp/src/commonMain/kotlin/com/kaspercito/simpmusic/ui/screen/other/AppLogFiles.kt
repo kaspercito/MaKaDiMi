@@ -230,3 +230,28 @@ internal suspend fun exportLog(chooserTitle: String): Boolean {
             "${stamp.hour.pad()}${stamp.minute.pad()}${stamp.second.pad()}.txt"
     return shareImage(bytes, fileName, chooserTitle, mimeType = "text/plain")
 }
+
+/**
+ * Where the log was last cleared, kept on disk next to the log files. The writer holds those files
+ * open, so Clear cannot delete them; it hides everything up to this moment instead. Keeping the
+ * moment (and not resetting it on Restart) is what makes cleared lines stay cleared after a
+ * refresh, after leaving the screen and after the app restarts.
+ */
+internal object LogClear {
+    @Volatile
+    private var cached: Long? = null
+
+    private fun file(): File? = Logger.logDirectory?.let { File(it, "cleared-at.txt") }
+
+    fun get(): Long {
+        cached?.let { return it }
+        val saved = runCatching { file()?.takeIf { it.exists() }?.readText()?.trim()?.toLong() }.getOrNull() ?: 0L
+        cached = saved
+        return saved
+    }
+
+    fun set(epochMillis: Long) {
+        cached = epochMillis
+        runCatching { file()?.writeText(epochMillis.toString()) }
+    }
+}
