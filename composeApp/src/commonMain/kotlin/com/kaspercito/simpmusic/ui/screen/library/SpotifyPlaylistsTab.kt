@@ -113,9 +113,7 @@ fun SpotifyPlaylistsTab(
                         } else {
                             Message(
                                 contentPadding,
-                                stringResource(
-                                    if (current.reason == SpotifyFailure.RATE_LIMITED) Res.string.spotify_rate_limited else Res.string.spotify_error,
-                                ),
+                                stringResource(Res.string.spotify_error),
                                 stringResource(Res.string.retry),
                             ) { viewModel.load(force = true) }
                         }
@@ -257,8 +255,7 @@ private fun ImportDialog(
                         Text(
                             stringResource(
                                 when (progress.reason) {
-                                    SpotifyFailure.UNKNOWN -> Res.string.spotify_error
-                                    SpotifyFailure.RATE_LIMITED -> Res.string.spotify_rate_limited
+                                    SpotifyFailure.UNKNOWN, SpotifyFailure.RATE_LIMITED -> Res.string.spotify_error
                                     else -> Res.string.spotify_session_expired
                                 },
                             ),

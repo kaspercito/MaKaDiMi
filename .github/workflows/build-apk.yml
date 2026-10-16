@@ -47,6 +47,11 @@ jobs:
             echo "KEY_PASSWORD=$KEY_PASSWORD"
           } > local.properties
 
+      - name: Diagnóstico
+        run: |
+          git log -1 --oneline
+          grep -rn "spotify_rate_limited" composeApp/src || echo "spotify_rate_limited NO ENCONTRADA"
+
       - name: Compilar APK release
         run: |
           chmod +x gradlew
