@@ -542,8 +542,8 @@ Built with ❤️ on top of the open source project SimpMusic by Tuan Minh Nguye
     <string name="other_version">Other version</string>
     <string name="later">Later</string>
     <string name="give_a_star">Give a star</string>
-    <string name="enjoying_simpmusic">Enjoying MaKaDiMi</string>
-    <string name="if_you_enjoy_using_simpmusic_star_simpmusic_on_github_or_leave_a_review_on">If you enjoy using MaKaDiMi, give it a star on GitHub</string>
+    <string name="enjoying_makadimi">Enjoying MaKaDiMi</string>
+    <string name="if_you_enjoy_using_makadimi_star_makadimi_on_github_or_leave_a_review_on">If you enjoy using MaKaDiMi, give it a star on GitHub</string>
     <string name="if_you_love_my_work_consider">"If you love my work, consider "</string>
     <string name="buying_me_a_coffee">buying me a coffee.</string>
     <string name="footguns_promo_title">Every trap I fell into</string>
@@ -606,8 +606,8 @@ Built with ❤️ on top of the open source project SimpMusic by Tuan Minh Nguye
     <string name="contributor_name">Contributor name</string>
     <string name="contributor_email">Contributor email</string>
     <string name="anonymous">Anonymous</string>
-    <string name="simpmusic_lyrics">MaKaDiMi Lyrics</string>
-    <string name="lyrics_provider_simpmusic">Lyrics provided by MaKaDiMi Lyrics</string>
+    <string name="makadimi_lyrics">MaKaDiMi Lyrics</string>
+    <string name="lyrics_provider_makadimi">Lyrics provided by MaKaDiMi Lyrics</string>
     <string name="backup_in_progress">Backup in progress</string>
     <string name="restore_in_progress">Restore in progress</string>
     <string name="backup_downloaded">Backup downloaded data</string>
@@ -736,7 +736,7 @@ Built with ❤️ on top of the open source project SimpMusic by Tuan Minh Nguye
     <string name="local_tracking_description">Log your listening history to local database</string>
     <string name="blog_notification_title">Blog post notifications</string>
     <string name="blog_notification_description">Get notified when a new blog post is published</string>
-    <string name="simpmusic_charts">MaKaDiMi Charts</string>
+    <string name="makadimi_charts">MaKaDiMi Charts</string>
     <string name="crossfading">Crossfading</string>
     <string name="your_320kbps_url">Your 320kbps URL</string>
     <string name="your_320kbps_url_description">Leave empty to auto-choose a working URL from the uptime checker.</string>
@@ -942,7 +942,7 @@ Built with ❤️ on top of the open source project SimpMusic by Tuan Minh Nguye
     <string name="login_sync_code_expired">The code on your computer has expired. Show a new one and scan again.</string>
     <string name="login_sync_failed">Something went wrong. Please try again.</string>
     <string name="modified_build_title">Unofficial app</string>
-    <string name="modified_build_message">You are using an unofficial copy of MaKaDiMi that was modified or repackaged by someone else. It cannot be used. Download the official version from simpmusic.org.</string>
+    <string name="modified_build_message">You are using an unofficial copy of MaKaDiMi that was modified or repackaged by someone else. It cannot be used. Download the official version from github.com/kaspercito/MaKaDiMi/releases.</string>
     <string name="taste_title">What's your music taste?</string>
     <string name="taste_invite">Let AI read the last 12 months of your listening and tell you.</string>
     <string name="taste_loading_title">Reading your music taste…</string>
@@ -1033,4 +1033,8 @@ Built with ❤️ on top of the open source project SimpMusic by Tuan Minh Nguye
     <string name="spotify_not_found_list">Not found:</string>
     <string name="spotify_import_error">Could not read that playlist from Spotify. Check your connection and try again.</string>
     <string name="spotify_import_hint">Songs are matched on YouTube Music, which is where they play from. They are saved as a local playlist.</string>
+    <string name="data_saver">Data saver</string>
+    <string name="data_saver_description">Streams audio at the lowest quality to use less data. Downloads are not affected.</string>
+    <string name="ai_dj">AI DJ</string>
+    <string name="ai_dj_description">A voice introduces songs between tracks (Windows only). Needs an AI API key; the voice comes from the system, so it uses no extra data.</string>
 </resources>

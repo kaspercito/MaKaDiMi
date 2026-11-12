@@ -31,8 +31,8 @@ import okio.IOException
 import okio.Path.Companion.toPath
 import okio.buffer
 import okio.use
-import org.simpmusic.aiservice.AIHost
-import org.simpmusic.aiservice.AiClient
+import org.makadimi.aiservice.AIHost
+import org.makadimi.aiservice.AiClient
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 

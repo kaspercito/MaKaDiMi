@@ -1,8 +1,6 @@
 package com.kaspercito.media3.service
 
 import android.app.Activity
-import android.app.ActivityManager
-import android.app.ActivityManager.RunningAppProcessInfo
 import android.app.PendingIntent
 import android.content.ComponentName
 import android.content.Context
@@ -16,6 +14,7 @@ import androidx.media3.session.MediaController
 import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaSession
 import androidx.media3.session.SessionToken
+import com.google.common.util.concurrent.ListenableFuture
 import com.google.common.util.concurrent.MoreExecutors
 import com.kaspercito.common.MEDIA_NOTIFICATION
 import com.kaspercito.domain.mediaservice.handler.DownloadHandler
@@ -41,6 +40,9 @@ internal class SimpleMediaService :
     private val coilBitmapLoader: CoilBitmapLoader by inject<CoilBitmapLoader>()
 
     private var mediaSession: MediaLibrarySession? = null
+
+    // Controller interno conectado a la propia sesión; se guarda para poder liberarlo en onDestroy.
+    private var selfControllerFuture: ListenableFuture<MediaController>? = null
 
     private val simpleMediaSessionCallback: MediaLibrarySession.Callback by inject<MediaLibrarySession.Callback>()
 
@@ -108,14 +110,18 @@ internal class SimpleMediaService :
 
         val sessionToken = SessionToken(this, ComponentName(this, SimpleMediaService::class.java))
         val controllerFuture = MediaController.Builder(this, sessionToken).buildAsync()
-        controllerFuture.addListener({ controllerFuture.get() }, MoreExecutors.directExecutor())
-
-        simpleMediaServiceHandler.onUpdateNotification = { list ->
-            val commandButtonList = list.map { it.toCommandButton(this) }
-            mediaSession?.setMediaButtonPreferences(
-                commandButtonList,
-            )
-        }
+        selfControllerFuture = controllerFuture
+        controllerFuture.addListener(
+            {
+                // get() lanza si la conexión falla; no debe tumbar el servicio.
+                try {
+                    controllerFuture.get()
+                } catch (e: Exception) {
+                    Logger.e("Service", "Self MediaController connection failed: ${e.message}")
+                }
+            },
+            MoreExecutors.directExecutor(),
+        )
     }
 
     @UnstableApi
@@ -129,14 +135,6 @@ internal class SimpleMediaService :
     }
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession? = mediaSession
-
-    @UnstableApi
-    override fun onUpdateNotification(
-        session: MediaSession,
-        startInForegroundRequired: Boolean,
-    ) {
-        super.onUpdateNotification(session, startInForegroundRequired)
-    }
 
     @UnstableApi
     fun release() {
@@ -164,12 +162,28 @@ internal class SimpleMediaService :
     override fun onDestroy() {
         super.onDestroy()
         Logger.w("Service", "Simple Media Service Destroyed")
+        // El handler ya no debe retener este servicio (la lambda lo captura).
+        simpleMediaServiceHandler.onUpdateNotification = {}
+        selfControllerFuture?.let { MediaController.releaseFuture(it) }
+        selfControllerFuture = null
         if (simpleMediaServiceHandler.shouldReleaseOnTaskRemoved()) {
             release()
         }
+        // Si el servicio se destruye sin release() completo, la sesión seguiría registrada con el
+        // mismo ID y al recrear el servicio Media3 lanzaría "Session ID must be unique".
+        // Solo se libera la sesión: el player lo gestiona el adaptador, no se toca.
+        mediaSession?.let { session ->
+            try {
+                session.release()
+            } catch (e: Exception) {
+                Logger.e("Service", "Error releasing MediaSession: ${e.message}")
+            }
+        }
+        mediaSession = null
     }
 
     override fun onTrimMemory(level: Int) {
+        super.onTrimMemory(level)
         Logger.w("Service", "Simple Media Service Trim Memory Level: $level")
         simpleMediaServiceHandler.mayBeSaveRecentSong()
     }
@@ -233,10 +247,4 @@ internal class SimpleMediaService :
                 }
             }
             .build()
-
-    private fun isAppInForeground(): Boolean {
-        val appProcessInfo = RunningAppProcessInfo()
-        ActivityManager.getMyMemoryState(appProcessInfo)
-        return appProcessInfo.importance == RunningAppProcessInfo.IMPORTANCE_FOREGROUND
-    }
 }

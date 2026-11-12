@@ -1,0 +1,85 @@
+name: Compilar instalador de Windows de MaKaDiMi
+
+# Se ejecuta al subir una etiqueta v* (ej. v1.1.5, la misma que dispara el APK) o a mano desde Actions.
+# Adjunta MaKaDiMi-Windows-installer.zip al mismo Release del APK.
+# Basado en .github/workflows-originales/desktop-package.yml, recortado a Windows x64.
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: write
+
+jobs:
+  windows:
+    name: Instalador de Windows (Conveyor, msix)
+    runs-on: ubuntu-22.04
+    defaults:
+      run:
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: 21
+          distribution: microsoft
+          cache: gradle
+
+      - name: Cache de mpv-natives
+        uses: actions/cache@v4
+        with:
+          path: mpv-natives
+          key: mpv-natives-${{ hashFiles('composeApp/build.gradle.kts') }}
+
+      - name: Descargar libmpv para todos los sistemas
+        run: |
+          chmod +x gradlew
+          ./gradlew :composeApp:mpvSetupAll --no-configuration-cache --stacktrace
+
+      - name: Generar configuración de Conveyor
+        run: ./gradlew :desktopApp:writeConveyorConfig --no-configuration-cache --stacktrace
+
+      - name: Conveyor (solo Windows x64)
+        uses: hydraulic-software/conveyor/actions/build@v22.0
+        with:
+          command: -Kapp.machines=windows.amd64 make site
+          agree_to_license: 1
+          signing_key: ${{ secrets.CONVEYOR_SIGNING_KEY }}
+
+      - name: Empaquetar instalador offline (install.bat + certificado + msix)
+        run: |
+          set -euo pipefail
+          if [ ! -f output/makadimi.crt ]; then
+            echo "::error::Falta output/makadimi.crt: la firma de Conveyor falló"
+            exit 1
+          fi
+          msix=$(ls output/makadimi-*.x64.msix 2>/dev/null | head -1)
+          if [ -z "$msix" ]; then
+            echo "::error::No se generó ningún makadimi-*.x64.msix en output/"
+            exit 1
+          fi
+          mkdir -p installers
+          stage="$(mktemp -d)"
+          cp scripts/windows/install.bat "$stage/"
+          cp output/makadimi.crt "$stage/"
+          cp "$msix" "$stage/"
+          ( cd "$stage" && zip -q -j "${GITHUB_WORKSPACE}/installers/MaKaDiMi-Windows-installer.zip" \
+              install.bat makadimi.crt "$(basename "$msix")" )
+          ls -lh installers/
+
+      - name: Guardar instalador como artefacto
+        uses: actions/upload-artifact@v4
+        with:
+          name: MaKaDiMi-windows
+          path: installers/MaKaDiMi-Windows-installer.zip
+
+      - name: Adjuntar al Release de GitHub
+        if: startsWith(github.ref, 'refs/tags/v')
+        uses: softprops/action-gh-release@v2
+        with:
+          files: installers/MaKaDiMi-Windows-installer.zip
+          generate_release_notes: true

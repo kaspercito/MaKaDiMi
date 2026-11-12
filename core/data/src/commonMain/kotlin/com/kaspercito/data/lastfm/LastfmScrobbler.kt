@@ -6,11 +6,11 @@ import com.kaspercito.logger.Logger
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
-import org.simpmusic.lastfm.LastfmOutcome
-import org.simpmusic.lastfm.LastfmTrack
-import org.simpmusic.lastfm.isLastfmAvailable
-import org.simpmusic.lastfm.scrobble
-import org.simpmusic.lastfm.updateNowPlaying
+import org.makadimi.lastfm.LastfmOutcome
+import org.makadimi.lastfm.LastfmTrack
+import org.makadimi.lastfm.isLastfmAvailable
+import org.makadimi.lastfm.scrobble
+import org.makadimi.lastfm.updateNowPlaying
 import kotlin.time.Clock
 import kotlin.time.ExperimentalTime
 

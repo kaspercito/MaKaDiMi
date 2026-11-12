@@ -70,7 +70,7 @@ private const val TAG = "CrossfadeExoPlayerAdapter"
 /**
  * ExoPlayer implementation of [MediaPlayerInterface] with crossfade support.
  *
- * Architecture mirrors [com.simpmusic.media_jvm.GstreamerPlayerAdapter]:
+ * Architecture mirrors [com.makadimi.media_jvm.GstreamerPlayerAdapter]:
  * - Internal playlist management (not ExoPlayer's playlist)
  * - Multi-player instance model: each track gets its own ExoPlayer
  * - Precaching system for smooth transitions
@@ -258,7 +258,9 @@ internal class CrossfadeExoPlayerAdapter(
 
                 AudioManager.AUDIOFOCUS_LOSS_TRANSIENT -> {
                     // Temporary loss (e.g. an incoming call): pause and remember to resume.
-                    resumeOnFocusGain = internalState == InternalState.PLAYING
+                    // `||` conserva la intención si llega una segunda pérdida transitoria mientras
+                    // el pause() de la primera ya dejó el estado en PAUSED (si no, se perdía el resume).
+                    resumeOnFocusGain = resumeOnFocusGain || internalState == InternalState.PLAYING
                     pause()
                 }
 

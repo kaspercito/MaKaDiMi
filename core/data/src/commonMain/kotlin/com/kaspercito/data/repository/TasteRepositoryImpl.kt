@@ -8,7 +8,7 @@ import com.kaspercito.domain.repository.TasteRepository
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import kotlinx.serialization.json.Json
-import org.simpmusic.aiservice.AiClient
+import org.makadimi.aiservice.AiClient
 
 internal class TasteRepositoryImpl(
     private val aiClient: AiClient,

@@ -22,9 +22,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
-import org.simpmusic.listentogether.ListenTogetherSession
-import org.simpmusic.listentogether.PlaybackActions
-import org.simpmusic.listentogether.TrackInfo
+import org.makadimi.listentogether.ListenTogetherSession
+import org.makadimi.listentogether.PlaybackActions
+import org.makadimi.listentogether.TrackInfo
 
 private const val PLAY_SETTLE_TIMEOUT_MS = 2_000L
 

@@ -52,14 +52,14 @@ import com.kaspercito.kotlinytmusicscraper.models.response.NextResponse
 import com.kaspercito.kotlinytmusicscraper.models.response.PipedResponse
 import com.kaspercito.kotlinytmusicscraper.models.response.PlayerResponse
 import com.kaspercito.kotlinytmusicscraper.models.response.SearchResponse
-import com.kaspercito.kotlinytmusicscraper.models.response.SimpMusicChartResponse
+import com.kaspercito.kotlinytmusicscraper.models.response.MakadimiChartResponse
 import com.kaspercito.kotlinytmusicscraper.models.response.TidalSearchResponse
 import com.kaspercito.kotlinytmusicscraper.models.response.TidalOAuthResponse
 import com.kaspercito.kotlinytmusicscraper.models.response.RemoteConfig
 import com.kaspercito.kotlinytmusicscraper.models.response.toLikeStatus
 import com.kaspercito.kotlinytmusicscraper.models.response.toListAccountInfo
-import com.kaspercito.kotlinytmusicscraper.models.simpmusic.FdroidResponse
-import com.kaspercito.kotlinytmusicscraper.models.simpmusic.GithubResponse
+import com.kaspercito.kotlinytmusicscraper.models.makadimi.FdroidResponse
+import com.kaspercito.kotlinytmusicscraper.models.makadimi.GithubResponse
 import com.kaspercito.kotlinytmusicscraper.models.sponsorblock.SkipSegments
 import com.kaspercito.kotlinytmusicscraper.models.youtube.GhostResponse
 import com.kaspercito.kotlinytmusicscraper.models.youtube.Transcript
@@ -2149,9 +2149,9 @@ class YouTube {
             ytMusic.removeFromLiked(mediaId).status.value
         }
 
-    suspend fun getSimpMusicChart() =
+    suspend fun getMakadimiChart() =
         runCatching {
-            ytMusic.getSimpMusicChart().body<SimpMusicChartResponse>()
+            ytMusic.getMakadimiChart().body<MakadimiChartResponse>()
         }
 
     /**

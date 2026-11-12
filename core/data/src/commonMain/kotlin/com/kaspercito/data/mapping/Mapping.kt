@@ -31,11 +31,11 @@ import com.kaspercito.kotlinytmusicscraper.models.youtube.Transcript
 import com.kaspercito.kotlinytmusicscraper.models.youtube.YouTubeInitialPage
 import com.kaspercito.spotify.model.response.spotify.CanvasResponse
 import com.kaspercito.spotify.model.response.spotify.SpotifyLyricsResponse
-import org.simpmusic.lyrics.models.response.LyricsResponse
-import org.simpmusic.lyrics.models.response.TranslatedLyricsResponse
-import org.simpmusic.lyrics.parser.parseRichSyncLyrics
-import org.simpmusic.lyrics.parser.parseSyncedLyrics
-import org.simpmusic.lyrics.parser.parseUnsyncedLyrics
+import org.makadimi.lyrics.models.response.LyricsResponse
+import org.makadimi.lyrics.models.response.TranslatedLyricsResponse
+import org.makadimi.lyrics.parser.parseRichSyncLyrics
+import org.makadimi.lyrics.parser.parseSyncedLyrics
+import org.makadimi.lyrics.parser.parseUnsyncedLyrics
 import kotlin.jvm.JvmName
 
 internal fun SongItem.toTrack(): Track =
@@ -108,7 +108,7 @@ internal fun Track.toSongItemForDownload(): SongItem =
         explicit = this.isExplicit,
     )
 
-internal fun org.simpmusic.lyrics.domain.Lyrics.toLyrics(): Lyrics {
+internal fun org.makadimi.lyrics.domain.Lyrics.toLyrics(): Lyrics {
     val lines: ArrayList<Line> = arrayListOf()
     if (this.lyrics != null) {
         this.lyrics?.lines?.forEach {
@@ -135,13 +135,13 @@ internal fun org.simpmusic.lyrics.domain.Lyrics.toLyrics(): Lyrics {
     }
 }
 
-internal fun Lyrics.toLibraryLyrics(): org.simpmusic.lyrics.domain.Lyrics =
-    org.simpmusic.lyrics.domain.Lyrics(
+internal fun Lyrics.toLibraryLyrics(): org.makadimi.lyrics.domain.Lyrics =
+    org.makadimi.lyrics.domain.Lyrics(
         lyrics =
-            org.simpmusic.lyrics.domain.Lyrics.LyricsX(
+            org.makadimi.lyrics.domain.Lyrics.LyricsX(
                 lines =
                     this.lines?.map {
-                        org.simpmusic.lyrics.domain.Lyrics.LyricsX.Line(
+                        org.makadimi.lyrics.domain.Lyrics.LyricsX.Line(
                             endTimeMs = it.endTimeMs,
                             startTimeMs = it.startTimeMs,
                             syllables = listOf(),

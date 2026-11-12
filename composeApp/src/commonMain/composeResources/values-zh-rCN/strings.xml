@@ -411,7 +411,7 @@
     <string name="other_version">其他版本</string>
     <string name="later">稍后询问</string>
     <string name="give_a_star">给颗星星</string>
-    <string name="enjoying_simpmusic">享受MaKaDiMi吧</string>
+    <string name="enjoying_makadimi">享受MaKaDiMi吧</string>
     <string name="if_you_love_my_work_consider">"如果你喜欢我的工作，请考虑： "</string>
     <string name="buying_me_a_coffee">软件称心多雅意，薄酬一杯解劳辛。</string>
     <string name="fade_audio_effect">音频淡入淡出</string>
@@ -464,8 +464,8 @@
     <string name="contributor_name">贡献者名称</string>
     <string name="contributor_email">贡献者邮箱</string>
     <string name="anonymous">匿名</string>
-    <string name="simpmusic_lyrics">MaKaDiMi 歌词</string>
-    <string name="lyrics_provider_simpmusic">歌词由 BetterLyrics 提供</string>
+    <string name="makadimi_lyrics">MaKaDiMi 歌词</string>
+    <string name="lyrics_provider_makadimi">歌词由 BetterLyrics 提供</string>
     <string name="backup_in_progress">正在备份</string>
     <string name="restore_in_progress">正在还原</string>
     <string name="backup_downloaded">备份已下载数据</string>
@@ -552,7 +552,7 @@
     <string name="local_tracking_description">将您的收听历史记录到本地数据库</string>
     <string name="blog_notification_title">博客文章通知</string>
     <string name="blog_notification_description">在开发者发布新博文时接收通知</string>
-    <string name="simpmusic_charts">MaKaDiMi 排行榜</string>
+    <string name="makadimi_charts">MaKaDiMi 排行榜</string>
     <string name="crossfading">交叉淡入淡出</string>
     <string name="your_320kbps_url">您的 320kbps URL</string>
     <string name="your_320kbps_url_description">留空则由可用性检查程序自动选择一个有效的 URL。</string>

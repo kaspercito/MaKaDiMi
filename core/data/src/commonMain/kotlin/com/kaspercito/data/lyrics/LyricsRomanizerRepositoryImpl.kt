@@ -16,8 +16,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.getAndUpdate
 import kotlinx.coroutines.launch
-import org.simpmusic.lyrics.romanization.LyricsRomanizer
-import org.simpmusic.lyrics.romanization.RomanizationDictionaryPack
+import org.makadimi.lyrics.romanization.LyricsRomanizer
+import org.makadimi.lyrics.romanization.RomanizationDictionaryPack
 import kotlin.concurrent.Volatile
 import kotlin.time.Duration
 import kotlin.time.Duration.Companion.hours

@@ -4,9 +4,9 @@ import com.kaspercito.domain.data.model.loginsync.DesktopInfo
 import com.kaspercito.domain.data.model.loginsync.LoginSyncException
 import com.kaspercito.domain.data.model.loginsync.LoginSyncService
 import com.kaspercito.domain.repository.LoginSyncSenderRepository
-import org.simpmusic.loginsync.LoginSyncClient
-import org.simpmusic.loginsync.LoginSyncInvite
-import org.simpmusic.loginsync.LoginSyncTransportException
+import org.makadimi.loginsync.LoginSyncClient
+import org.makadimi.loginsync.LoginSyncInvite
+import org.makadimi.loginsync.LoginSyncTransportException
 
 /** Android: turns this device's sign-ins into a payload and hands it to the loginSync service. */
 internal class LoginSyncSenderRepositoryImpl(

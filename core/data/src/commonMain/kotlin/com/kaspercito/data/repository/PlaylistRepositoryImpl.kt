@@ -773,7 +773,7 @@ internal class PlaylistRepositoryImpl(
     override fun getChartPlaylist(): Flow<Resource<List<ChartItem>>> =
         flow {
             youTube
-                .getSimpMusicChart()
+                .getMakadimiChart()
                 .onSuccess { response ->
                     val data = response.data?.filterNotNull() ?: emptyList()
                     val result =

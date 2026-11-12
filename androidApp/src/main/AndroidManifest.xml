@@ -8,6 +8,7 @@
     <uses-permission android:name="android.permission.ACCESS_NETWORK_STATE" />
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.READ_MEDIA_AUDIO" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_DATA_SYNC" />
     <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
@@ -20,7 +21,7 @@
         android:name="android.permission.WRITE_EXTERNAL_STORAGE"
         android:maxSdkVersion="28" />
     <uses-permission android:name="androidx.car.app.MEDIA_TEMPLATES" />
-    <!-- Login sync: scanning the QR shown by SimpMusic Desktop. -->
+    <!-- Login sync: scanning the QR shown by MaKaDiMi Desktop. -->
     <uses-permission android:name="android.permission.CAMERA" />
     <!-- Login sync reaches the computer by its LAN address. Only enforced for apps targeting
          Android 17 (API 37) and up, where it is a runtime permission; LoginSync.android.kt asks
@@ -62,7 +63,7 @@
     </queries>
 
     <application
-        android:name=".SimpMusicApplication"
+        android:name=".MakadimiApplication"
         android:allowBackup="true"
         android:appCategory="audio"
         android:dataExtractionRules="@xml/data_extraction_rules"
@@ -71,7 +72,7 @@
         android:localeConfig="@xml/locale_config"
         android:networkSecurityConfig="@xml/network_security_config"
         android:supportsRtl="true"
-        android:theme="@style/Theme.SimpMusic"
+        android:theme="@style/Theme.Makadimi"
         android:enableOnBackInvokedCallback="true"
         android:requestLegacyExternalStorage="true"
         tools:replace="android:name"
@@ -84,7 +85,7 @@
             android:supportsPictureInPicture="true"
             android:enableOnBackInvokedCallback="true"
             android:launchMode="singleTask"
-            android:theme="@style/Theme.SimpMusic"
+            android:theme="@style/Theme.Makadimi"
             tools:ignore="DiscouragedApi,LockedOrientationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
@@ -155,7 +156,7 @@
                 <data android:scheme="vnd.youtube.launch" />
             </intent-filter>
 
-            <!-- SimpMusic deep link filter (https) -->
+            <!-- MaKaDiMi deep link filter (https) -->
             <intent-filter android:autoVerify="true">
                 <action android:name="android.intent.action.VIEW" />
 
@@ -167,7 +168,7 @@
                 <data android:pathPrefix="/app/" />
             </intent-filter>
 
-            <!-- SimpMusic deep link filter (custom scheme) -->
+            <!-- MaKaDiMi deep link filter (custom scheme) -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 
@@ -277,7 +278,7 @@
             android:value="8" />
 
         <service
-            android:name="com.kaspercito.media3.carapp.SimpMusicCarAppService"
+            android:name="com.kaspercito.media3.carapp.MakadimiCarAppService"
             android:exported="true"
             tools:ignore="ExportedService">
             <intent-filter>
@@ -286,11 +287,6 @@
                 <category android:name="androidx.car.app.category.MEDIA" />
             </intent-filter>
         </service>
-
-
-        <meta-data
-            android:name="io.sentry.auto-init"
-            android:value="false" />
 
 
         <receiver android:name=".ui.widget.TurntableWidgetReceiver"

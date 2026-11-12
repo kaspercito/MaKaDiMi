@@ -22,7 +22,7 @@ import com.kaspercito.domain.manager.DataStoreManager.Values.PROXY_TYPE_SOCKS
 import com.kaspercito.domain.manager.DataStoreManager.Values.REPEAT_ALL
 import com.kaspercito.domain.manager.DataStoreManager.Values.REPEAT_MODE_OFF
 import com.kaspercito.domain.manager.DataStoreManager.Values.REPEAT_ONE
-import com.kaspercito.domain.manager.DataStoreManager.Values.SIMPMUSIC
+import com.kaspercito.domain.manager.DataStoreManager.Values.MAKADIMI
 import com.kaspercito.domain.manager.DataStoreManager.Values.TRUE
 import com.kaspercito.logger.Logger
 import kotlinx.coroutines.Dispatchers
@@ -482,7 +482,7 @@ internal class DataStoreManagerImpl(
 
     override val lyricsProvider =
         settingsDataStore.data.map { preferences ->
-            preferences[LYRICS_PROVIDER] ?: SIMPMUSIC
+            preferences[LYRICS_PROVIDER] ?: MAKADIMI
         }
 
     override suspend fun setLyricsProvider(provider: String) {
@@ -1243,6 +1243,32 @@ internal class DataStoreManagerImpl(
         }
     }
 
+    override val dataSaver =
+        settingsDataStore.data.map { preferences ->
+            preferences[DATA_SAVER] ?: FALSE
+        }
+
+    override suspend fun setDataSaver(enabled: Boolean) {
+        withContext(Dispatchers.IO) {
+            settingsDataStore.edit { settings ->
+                settings[DATA_SAVER] = if (enabled) TRUE else FALSE
+            }
+        }
+    }
+
+    override val aiDj =
+        settingsDataStore.data.map { preferences ->
+            preferences[AI_DJ] ?: FALSE
+        }
+
+    override suspend fun setAiDj(enabled: Boolean) {
+        withContext(Dispatchers.IO) {
+            settingsDataStore.edit { settings ->
+                settings[AI_DJ] = if (enabled) TRUE else FALSE
+            }
+        }
+    }
+
     override val updateChannel =
         settingsDataStore.data.map { preferences ->
             preferences[UPDATE_CHANNEL] ?: GITHUB
@@ -1868,6 +1894,8 @@ internal class DataStoreManagerImpl(
         val SHOULD_SHOW_LOG_IN_REQUIRED_ALERT = stringPreferencesKey("should_show_log_in_required_alert")
         val AUTO_CHECK_FOR_UPDATES = stringPreferencesKey("auto_check_for_updates")
         val UPDATE_CHANNEL = stringPreferencesKey("update_channel")
+        val DATA_SAVER = stringPreferencesKey("data_saver")
+        val AI_DJ = stringPreferencesKey("ai_dj")
         val PLAYBACK_SPEED = floatPreferencesKey("playback_speed")
         val PITCH = intPreferencesKey("pitch")
         val OPEN_APP_TIME = intPreferencesKey("open_app_time")

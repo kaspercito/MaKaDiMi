@@ -16,8 +16,8 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.sync.withLock
 import kotlinx.coroutines.withContext
-import org.simpmusic.loginsync.LoginSyncServer
-import org.simpmusic.loginsync.reachableAddresses
+import org.makadimi.loginsync.LoginSyncServer
+import org.makadimi.loginsync.reachableAddresses
 
 private const val TAG = "LoginSyncHost"
 

@@ -500,7 +500,7 @@
     <string name="other_version">他のバージョン</string>
     <string name="later">また今度</string>
     <string name="give_a_star">星マークを押す</string>
-    <string name="enjoying_simpmusic">MaKaDiMiを楽しんでください</string>
+    <string name="enjoying_makadimi">MaKaDiMiを楽しんでください</string>
     <string name="if_you_love_my_work_consider">"私のアプリを気に入ったら、 "</string>
     <string name="buying_me_a_coffee">コーヒーを一杯ご馳走してください。</string>
     <string name="footguns_promo_title">私が陥ったすべての罠</string>
@@ -562,8 +562,8 @@
     <string name="contributor_name">貢献者名</string>
     <string name="contributor_email">貢献者のメールアドレス</string>
     <string name="anonymous">匿名</string>
-    <string name="simpmusic_lyrics">MaKaDiMi Lyrics</string>
-    <string name="lyrics_provider_simpmusic">MaKaDiMi Lyricsが提供する歌詞</string>
+    <string name="makadimi_lyrics">MaKaDiMi Lyrics</string>
+    <string name="lyrics_provider_makadimi">MaKaDiMi Lyricsが提供する歌詞</string>
     <string name="backup_in_progress">バックアップ中</string>
     <string name="restore_in_progress">復元中</string>
     <string name="backup_downloaded">ダウンロードしたデータをバックアップする</string>
@@ -691,7 +691,7 @@
     <string name="local_tracking_description">再生履歴をローカルデータベースに記録しま す</string>
     <string name="blog_notification_title">ブログ投稿の通知</string>
     <string name="blog_notification_description">新しいブログ投稿が公開されたときに通知されます</string>
-    <string name="simpmusic_charts">MaKaDiMi チャート</string>
+    <string name="makadimi_charts">MaKaDiMi チャート</string>
     <string name="crossfading">クロスフェード</string>
     <string name="your_320kbps_url">320kbpsのURL</string>
     <string name="your_320kbps_url_description">アップタイムチェッカーから作業中の URL を自動的に選択するには、空白のままにします。</string>
@@ -892,7 +892,7 @@
     <string name="login_sync_code_expired">お使いのコンピューターのコードの有効期限が切れています。新しいコードを表示して再度スキャンしてください。</string>
     <string name="login_sync_failed">問題が発生しました。もう一度やり直してください。</string>
     <string name="modified_build_title">非公式アプリ</string>
-    <string name="modified_build_message">あなたは、他の誰かによって修正または再パッケージ化されたMaKaDiMiの非公式コピーを使用しています。 使用できません。simpmusic.org から公式バージョンをダウンロードしてください。</string>
+    <string name="modified_build_message">あなたは、他の誰かによって修正または再パッケージ化されたMaKaDiMiの非公式コピーを使用しています。 使用できません。github.com/kaspercito/MaKaDiMi/releases から公式バージョンをダウンロードしてください。</string>
     <string name="taste_title">あなたの音楽の好みは？</string>
     <string name="taste_invite">AIに過去12か月間のあなたの聴き方を分析してもらいましょう。</string>
     <string name="taste_loading_title">あなたの音楽の好みを分析中…</string>

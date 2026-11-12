@@ -34,7 +34,7 @@ val coreDir = File(rootDir, "core")
 val serviceDir = File(rootDir, "core/service")
 val mediaDir = File(rootDir, "core/media")
 
-rootProject.name = "SimpMusic"
+rootProject.name = "MaKaDiMi"
 include(
     ":androidApp",
     ":vivoAndroidApp",
@@ -54,7 +54,6 @@ include(
     ":media3",
     ":media3-ui",
     ":crashlytics",
-    ":crashlytics-empty",
     ":cast",
     ":cast-empty",
     ":lastfm",

@@ -430,7 +430,7 @@
     <string name="other_version">Başka versiyon</string>
     <string name="later">Daha sonra</string>
     <string name="give_a_star">Yıldız bırak</string>
-    <string name="enjoying_simpmusic">MaKaDiMi'in keyfini çıkarın</string>
+    <string name="enjoying_makadimi">MaKaDiMi'in keyfini çıkarın</string>
     <string name="if_you_love_my_work_consider">"Eğer çalışmalarımı seviyorsanız"</string>
     <string name="buying_me_a_coffee">bana bir kavhe ısmarla.</string>
     <string name="fade_audio_effect">Ses efektini soldur</string>
@@ -483,8 +483,8 @@
     <string name="contributor_name">Katkıda bulunanın adı</string>
     <string name="contributor_email">Katkıda bulunanın e-postası</string>
     <string name="anonymous">Anonim</string>
-    <string name="simpmusic_lyrics">MaKaDiMi Şarkı Sözleri</string>
-    <string name="lyrics_provider_simpmusic">Şarkı sözleri MaKaDiMi tarafından sağlanmıştır</string>
+    <string name="makadimi_lyrics">MaKaDiMi Şarkı Sözleri</string>
+    <string name="lyrics_provider_makadimi">Şarkı sözleri MaKaDiMi tarafından sağlanmıştır</string>
     <string name="backup_in_progress">Yedekleme devam ediyor</string>
     <string name="restore_in_progress">Geri yükleme devam ediyor</string>
     <string name="backup_downloaded">İndirilen verileri yedekleyin</string>

@@ -86,31 +86,31 @@ interface LyricsCanvasRepository {
         targetLanguage: String,
     ): Flow<Resource<Lyrics>>
 
-    fun getSimpMusicLyrics(videoId: String): Flow<Resource<Lyrics>>
+    fun getMakadimiLyrics(videoId: String): Flow<Resource<Lyrics>>
 
-    fun getSimpMusicTranslatedLyrics(
+    fun getMakadimiTranslatedLyrics(
         videoId: String,
         language: String,
     ): Flow<Resource<Lyrics>>
 
-    fun voteSimpMusicLyrics(
+    fun voteMakadimiLyrics(
         lyricsId: String,
         upvote: Boolean,
     ): Flow<Resource<String>>
 
-    fun voteSimpMusicTranslatedLyrics(
+    fun voteMakadimiTranslatedLyrics(
         translatedLyricsId: String,
         upvote: Boolean,
     ): Flow<Resource<String>>
 
-    fun insertSimpMusicLyrics(
+    fun insertMakadimiLyrics(
         dataStoreManager: DataStoreManager,
         track: Track,
         duration: Int,
         lyrics: Lyrics,
     ): Flow<Resource<String>>
 
-    fun insertSimpMusicTranslatedLyrics(
+    fun insertMakadimiTranslatedLyrics(
         dataStoreManager: DataStoreManager,
         track: Track,
         translatedLyrics: Lyrics,

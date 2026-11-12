@@ -9,8 +9,8 @@ import com.kaspercito.domain.repository.AutoEqRepository
 import com.kaspercito.logger.Logger
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.simpmusic.autoeq.AutoEq
-import org.simpmusic.autoeq.AutoEqIndexResult
+import org.makadimi.autoeq.AutoEq
+import org.makadimi.autoeq.AutoEqIndexResult
 import kotlin.time.Clock
 
 private const val TAG = "AutoEqRepositoryImpl"

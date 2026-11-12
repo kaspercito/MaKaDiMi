@@ -35,6 +35,8 @@ plugins {
 // Force it to `always` so `Res` is generated for this app module.
 compose.resources {
     generateResClass = always
+    // Paquete fijo de `Res`: no depende del nombre del proyecto Gradle.
+    packageOfResClass = "makadimi.composeapp.generated.resources"
 }
 
 kotlin {
@@ -45,7 +47,7 @@ kotlin {
         freeCompilerArgs.add("-Xexpect-actual-classes")
     }
     android {
-        namespace = "com.kaspercito.simpmusic.composeapp"
+        namespace = "com.kaspercito.makadimi.composeapp"
         compileSdk = 37
         minSdk = 26
         withJava()
@@ -129,7 +131,7 @@ kotlin {
 
             // Last.fm (gated: real scrobbler for full builds, no-op stub for FOSS builds).
             // `api` rather than `implementation` so :androidApp can hand it the credentials from
-            // BuildKonfig at startup, the same way it does for Sentry.
+            // BuildKonfig at startup.
             if (isFullBuild) {
                 api(projects.lastfm)
             } else {
@@ -191,7 +193,6 @@ kotlin {
             // shared JVM UI + expect/actuals and their direct dependencies.
             implementation(compose.desktop.currentOs)
             implementation(libs.kotlinx.coroutinesSwing)
-            implementation(libs.sentry.jvm)
             implementation(libs.native.tray)
             implementation(libs.nucleus.core.runtime)
             implementation(projects.mediaJvmUi)
@@ -824,7 +825,7 @@ val mpvSetupAll by tasks.registering {
 }
 
 buildkonfig {
-    packageName = "com.kaspercito.simpmusic"
+    packageName = "com.kaspercito.makadimi"
     exposeObjectWithName = "BuildKonfig"
     defaultConfigs {
         val versionName =
@@ -839,14 +840,9 @@ buildkonfig {
 
         if (isFullBuild) {
             try {
-                println("Full build detected, enabling Sentry DSN")
+                println("Full build detected, loading Last.fm credentials")
                 val properties = Properties()
                 properties.load(rootProject.file("local.properties").inputStream())
-                buildConfigField(
-                    STRING,
-                    "sentryDsn",
-                    properties.getProperty("SENTRY_DSN") ?: "",
-                )
                 buildConfigField(
                     STRING,
                     "lastfmApiKey",
@@ -859,12 +855,10 @@ buildkonfig {
                 )
             } catch (e: Exception) {
                 println("Failed to load secrets from local.properties: ${e.message}")
-                buildConfigField(STRING, "sentryDsn", "")
                 buildConfigField(STRING, "lastfmApiKey", "")
                 buildConfigField(STRING, "lastfmSecret", "")
             }
         } else {
-            buildConfigField(STRING, "sentryDsn", "")
             // A FOSS build ships no Last.fm credentials, so `isLastfmAvailable()` stays false and
             // the feature hides itself. The stub module is linked in this flavour anyway.
             buildConfigField(STRING, "lastfmApiKey", "")

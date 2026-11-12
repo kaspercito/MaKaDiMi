@@ -58,9 +58,9 @@
 
 -dontwarn org.slf4j.impl.StaticLoggerBinder
 -dontwarn kotlinx.serialization.internal.ClassValueReferences
--keep class com.kaspercito.simpmusic.data.model.** { *; }
--keep class com.kaspercito.simpmusic.extension.AllExtKt { *; }
--keep class com.kaspercito.simpmusic.extension.AllExtKt$* { *; }
+-keep class com.kaspercito.makadimi.data.model.** { *; }
+-keep class com.kaspercito.makadimi.extension.AllExtKt { *; }
+-keep class com.kaspercito.makadimi.extension.AllExtKt$* { *; }
 -keep class com.kaspercito.kotlinytmusicscraper.extension.MapExtKt$* { *; }
 
 ## Removes all Logs as they cause perfomance issues in prod
@@ -210,9 +210,8 @@
 
 -keep class com.kaspercito.kotlinytmusicscraper.** { *; }
 
--keep class org.simpmusic.lyrics.parser.** { *; }
--keep class org.simpmusic.lyrics.models.** { *; }
--keep class com.simpmusic.lyrics.parser.** { *; }
+-keep class org.makadimi.lyrics.parser.** { *; }
+-keep class org.makadimi.lyrics.models.** { *; }
 
 -keep class com.google.re2j.** { *; }
 -dontwarn com.google.re2j.Matcher
@@ -220,12 +219,7 @@
 
 -keep class * extends androidx.room.RoomDatabase { <init>(); }
 
--dontwarn io.sentry.android.core.SentryLogcatAdapter
--dontwarn io.sentry.instrumentation.file.SentryFileInputStream$Factory
--dontwarn io.sentry.instrumentation.file.SentryFileOutputStream$Factory
--dontwarn io.sentry.okhttp.SentryOkHttpEventListener
--dontwarn io.sentry.okhttp.SentryOkHttpInterceptor
 
 # Escuchar juntos: los mensajes del protocolo (protobuf) se codifican con serializadores generados;
 # no se ofuscan ni se recortan, para que la versión release hable igual que la debug.
--keep class org.simpmusic.listentogether.** { *; }
+-keep class org.makadimi.listentogether.** { *; }

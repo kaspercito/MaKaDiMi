@@ -1,7 +1,7 @@
 [versions]
 # App version
-version-name = "1.1.4"
-version-code = "16"
+version-name = "1.1.5"
+version-code = "17"
 
 android = "9.4.1"
 kotlin = "2.4.20"
@@ -56,9 +56,6 @@ common = "1.22.1"
 json = "1.11.0"
 gemini-kotlin = "4.0.2"
 slf4j = "1.7.36"
-sentry-android = "8.59.0"
-sentry-gradle-android = "6.23.0"
-sentry-jvm = "8.59.0"
 newpipe = "v0.26.1"
 brave-newpipe = "0fcaf19ecc"
 # org.json ships with the Android SDK but is absent on JVM desktop; PipePipeExtractor references it.
@@ -249,10 +246,6 @@ koin-compose-viewmodel = { module = "io.insert-koin:koin-compose-viewmodel" }
 koin-androidx-compose = { module = "io.insert-koin:koin-androidx-compose" }
 koin-android = { module = "io.insert-koin:koin-android"}
 
-#Sentry
-sentry-android = { module = "io.sentry:sentry-android", version.ref = "sentry-android"}
-sentry-jvm = { module = "io.sentry:sentry", version.ref = "sentry-jvm"}
-
 androidx-webkit = { group = "androidx.webkit", name = "webkit", version.ref = "webkit" }
 
 androidx-paging-common = { group = "androidx.paging", name = "paging-common", version.ref = "paging-common" }
@@ -272,7 +265,6 @@ ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
 aboutlibraries = { id = "com.mikepenz.aboutlibraries.plugin.android", version.ref = "aboutlibraries" }
 aboutlibraries-multiplatform = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutlibraries" }
 room = { id = "androidx.room", version.ref = "room" }
-sentry-gradle = { id = "io.sentry.android.gradle", version.ref = "sentry-gradle-android" }
 
 # KMP
 android-lint = { id = "com.android.lint", version.ref = "android" }

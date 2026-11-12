@@ -39,8 +39,8 @@ print_usage() {
   echo "Options:"
   echo "  --release          Build in release mode (default)"
   echo "  --debug            Build in debug mode"
-  echo "  --full             Build full with Sentry"
-  echo "  --foss             Build foss, compatibility with F-Droid, no Sentry"
+  echo "  --full             Build full (with Last.fm credentials)"
+  echo "  --foss             Build foss, compatibility with F-Droid, no Last.fm"
   echo "  --vivo             Build the vivo edition (vivoAndroidApp, arm64-v8a only)"
   echo "  -h, --help         Show this help message"
   echo ""
@@ -108,7 +108,7 @@ for APK_PATH in $APK_PATHS; do
   RELEASE_NAME=$(basename "${APK_PATH/-unsigned/}")
   RELEASE_NAME="${RELEASE_NAME/app-/}"
   RELEASE_NAME="${RELEASE_NAME/$MODULE-/}"
-  SIGNED_APK_PATH="$SIGNED_APK_OUTPUT_DIR/SimpMusic-$BUILD_VARIANT$NAME_SUFFIX-$(basename "$RELEASE_NAME")"
+  SIGNED_APK_PATH="$SIGNED_APK_OUTPUT_DIR/MaKaDiMi-$BUILD_VARIANT$NAME_SUFFIX-$(basename "$RELEASE_NAME")"
 
   echo "[Step 4] Aligning the APK: $APK_PATH..."
   if [ ! -f "$ZIPALIGN" ]; then

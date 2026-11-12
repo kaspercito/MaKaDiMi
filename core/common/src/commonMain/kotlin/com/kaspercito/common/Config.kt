@@ -17,8 +17,8 @@ object Config {
         setOf(
             "com.makadimi.app",
             "com.makadimi.app.dev",
-            "com.kaspercito.simpmusic",
-            "com.kaspercito.simpmusic.dev",
+            "com.kaspercito.makadimi",
+            "com.kaspercito.makadimi.dev",
             "com.spotify.music",
         )
 

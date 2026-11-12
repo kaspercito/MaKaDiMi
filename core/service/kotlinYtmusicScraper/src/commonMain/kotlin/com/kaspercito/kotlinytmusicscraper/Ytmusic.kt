@@ -455,7 +455,7 @@ class Ytmusic {
         parameter("prettyPrint", false)
     }
 
-    suspend fun getSimpMusicChart() =
+    suspend fun getMakadimiChart() =
         httpClient.get("https://chart.simpmusic.org/api/playlists") {
             accept(ContentType.Application.Json)
             contentType(ContentType.Application.Json)

@@ -497,7 +497,7 @@
     <string name="other_version">Andere Version</string>
     <string name="later">später</string>
     <string name="give_a_star">Gebe einen Stern</string>
-    <string name="enjoying_simpmusic">Spaß an MaKaDiMi</string>
+    <string name="enjoying_makadimi">Spaß an MaKaDiMi</string>
     <string name="if_you_love_my_work_consider">"Wenn Dumeine Arbeit liebst, denk darüber nach "</string>
     <string name="buying_me_a_coffee">Mir einen Kaffee zu kaufen.</string>
     <string name="footguns_promo_title">Jede Falle, in die ich getappt bin</string>
@@ -559,8 +559,8 @@
     <string name="contributor_name">Name des Mitwirkenden</string>
     <string name="contributor_email">E-Mail des Mitwirkenden</string>
     <string name="anonymous">Anonym</string>
-    <string name="simpmusic_lyrics">MaKaDiMi-Lyrics</string>
-    <string name="lyrics_provider_simpmusic">Songtexte von MaKaDiMi-Lyrics bereitgestellt</string>
+    <string name="makadimi_lyrics">MaKaDiMi-Lyrics</string>
+    <string name="lyrics_provider_makadimi">Songtexte von MaKaDiMi-Lyrics bereitgestellt</string>
     <string name="backup_in_progress">Backup wird erstellt</string>
     <string name="restore_in_progress">Backup wird wiederhergestellt</string>
     <string name="backup_downloaded">Backup der heruntergeladenen Daten</string>
@@ -688,7 +688,7 @@
     <string name="local_tracking_description">Zeichne den Wiedergabeverlauf in der lokalen Datenbank auf</string>
     <string name="blog_notification_title">Benachrichtigungen zu Blogbeiträgen</string>
     <string name="blog_notification_description">Werde benachrichtigt wenn ein neuer Blog-Beitrag veröffentlicht wird</string>
-    <string name="simpmusic_charts">MaKaDiMi Charts</string>
+    <string name="makadimi_charts">MaKaDiMi Charts</string>
     <string name="crossfading">Crossfading (überblenden)</string>
     <string name="your_320kbps_url">Deine 320kbps URL</string>
     <string name="your_320kbps_url_description">Lassen Sie das Feld leer, damit automatisch eine funktionierende URL aus dem Verfügbarkeitsprüfer ausgewählt wird.</string>
@@ -888,7 +888,7 @@ In MaKaDiMi können nur Playlist-Dateien in unserem eigenen Format importiert we
     <string name="login_sync_code_expired">Der Code auf Ihrem Computer ist abgelaufen. Zeige einen neuen und scanne erneut.</string>
     <string name="login_sync_failed">Etwas ist schiefgelaufen. Bitte versuche es erneut.</string>
     <string name="modified_build_title">Inoffizielle App</string>
-    <string name="modified_build_message">Du verwendest eine inoffizielle Kopie von MaKaDiMi die von jemand anderem modifiziert oder neu verpackt wurde. Es kann nicht benutzt werden. Laden Sie die offizielle Version von simpmusic.org herunter.</string>
+    <string name="modified_build_message">Du verwendest eine inoffizielle Kopie von MaKaDiMi die von jemand anderem modifiziert oder neu verpackt wurde. Es kann nicht benutzt werden. Laden Sie die offizielle Version von github.com/kaspercito/MaKaDiMi/releases herunter.</string>
     <string name="taste_title">Was ist dein Musikgeschmack?</string>
     <string name="taste_invite">Lass die KI deine Hörgewohnheiten der letzten 12 Monate analysieren und dir das Ergebnis mitteilen.</string>
     <string name="taste_loading_title">Deinen Musikgeschmack analysieren…</string>

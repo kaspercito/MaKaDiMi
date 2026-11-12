@@ -380,6 +380,16 @@ interface DataStoreManager {
 
     suspend fun setAutoCheckForUpdates(autoCheck: Boolean)
 
+    /** Ahorro de datos: audio a la calidad más baja y sin vídeo en alta resolución al reproducir en streaming. */
+    val dataSaver: Flow<String>
+
+    suspend fun setDataSaver(enabled: Boolean)
+
+    /** Locutor DJ con IA: comenta la siguiente canción entre temas (solo escritorio Windows). */
+    val aiDj: Flow<String>
+
+    suspend fun setAiDj(enabled: Boolean)
+
     val updateChannel: Flow<String>
 
     suspend fun setUpdateChannel(channel: String)
@@ -527,7 +537,7 @@ interface DataStoreManager {
 
     /**
      * Which languages get a Latin-script reading shown for their lyrics, as a comma-separated list
-     * of [org.simpmusic.lyrics.romanization.RomanizationLanguage] NAMES — empty string means the
+     * of [org.makadimi.lyrics.romanization.RomanizationLanguage] NAMES — empty string means the
      * feature is off, which is the default.
      *
      * Stored as names rather than ordinals because an enum's ordinal is a position, not an
@@ -614,7 +624,7 @@ interface DataStoreManager {
     }
 
     companion object Values {
-        const val SIMPMUSIC = "simpmusic"
+        const val MAKADIMI = "simpmusic"
         const val YOUTUBE = "youtube"
         const val LRCLIB = "lrclib"
         const val BETTER_LYRICS = "better_lyrics"

@@ -23,7 +23,7 @@ import org.koin.core.component.inject
 /**
  * Now-playing screen for Android Auto. The host renders artwork, seek bar and
  * transport controls from the MediaSession token registered by
- * [SimpMusicCarSession]; the app only owns the header — queue name as title
+ * [MakadimiCarSession]; the app only owns the header — queue name as title
  * plus a queue button, which the classic media surface never allowed us to
  * customize.
  */

@@ -502,7 +502,7 @@
     <string name="other_version">Phiên bản khác</string>
     <string name="later">Để sau</string>
     <string name="give_a_star">Tặng một sao</string>
-    <string name="enjoying_simpmusic">Yêu thích MaKaDiMi</string>
+    <string name="enjoying_makadimi">Yêu thích MaKaDiMi</string>
     <string name="if_you_love_my_work_consider">"Nếu bạn cảm thấy yêu thích những gì tôi làm, có thể "</string>
     <string name="buying_me_a_coffee">mua cho tôi một ly cà phê.</string>
     <string name="footguns_promo_title">Mỗi cái bẫy tôi rơi vào</string>
@@ -564,8 +564,8 @@
     <string name="contributor_name">Tên người đóng góp</string>
     <string name="contributor_email">Email người đóng góp</string>
     <string name="anonymous">Ẩn danh</string>
-    <string name="simpmusic_lyrics">MaKaDiMi Lyrics</string>
-    <string name="lyrics_provider_simpmusic">Lời bài hát được cung cấp bởi MaKaDiMi Lyrics</string>
+    <string name="makadimi_lyrics">MaKaDiMi Lyrics</string>
+    <string name="lyrics_provider_makadimi">Lời bài hát được cung cấp bởi MaKaDiMi Lyrics</string>
     <string name="backup_in_progress">Đang sao lưu</string>
     <string name="restore_in_progress">Đang tiến hành khôi phục</string>
     <string name="backup_downloaded">Sao lưu dữ liệu đã tải xuống</string>
@@ -693,7 +693,7 @@
     <string name="local_tracking_description">Ghi lại lịch sử nghe nhạc vào cơ sở dữ liệu cục bộ</string>
     <string name="blog_notification_title">Thông báo về các bài blog mới</string>
     <string name="blog_notification_description">Nhận thông báo khi có bài blog mới được phát hành</string>
-    <string name="simpmusic_charts">MaKaDiMi Charts</string>
+    <string name="makadimi_charts">MaKaDiMi Charts</string>
     <string name="crossfading">Đang chuyển bài mượt mà</string>
     <string name="your_320kbps_url">Đường dẫn link 320kbps của bạn</string>
     <string name="your_320kbps_url_description">Để trống để tự động chọn một URL hoạt động từ hệ thống kiểm tra.</string>
@@ -894,7 +894,7 @@
     <string name="login_sync_code_expired">Mã trên máy tính của bạn đã hết hạn. Hãy tạo mã mới rồi quét lại.</string>
     <string name="login_sync_failed">Đã xảy ra lỗi. Vui lòng thử lại.</string>
     <string name="modified_build_title">Ứng dụng không chính thức</string>
-    <string name="modified_build_message">Bạn đang dùng một bản MaKaDiMi không chính thức do người khác chỉnh sửa hoặc đóng gói lại. Bản này không thể sử dụng. Hãy tải bản chính thức tại simpmusic.org.</string>
+    <string name="modified_build_message">Bạn đang dùng một bản MaKaDiMi không chính thức do người khác chỉnh sửa hoặc đóng gói lại. Bản này không thể sử dụng. Hãy tải bản chính thức tại github.com/kaspercito/MaKaDiMi/releases.</string>
     <string name="taste_title">Gu nhạc của bạn là gì?</string>
     <string name="taste_invite">Để AI đọc 12 tháng nghe nhạc gần nhất của bạn và nói cho bạn biết.</string>
     <string name="taste_loading_title">Đang đọc gu nhạc của bạn…</string>

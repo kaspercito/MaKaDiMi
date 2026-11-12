@@ -91,8 +91,8 @@ import org.koin.android.ext.koin.androidContext
 import org.koin.core.context.loadKoinModules
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
-import org.simpmusic.cast.initCast
-import org.simpmusic.cast.wrapWithCastPlayer
+import org.makadimi.cast.initCast
+import org.makadimi.cast.wrapWithCastPlayer
 import java.net.Proxy
 import kotlin.time.Duration.Companion.seconds
 
@@ -178,7 +178,7 @@ private val mediaServiceModule =
 
         // Player exposed for MediaSession + UI (video rendering via PlayerView/PlayerSurface).
         // The adapter's ForwardingPlayer (delegating to the active ExoPlayer) is wrapped with
-        // Cast support in the full build; org.simpmusic.cast no-ops back to the same instance
+        // Cast support in the full build; org.makadimi.cast no-ops back to the same instance
         // in the FOSS build, so this stays the stable session-level player either way.
         single<Player>(qualifier = named(MAIN_PLAYER)) {
             val adapter = get<MediaPlayerInterface>() as CrossfadeExoPlayerAdapter

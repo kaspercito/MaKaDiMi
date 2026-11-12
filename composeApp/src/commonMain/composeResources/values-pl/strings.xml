@@ -411,7 +411,7 @@
     <string name="other_version">Inne wersje</string>
     <string name="later">Później</string>
     <string name="give_a_star">Daj gwiazdkę</string>
-    <string name="enjoying_simpmusic">Ciesz się MaKaDiMi</string>
+    <string name="enjoying_makadimi">Ciesz się MaKaDiMi</string>
     <string name="if_you_love_my_work_consider">"Jeśli kochasz moją pracę, rozważ "</string>
     <string name="buying_me_a_coffee">postawienie mi kawy.</string>
     <string name="fade_audio_effect">Efekt zanikania dźwięku</string>
@@ -456,8 +456,8 @@
     <string name="contributor_name">Nazwa kontrybutora</string>
     <string name="contributor_email">E-mail kontrybutora</string>
     <string name="anonymous">Anonimowy</string>
-    <string name="simpmusic_lyrics">Teksty MaKaDiMi</string>
-    <string name="lyrics_provider_simpmusic">Tekst dostarczony przez Teksty MaKaDiMi</string>
+    <string name="makadimi_lyrics">Teksty MaKaDiMi</string>
+    <string name="lyrics_provider_makadimi">Tekst dostarczony przez Teksty MaKaDiMi</string>
     <string name="backup_in_progress">Kopia zapasowa w toku</string>
     <string name="restore_in_progress">Przywracanie w toku</string>
     <string name="backup_downloaded">Utwórz kopię zapasową pobranych danych</string>

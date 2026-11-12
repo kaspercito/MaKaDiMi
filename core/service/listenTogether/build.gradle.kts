@@ -9,7 +9,7 @@ plugins {
 
 kotlin {
     android {
-        namespace = "org.simpmusic.listentogether"
+        namespace = "org.makadimi.listentogether"
         compileSdk = 37
         minSdk = 26
     }

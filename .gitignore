@@ -24,8 +24,6 @@ crowdin.yml
 #dev files
 ign.md
 .docs
-# Sentry Config File
-sentry.properties
 /composeApp/build/
 /composeApp/cache/
 /composeApp/kcef-bundle/

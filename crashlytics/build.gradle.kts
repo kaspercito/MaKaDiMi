@@ -11,7 +11,7 @@ kotlin {
 }
 
 android {
-    namespace = "org.simpmusic.crashlytics"
+    namespace = "org.makadimi.crashlytics"
     compileSdk = 37
 
     defaultConfig {
@@ -37,6 +37,7 @@ android {
 }
 
 dependencies {
+    implementation(projects.common)
     implementation(projects.domain)
     implementation(libs.core.ktx)
     implementation(libs.appcompat)
@@ -44,5 +45,4 @@ dependencies {
     testImplementation(libs.junit)
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.espresso.core)
-    implementation(libs.sentry.android)
 }

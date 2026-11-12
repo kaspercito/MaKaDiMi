@@ -43,9 +43,9 @@ import com.kaspercito.domain.data.model.metadata.Lyrics
 import com.kaspercito.domain.data.model.streams.TimeLine
 import com.kaspercito.domain.manager.DataStoreManager
 import com.kaspercito.domain.mediaservice.handler.MediaPlayerHandler
-import com.simpmusic.media_jvm.mpv.MpvPlayer
-import com.simpmusic.media_jvm.mpv.MpvPlayerAdapter
-import com.simpmusic.media_jvm.mpv.MpvVideoFrameSource
+import com.makadimi.media_jvm.mpv.MpvPlayer
+import com.makadimi.media_jvm.mpv.MpvPlayerAdapter
+import com.makadimi.media_jvm.mpv.MpvVideoFrameSource
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext

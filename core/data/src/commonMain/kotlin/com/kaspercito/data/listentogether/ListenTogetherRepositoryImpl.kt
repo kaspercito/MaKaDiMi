@@ -12,13 +12,13 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
-import org.simpmusic.listentogether.ConnectionState
-import org.simpmusic.listentogether.ListenTogetherSession
-import org.simpmusic.listentogether.ListenTogetherState
-import org.simpmusic.listentogether.PendingJoin
-import org.simpmusic.listentogether.PendingSuggestion
-import org.simpmusic.listentogether.RoomMember as ProtocolMember
-import org.simpmusic.listentogether.TrackInfo
+import org.makadimi.listentogether.ConnectionState
+import org.makadimi.listentogether.ListenTogetherSession
+import org.makadimi.listentogether.ListenTogetherState
+import org.makadimi.listentogether.PendingJoin
+import org.makadimi.listentogether.PendingSuggestion
+import org.makadimi.listentogether.RoomMember as ProtocolMember
+import org.makadimi.listentogether.TrackInfo
 
 /**
  * The only place in the app that knows the Listen Together protocol exists.

@@ -496,7 +496,7 @@
     <string name="other_version">Annan version</string>
     <string name="later">Senare</string>
     <string name="give_a_star">Ge en stjärna</string>
-    <string name="enjoying_simpmusic">Gillar du MaKaDiMi?</string>
+    <string name="enjoying_makadimi">Gillar du MaKaDiMi?</string>
     <string name="if_you_love_my_work_consider">"Om du uppskattar mitt arbete kan du överväga att "</string>
     <string name="buying_me_a_coffee">bjuda mig på en kaffe.</string>
     <string name="footguns_promo_title">Alla fallgropar jag hamnade i</string>
@@ -558,8 +558,8 @@
     <string name="contributor_name">Bidragsgivarens namn</string>
     <string name="contributor_email">Bidragsgivarens e-postadress</string>
     <string name="anonymous">Anonym</string>
-    <string name="simpmusic_lyrics">MaKaDiMi Lyrics</string>
-    <string name="lyrics_provider_simpmusic">Låttexter tillhandahålls av MaKaDiMi Lyrics</string>
+    <string name="makadimi_lyrics">MaKaDiMi Lyrics</string>
+    <string name="lyrics_provider_makadimi">Låttexter tillhandahålls av MaKaDiMi Lyrics</string>
     <string name="backup_in_progress">Säkerhetskopiering pågår</string>
     <string name="restore_in_progress">Återställning pågår</string>
     <string name="backup_downloaded">Säkerhetskopiera hämtade data</string>
@@ -687,7 +687,7 @@
     <string name="local_tracking_description">Spara din lyssningshistorik i den lokala databasen</string>
     <string name="blog_notification_title">Aviseringar om blogginlägg</string>
     <string name="blog_notification_description">Få en avisering när ett nytt blogginlägg publiceras</string>
-    <string name="simpmusic_charts">MaKaDiMi-topplistor</string>
+    <string name="makadimi_charts">MaKaDiMi-topplistor</string>
     <string name="crossfading">Övertoning</string>
     <string name="your_320kbps_url">Din webbadress för 320 kbit/s</string>
     <string name="your_320kbps_url_description">Lämna tomt för att automatiskt välja en fungerande webbadress med hjälp av drifttidskontrollen.</string>
@@ -880,5 +880,5 @@
     <string name="login_sync_code_expired">Koden på datorn har gått ut. Visa en ny kod och skanna igen.</string>
     <string name="login_sync_failed">Något gick fel. Försök igen.</string>
     <string name="modified_build_title">Inofficiell app</string>
-    <string name="modified_build_message">Du använder en inofficiell kopia av MaKaDiMi som har ändrats eller paketerats om av någon annan. Den kan inte användas. Hämta den officiella versionen från simpmusic.org.</string>
+    <string name="modified_build_message">Du använder en inofficiell kopia av MaKaDiMi som har ändrats eller paketerats om av någon annan. Den kan inte användas. Hämta den officiella versionen från github.com/kaspercito/MaKaDiMi/releases.</string>
 </resources>

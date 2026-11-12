@@ -12,8 +12,8 @@ import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import org.koin.core.qualifier.named
 import org.koin.dsl.module
-import org.simpmusic.listentogether.ListenTogetherClient
-import org.simpmusic.listentogether.ListenTogetherSession
+import org.makadimi.listentogether.ListenTogetherClient
+import org.makadimi.listentogether.ListenTogetherSession
 
 /**
  * Listen Together lives for as long as the app does, not as long as its screen.

@@ -132,9 +132,8 @@
 -keep class com.kaspercito.kotlinytmusicscraper.pages.** { *; }
 -keep class com.kaspercito.kotlinytmusicscraper.utils.** { *; }
 
--keep class org.simpmusic.lyrics.parser.** { *; }
--keep class org.simpmusic.lyrics.models.** { *; }
--keep class com.simpmusic.lyrics.parser.** { *; }
+-keep class org.makadimi.lyrics.parser.** { *; }
+-keep class org.makadimi.lyrics.models.** { *; }
 
 -dontwarn com.kaspercito.kotlinytmusicscraper.YouTube$SearchFilter$Companion
 -dontwarn com.kaspercito.kotlinytmusicscraper.YouTube$SearchFilter
@@ -159,12 +158,12 @@
 -dontwarn com.kaspercito.spotify.model.response.spotify.search.SpotifySearchResponse$Data$Search
 -dontwarn com.kaspercito.spotify.model.response.spotify.search.SpotifySearchResponse$Data
 -dontwarn com.kaspercito.spotify.model.response.spotify.search.SpotifySearchResponse
--dontwarn org.simpmusic.aiservice.AIHost
--dontwarn org.simpmusic.aiservice.AiClient
--dontwarn org.simpmusic.lyrics.SimpMusicLyricsClient
--dontwarn org.simpmusic.lyrics.domain.Lyrics$LyricsX$Line
--dontwarn org.simpmusic.lyrics.domain.Lyrics$LyricsX
--dontwarn org.simpmusic.lyrics.domain.Lyrics
+-dontwarn org.makadimi.aiservice.AIHost
+-dontwarn org.makadimi.aiservice.AiClient
+-dontwarn org.makadimi.lyrics.MakadimiLyricsClient
+-dontwarn org.makadimi.lyrics.domain.Lyrics$LyricsX$Line
+-dontwarn org.makadimi.lyrics.domain.Lyrics$LyricsX
+-dontwarn org.makadimi.lyrics.domain.Lyrics
 
 -keep class org.apache.commons.io.** { *; }
 

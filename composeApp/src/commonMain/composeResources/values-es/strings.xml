@@ -495,8 +495,8 @@
     <string name="other_version">Otras versiones</string>
     <string name="later">Más tarde</string>
     <string name="give_a_star">Dar una estrella</string>
-    <string name="enjoying_simpmusic">Disfrutando MaKaDiMi</string>
-    <string name="if_you_enjoy_using_simpmusic_star_simpmusic_on_github_or_leave_a_review_on">Si te gusta MaKaDiMi, dale una estrella en GitHub</string>
+    <string name="enjoying_makadimi">Disfrutando MaKaDiMi</string>
+    <string name="if_you_enjoy_using_makadimi_star_makadimi_on_github_or_leave_a_review_on">Si te gusta MaKaDiMi, dale una estrella en GitHub</string>
     <string name="if_you_love_my_work_consider">"Si amas mi trabajo, considera "</string>
     <string name="buying_me_a_coffee">comprame un café.</string>
     <string name="footguns_promo_title">Every trap I fell into</string>
@@ -555,8 +555,8 @@
     <string name="contributor_name">Nombre del contribuidor</string>
     <string name="contributor_email">Correo del contribuidor</string>
     <string name="anonymous">Anónimo</string>
-    <string name="simpmusic_lyrics">MaKaDiMi Lyrics</string>
-    <string name="lyrics_provider_simpmusic">Letras proporcionadas por MaKaDiMi Lyrics</string>
+    <string name="makadimi_lyrics">MaKaDiMi Lyrics</string>
+    <string name="lyrics_provider_makadimi">Letras proporcionadas por MaKaDiMi Lyrics</string>
     <string name="backup_in_progress">Copia de seguridad en curso</string>
     <string name="restore_in_progress">Restauración en curso</string>
     <string name="backup_downloaded">Respaldar datos descargados</string>
@@ -666,7 +666,7 @@
     <string name="local_tracking_description">Registra tu historial de escucha en la base de datos local</string>
     <string name="blog_notification_title">Notificaciones de publicaciones del blog</string>
     <string name="blog_notification_description">Recibe una notificación cuando se publique una nueva entrada del blog</string>
-    <string name="simpmusic_charts">Gráficos MaKaDiMi</string>
+    <string name="makadimi_charts">Gráficos MaKaDiMi</string>
     <string name="crossfading">Crossfade</string>
     <string name="your_320kbps_url">Su URL de 320kbps</string>
     <string name="your_320kbps_url_description">Dejar en blanco para elegir automáticamente una URL funcional desde la comprobación de tiempo de activación.</string>
@@ -902,7 +902,7 @@
     <string name="login_sync_code_expired">El código de tu computadora ha caducado. Muestra uno nuevo y vuelve a escanear.</string>
     <string name="login_sync_failed">Algo salió mal. Inténtalo de nuevo.</string>
     <string name="modified_build_title">App no oficial</string>
-    <string name="modified_build_message">Estás usando una copia no oficial de MaKaDiMi que alguien modificó o reempaquetó. No se puede usar. Descarga la versión oficial desde simpmusic.org.</string>
+    <string name="modified_build_message">Estás usando una copia no oficial de MaKaDiMi que alguien modificó o reempaquetó. No se puede usar. Descarga la versión oficial desde github.com/kaspercito/MaKaDiMi/releases.</string>
     <string name="taste_title">¿Cuál es tu gusto musical?</string>
     <string name="taste_invite">Deja que la IA lea tus últimos 12 meses de escucha y te lo diga.</string>
     <string name="taste_loading_title">Leyendo tu gusto musical…</string>
@@ -993,4 +993,8 @@
     <string name="spotify_not_found_list">No encontradas:</string>
     <string name="spotify_import_error">No se pudo leer esa playlist de Spotify. Revisa tu conexión e inténtalo de nuevo.</string>
     <string name="spotify_import_hint">Las canciones se buscan en YouTube Music, que es de donde se reproducen. Se guardan como una playlist local.</string>
+    <string name="data_saver">Ahorro de datos</string>
+    <string name="data_saver_description">Reproduce el audio a la calidad más baja para gastar menos datos. Las descargas no cambian.</string>
+    <string name="ai_dj">Locutor DJ con IA</string>
+    <string name="ai_dj_description">Una voz presenta las canciones entre temas (solo Windows). Necesita una clave de IA; la voz es la del sistema, así que no gasta datos extra.</string>
 </resources>

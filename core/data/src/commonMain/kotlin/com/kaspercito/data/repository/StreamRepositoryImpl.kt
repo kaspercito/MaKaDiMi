@@ -100,14 +100,21 @@ internal class StreamRepositoryImpl(
                 emit(null)
                 return@flow
             }
+            // Ahorro de datos: solo afecta a la reproducción en streaming; las descargas conservan la
+            // calidad que el usuario eligió para ellas.
+            val dataSaver = !isDownloading && dataStoreManager.dataSaver.first() == DataStoreManager.TRUE
             val itag =
                 if (isDownloading) {
                     QUALITY.itagOf(dataStoreManager.downloadQuality.first())
+                } else if (dataSaver) {
+                    ITAG.AUDIO_OPUS_LOW
                 } else {
                     QUALITY.itagOf(dataStoreManager.quality.first())
                 }
             val videoItag =
-                if (!muxed) {
+                if (dataSaver && !muxed) {
+                    ITAG.VIDEO_360P
+                } else if (!muxed) {
                     VIDEO_QUALITY.itags.getOrNull(
                         VIDEO_QUALITY.items.indexOf(
                             if (isDownloading) {
@@ -168,7 +175,12 @@ internal class StreamRepositoryImpl(
                             ?: formatList.find { !it.isAudio && it.url.isNullOrEmpty().not() }
                     val audioTwinItag = ITAG.highQualityTwinOf(itag)
                     val audioFormat =
-                        formatList.find { it.itag == itag } ?: if (audioTwinItag != null) {
+                        formatList.find { it.itag == itag } ?: if (dataSaver) {
+                            // Sin el itag más bajo, el audio más ligero que haya en vez del primero.
+                            formatList
+                                .filter { it.isAudio && it.url.isNullOrEmpty().not() }
+                                .minByOrNull { it.bitrate }
+                        } else if (audioTwinItag != null) {
                             formatList.find { it.itag == audioTwinItag }
                         } else {
                             formatList.find { it.isAudio && it.url.isNullOrEmpty().not() }

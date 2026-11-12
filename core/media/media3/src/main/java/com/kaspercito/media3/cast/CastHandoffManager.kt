@@ -20,7 +20,7 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import org.simpmusic.cast.currentCastDeviceName
+import org.makadimi.cast.currentCastDeviceName
 
 /**
  * Owns the local ↔ Cast-receiver handoff.

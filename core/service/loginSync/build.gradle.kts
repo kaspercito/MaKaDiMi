@@ -9,7 +9,7 @@ plugins {
 
 kotlin {
     android {
-        namespace = "org.simpmusic.loginsync"
+        namespace = "org.makadimi.loginsync"
         compileSdk = 37
         minSdk = 26
     }

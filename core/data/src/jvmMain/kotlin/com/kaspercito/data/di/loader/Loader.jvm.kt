@@ -1,6 +1,6 @@
 package com.kaspercito.data.di.loader
 
-import com.simpmusic.media_jvm.di.loadDesktopPlayerModule
+import com.makadimi.media_jvm.di.loadDesktopPlayerModule
 import com.kaspercito.data.loginsync.LoginSyncHostRepositoryImpl
 import com.kaspercito.data.loginsync.LoginSyncStore
 import com.kaspercito.domain.repository.LoginSyncHostRepository

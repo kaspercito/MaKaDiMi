@@ -127,6 +127,11 @@ internal class MediaServiceHandlerImpl(
 ) : MediaPlayerHandler,
     MediaPlayerListener {
     private val backgroundScope = CoroutineScope(Dispatchers.IO + SupervisorJob())
+
+    // Ajuste "cola infinita" en caché: se consulta dentro de callbacks del player (hilo principal) y
+    // leer DataStore con runBlocking ahí bloquea la reproducción. Se mantiene al día con un collector.
+    @Volatile
+    private var endlessQueueEnabled: Boolean = false
     private val context: Context = getKoin().get()
     override val player: MediaPlayerInterface = getKoin().get()
 
@@ -341,6 +346,10 @@ internal class MediaServiceHandlerImpl(
         getFormatJob = Job()
         jobWatchtime = Job()
         skipSilent = runBlocking { dataStoreManager.skipSilent.first() == TRUE }
+        endlessQueueEnabled = runBlocking { dataStoreManager.endlessQueue.first() == TRUE }
+        backgroundScope.launch {
+            dataStoreManager.endlessQueue.collectLatest { endlessQueueEnabled = it == TRUE }
+        }
         // Collected rather than read once like the settings around it: the equalizer is adjusted
         // while music is playing, and a curve that only takes effect after a restart is useless
         // for judging what you just changed.
@@ -1621,7 +1630,7 @@ internal class MediaServiceHandlerImpl(
                                             ),
                                     )
                                 }
-                                if (runBlocking { dataStoreManager.endlessQueue.first() } == TRUE) {
+                                if (endlessQueueEnabled) {
                                     Logger.w(TAG, "loadMore: Endless Queue")
                                     val lastTrack =
                                         queueData.value.data.listTracks
@@ -1651,7 +1660,7 @@ internal class MediaServiceHandlerImpl(
                         }
                 }
             }
-        } else if (runBlocking { dataStoreManager.endlessQueue.first() } == TRUE) {
+        } else if (endlessQueueEnabled) {
             Logger.w(TAG, "loadMore: Endless Queue")
             val lastTrack =
                 queueData.value.data.listTracks
@@ -2802,7 +2811,7 @@ internal class MediaServiceHandlerImpl(
             nowPlayingState.value.songEntity?.let { updateDiscordRpc(it) }
         }
         queueData.value.data.listTracks.let { list ->
-            if ((list.size > 3 || runBlocking { dataStoreManager.endlessQueue.first() == TRUE }) &&
+            if ((list.size > 3 || endlessQueueEnabled) &&
                 list.size - player.currentMediaItemIndex < 3 &&
                 list.size - player.currentMediaItemIndex >= 0 &&
                 queueData.value.queueState == QueueData.StateSource.STATE_INITIALIZED

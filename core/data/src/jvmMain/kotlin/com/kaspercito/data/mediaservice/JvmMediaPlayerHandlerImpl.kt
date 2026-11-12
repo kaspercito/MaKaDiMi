@@ -218,8 +218,8 @@ class JvmMediaPlayerHandlerImpl(
             Platform.MacOs
         } else {
             Platform.Linux(
-                "SimpMusic",
-                "com.kaspercito.simpmusic",
+                "MaKaDiMi",
+                "com.kaspercito.makadimi",
             )
         }
     }
@@ -415,6 +415,21 @@ class JvmMediaPlayerHandlerImpl(
         getSkipSegmentsJob = Job()
         getFormatJob = Job()
         jobWatchtime = Job()
+        // Locutor DJ con IA (solo Windows). Fuera de la inyección por la misma razón que el scrobbler:
+        // no hace falta tocar la firma de createMediaServiceHandler. Cualquier fallo aquí deja el
+        // reproductor intacto, que es lo único que importa.
+        runCatching {
+            com.kaspercito.data.dj
+                .DjAnnouncer(
+                    dataStoreManager = dataStoreManager,
+                    aiClient = getKoin().get(),
+                    player = player,
+                    nowPlaying = nowPlaying,
+                    isPlaying = { _controlState.value.isPlaying },
+                    isSleepTimerActive = { _sleepTimerState.value.timeRemaining > 0 && !_sleepTimerState.value.isDone },
+                    scope = backgroundScope,
+                ).start()
+        }.onFailure { Logger.w(TAG, "Locutor DJ no disponible: ${it.message}") }
         skipSilent = runBlocking { dataStoreManager.skipSilent.first() == TRUE }
         // Collected rather than read once like the settings around it: the equalizer is adjusted
         // while music is playing, and a curve that only takes effect after a restart is useless
@@ -1040,7 +1055,11 @@ class JvmMediaPlayerHandlerImpl(
                 // position is otherwise only saved on pause / track change / release, which
                 // misses uninterrupted playback.
                 val positionPersistIntervalMs = 5_000L
-                // 50 ms, which is only safe BECAUSE the published position is smoothed below.
+                // 100 ms (antes 50). Cada tick publica un estado nuevo y recompone todo lo que observa la
+                // posición (barra, letras, mini-reproductor): 20 recomposiciones por segundo era una de las
+                // fuentes de carga de CPU/GPU en Windows. A 10 Hz una barra de 500 px se mueve ~0,2 px por
+                // tick en una canción de 4 minutos, imperceptible. Solo es seguro porque la posición
+                // publicada se suaviza más abajo.
                 //
                 // _simpleMediaState is a StateFlow of a data class, so a tick carrying the same
                 // value as the previous one is swallowed and the UI gets nothing that round. While
@@ -1050,7 +1069,7 @@ class JvmMediaPlayerHandlerImpl(
                 // faster made it worse. The smoothed value is derived from the wall clock, so it
                 // differs on every tick and nothing is swallowed. Rate is now free to choose, and
                 // twice as many even steps reads better than half as many.
-                val tickIntervalMs = 50L
+                val tickIntervalMs = 100L
                 var sinceLastPositionSaveMs = 0L
                 while (true) {
                     delay(tickIntervalMs)
