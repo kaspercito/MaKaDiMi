@@ -47,6 +47,9 @@ private const val SPEECH_PITCH = 1.0f
 /** Tiempo máximo que se espera a que termine de hablar, por si el motor TTS no avisa. */
 private const val MAX_SPEECH_MS = 25_000L
 
+/** Tiempo máximo que se espera a que la canción empiece a sonar antes de hablar. */
+private const val PLAYBACK_WAIT_MS = 20_000L
+
 /**
  * Locutor DJ con IA para Android (equivalente móvil del de escritorio).
  *
@@ -188,12 +191,22 @@ internal class AndroidDjAnnouncer(
     }
 
     private suspend fun introFor(item: GenericMediaItem) {
-        val description = describe(item) ?: return
         val languageCode = runCatching { dataStoreManager.language.first().take(2) }.getOrDefault("es").ifBlank { "es" }
+        val description = describe(item)
+        if (description == null) {
+            // La canción aún no trae título: se saluda igual en vez de quedarse mudo.
+            Logger.w(TAG, "Intro sin título de canción; se usa el saludo local")
+            speak(fallbackIntro(item, languageCode))
+            return
+        }
+        showToast("DJ MaKa: preparando el saludo…")
         val languageName = Locale.forLanguageTag(languageCode).getDisplayLanguage(Locale.ENGLISH)
         val line =
             aiClient.djLine(null, description, languageName, localTime = localTimeLabel(), taste = DjSession.tasteProfile, avoid = recentSnapshot()).getOrElse {
                 Logger.w(TAG, "La IA no pudo escribir la intro: ${it.message}")
+                // Antes se quedaba mudo sin decir nada. Ahora se avisa del motivo y se saluda igual.
+                showToast("DJ: la IA falló (${it.message?.take(90) ?: "sin detalle"}). Revisa tu API key y modelo en Ajustes.")
+                speak(fallbackIntro(item, languageCode))
                 return
             }
         val spoken = sanitize(line, max = 420)
@@ -208,15 +221,20 @@ internal class AndroidDjAnnouncer(
         speakJob =
             scope.launch(Dispatchers.IO) {
                 // La intro puede estar lista antes de que la canción arranque del todo: se espera un poco.
-                val playing = withTimeoutOrNull(4_000L) {
+                // La canción llega por streaming y puede tardar en sonar: se espera hasta 20 s y, si aun así
+                // no ha arrancado, se habla igualmente en vez de quedarse mudo.
+                withTimeoutOrNull(PLAYBACK_WAIT_MS) {
                     while (!isPlaying()) delay(150)
-                    true
-                } ?: false
-                if (!playing || isSleepTimerActive()) return@launch
+                }
+                if (isSleepTimerActive()) return@launch
                 if (dataStoreManager.aiDj.first() != DataStoreManager.TRUE) return@launch
                 var ducked = false
                 try {
-                    val engine = ensureTts() ?: return@launch
+                    val engine =
+                        ensureTts() ?: run {
+                            showToast("DJ: el teléfono no tiene un motor de voz (TTS) disponible.")
+                            return@launch
+                        }
                     val languageCode =
                         runCatching { dataStoreManager.language.first().take(2) }.getOrDefault("es").ifBlank { "es" }
                     applyLanguage(engine, languageCode)
@@ -240,7 +258,11 @@ internal class AndroidDjAnnouncer(
 
                             @Deprecated("Deprecated in Java")
                             override fun onError(utteranceId: String?) {
-                                if (utteranceId?.startsWith(stamp) == true) done.complete(Unit)
+                                if (utteranceId?.startsWith(stamp) == true) {
+                                    Logger.w(TAG, "El motor de voz devolvió error en $utteranceId")
+                                    scope.launch { showToast("DJ: el motor de voz del teléfono dio un error al hablar.") }
+                                    done.complete(Unit)
+                                }
                             }
 
                             override fun onStop(
@@ -261,6 +283,8 @@ internal class AndroidDjAnnouncer(
                     }
                     if (ok) {
                         withTimeoutOrNull(MAX_SPEECH_MS) { done.await() }
+                    } else {
+                        showToast("DJ: la voz del teléfono rechazó el texto.")
                     }
                 } catch (e: Exception) {
                     if (e is kotlinx.coroutines.CancellationException) {
@@ -371,6 +395,27 @@ internal class AndroidDjAnnouncer(
             delay(50)
         }
         player.sleepFadeFactor = 1f
+    }
+
+    /** Saludo local (sin IA) para cuando la IA no responde: así el DJ nunca arranca en silencio. */
+    private fun fallbackIntro(
+        item: GenericMediaItem,
+        languageCode: String,
+    ): String {
+        val title = item.metadata.title?.takeIf { it.isNotBlank() }
+        val artist = item.metadata.artist?.takeIf { it.isNotBlank() }
+        val song = listOfNotNull(title, artist).joinToString(", de ").ifBlank { null }
+        return if (languageCode == "es") {
+            "Hola, soy DJ MaKa y arrancamos la sesión" + (song?.let { " con $it" } ?: "") + ". Sube ese volumen."
+        } else {
+            "Hey, it's DJ MaKa and we're kicking off the session" + (song?.let { " with $it" } ?: "") + ". Turn it up."
+        }
+    }
+
+    private suspend fun showToast(message: String) {
+        withContext(Dispatchers.Main) {
+            runCatching { android.widget.Toast.makeText(context.applicationContext, message, android.widget.Toast.LENGTH_LONG).show() }
+        }
     }
 
     private fun describe(item: GenericMediaItem): String? {

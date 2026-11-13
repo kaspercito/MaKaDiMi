@@ -1,6 +1,7 @@
 package com.kaspercito.media3.service.download
 
 import android.app.Notification
+import android.app.PendingIntent
 import android.content.Context
 import androidx.core.app.NotificationCompat
 import androidx.media3.common.util.NotificationUtil
@@ -80,15 +81,25 @@ internal class MusicDownloadService :
         val songTitle = (active.firstOrNull { it.state == Download.STATE_DOWNLOADING } ?: active.first()).let {
             Util.fromUtf8Bytes(it.request.data)
         }
+        // "37 %" y, si hay más esperando, cuántas quedan detrás de la actual.
+        val waiting = (active.size - 1).coerceAtLeast(0)
+        val subText =
+            if (waiting > 0) "$percent %  ·  ${getString(R.string.download_queue_left, waiting)}" else "$percent %"
         return NotificationCompat
             .Builder(this, CHANNEL_ID)
             .setSmallIcon(R.drawable.mono)
+            .setColor(ACCENT_COLOR)
             .setContentTitle(title)
             .setContentText(songTitle)
-            .setProgress(100, percent, false)
+            .setSubText(subText)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(songTitle))
+            .setProgress(100, percent, notMetRequirements == 0 && percent == 0)
+            .setContentIntent(openAppIntent(this))
             .setOngoing(true)
             .setOnlyAlertOnce(true)
             .setShowWhen(false)
+            .setPriority(NotificationCompat.PRIORITY_LOW)
+            .setForegroundServiceBehavior(NotificationCompat.FOREGROUND_SERVICE_IMMEDIATE)
             .setCategory(NotificationCompat.CATEGORY_PROGRESS)
             .build()
     }
@@ -161,11 +172,12 @@ internal class MusicDownloadService :
                 NotificationUtil.setNotification(
                     context,
                     COMPLETED_NOTIFICATION_ID,
-                    notificationHelper.buildDownloadCompletedNotification(
-                        context,
-                        R.drawable.baseline_downloaded,
-                        null,
-                        text,
+                    resultNotification(
+                        context = context,
+                        icon = R.drawable.baseline_downloaded,
+                        color = ACCENT_COLOR,
+                        title = context.getString(R.string.download_complete),
+                        text = text,
                     ),
                 )
             }
@@ -179,11 +191,12 @@ internal class MusicDownloadService :
                 NotificationUtil.setNotification(
                     context,
                     FAILED_NOTIFICATION_ID,
-                    notificationHelper.buildDownloadFailedNotification(
-                        context,
-                        R.drawable.baseline_error_outline_24,
-                        null,
-                        text,
+                    resultNotification(
+                        context = context,
+                        icon = R.drawable.baseline_error_outline_24,
+                        color = ERROR_COLOR,
+                        title = context.getString(R.string.download_failed),
+                        text = text,
                     ),
                 )
             }
@@ -204,6 +217,39 @@ internal class MusicDownloadService :
     }
 
     companion object {
+        /** Violeta Aurora, el mismo acento de la app. */
+        const val ACCENT_COLOR = 0xFF8B7BFF.toInt()
+        const val ERROR_COLOR = 0xFFFF5C7A.toInt()
+
+        /** Al tocar la notificación se abre la app. */
+        fun openAppIntent(context: Context): PendingIntent? =
+            context.packageManager.getLaunchIntentForPackage(context.packageName)?.let { launch ->
+                PendingIntent.getActivity(context, 0, launch, PendingIntent.FLAG_IMMUTABLE)
+            }
+
+        /** Aviso final de una tanda (completada o fallida): se cierra al tocarlo y abre la app. */
+        fun resultNotification(
+            context: Context,
+            icon: Int,
+            color: Int,
+            title: String,
+            text: String?,
+        ): Notification =
+            NotificationCompat
+                .Builder(context, CHANNEL_ID)
+                .setSmallIcon(icon)
+                .setColor(color)
+                .setContentTitle(title)
+                .setContentText(text)
+                .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+                .setContentIntent(openAppIntent(context))
+                .setAutoCancel(true)
+                .setOnlyAlertOnce(true)
+                .setShowWhen(true)
+                .setCategory(NotificationCompat.CATEGORY_STATUS)
+                .setPriority(NotificationCompat.PRIORITY_LOW)
+                .build()
+
         const val CHANNEL_ID = "download"
         const val NOTIFICATION_ID = 1000
         const val COMPLETED_NOTIFICATION_ID = NOTIFICATION_ID + 1

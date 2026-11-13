@@ -68,7 +68,7 @@ class AiService(
             ModelId(customModelId)
         } else {
             when (aiHost) {
-                AIHost.GEMINI -> ModelId("gemini-2.0-flash")
+                AIHost.GEMINI -> ModelId("gemini-3.5-flash")
                 AIHost.OPENAI -> ModelId("gpt-4o")
                 AIHost.CUSTOM_OPENAI -> ModelId("gpt-4o")
             }
