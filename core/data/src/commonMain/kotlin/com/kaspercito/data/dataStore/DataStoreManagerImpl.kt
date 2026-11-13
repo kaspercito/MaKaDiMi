@@ -1360,6 +1360,19 @@ internal class DataStoreManagerImpl(
             preferences[AI_API_KEY] ?: ""
         }
 
+    override suspend fun setDjVoiceApiKey(apiKey: String) {
+        withContext(Dispatchers.IO) {
+            settingsDataStore.edit { settings ->
+                settings[DJ_VOICE_API_KEY] = apiKey.trim()
+            }
+        }
+    }
+
+    override val djVoiceApiKey: Flow<String> =
+        settingsDataStore.data.map { preferences ->
+            preferences[DJ_VOICE_API_KEY] ?: ""
+        }
+
     override val useAITranslation: Flow<String> =
         settingsDataStore.data.map { preferences ->
             preferences[USE_AI_TRANSLATION] ?: FALSE
@@ -1903,6 +1916,7 @@ internal class DataStoreManagerImpl(
         val VISITOR_DATA = stringPreferencesKey("visitor_data")
         val AI_PROVIDER = stringPreferencesKey("ai_provider")
         val AI_API_KEY = stringPreferencesKey("ai_gemini_api_key")
+        val DJ_VOICE_API_KEY = stringPreferencesKey("dj_voice_gemini_api_key")
 
         val CUSTOM_MODEL_ID = stringPreferencesKey("custom_model_id")
         val CUSTOM_OPENAI_BASE_URL = stringPreferencesKey("custom_openai_base_url")

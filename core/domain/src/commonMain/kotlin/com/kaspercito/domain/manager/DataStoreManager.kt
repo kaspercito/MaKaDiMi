@@ -418,6 +418,11 @@ interface DataStoreManager {
 
     val aiApiKey: Flow<String>
 
+    /** Clave de Gemini para la voz neuronal del DJ (vacía = se usa la voz del teléfono). */
+    suspend fun setDjVoiceApiKey(apiKey: String)
+
+    val djVoiceApiKey: Flow<String>
+
     val useAITranslation: Flow<String>
 
     suspend fun setUseAITranslation(use: Boolean)

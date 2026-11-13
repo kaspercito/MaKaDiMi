@@ -2,6 +2,8 @@ package com.kaspercito.data.dj
 
 import android.content.Context
 import android.media.AudioAttributes
+import android.media.AudioFormat
+import android.media.AudioTrack
 import android.os.Bundle
 import android.speech.tts.TextToSpeech
 import android.speech.tts.UtteranceProgressListener
@@ -39,9 +41,9 @@ private const val TRACKS_PER_COMMENT = 3
 private const val DUCKED_LEVEL = 0.25f
 
 /** Pausa entre frases, para que no suene a lector de pantalla. */
-private const val PAUSE_BETWEEN_SENTENCES_MS = 220L
+private const val PAUSE_BETWEEN_SENTENCES_MS = 300L
 
-private const val SPEECH_RATE = 1.0f
+private const val SPEECH_RATE = 1.05f
 private const val SPEECH_PITCH = 1.0f
 
 /** Tiempo máximo que se espera a que termine de hablar, por si el motor TTS no avisa. */
@@ -71,7 +73,14 @@ internal class AndroidDjAnnouncer(
     private class Prepared(
         val forMediaId: String,
         val text: String,
+        /** Audio de la voz neuronal ya generado (null si no hay clave o falló). */
+        val clip: SpeechClip?,
     )
+
+    private val neuralVoice = GeminiVoice(dataStoreManager)
+
+    @Volatile
+    private var voiceProblemShown = false
 
     @Volatile
     private var prepared: Prepared? = null
@@ -90,6 +99,10 @@ internal class AndroidDjAnnouncer(
 
     @Volatile
     private var ttsLanguageCode: String? = null
+
+    /** Se activa si una voz de red falla: desde entonces solo se usan voces instaladas. */
+    @Volatile
+    private var offlineVoicesOnly = false
 
     /** Últimas frases dichas, para pedirle a la IA que no se repita. */
     private val recentLines = ArrayDeque<String>()
@@ -151,7 +164,7 @@ internal class AndroidDjAnnouncer(
         if (ready != null && ready.forMediaId == item.mediaId) {
             sinceLastComment = 0
             introPending = false
-            speak(ready.text)
+            speak(ready.text, ready.clip, synthesize = false)
         } else if (introPending) {
             // Primera canción con el DJ encendido: saluda y la presenta (no hay comentario preparado).
             introPending = false
@@ -187,7 +200,8 @@ internal class AndroidDjAnnouncer(
         val spoken = sanitize(line)
         if (spoken.isEmpty()) return
         remember(spoken)
-        prepared = Prepared(next.mediaId, spoken)
+        // La voz neuronal se genera ya, durante la canción anterior, para que no haya espera al hablar.
+        prepared = Prepared(next.mediaId, spoken, synthesizeWithNotice(spoken))
     }
 
     private suspend fun introFor(item: GenericMediaItem) {
@@ -216,10 +230,17 @@ internal class AndroidDjAnnouncer(
         }
     }
 
-    private fun speak(text: String) {
+    private fun speak(
+        text: String,
+        clip: SpeechClip? = null,
+        synthesize: Boolean = true,
+    ) {
         speakJob?.cancel()
         speakJob =
             scope.launch(Dispatchers.IO) {
+                // Voz neuronal: se genera mientras la canción carga y ANTES de bajar la música, para no
+                // dejarla atenuada mientras se espera al audio.
+                val voiceClip = clip ?: if (synthesize) synthesizeWithNotice(text) else null
                 // La intro puede estar lista antes de que la canción arranque del todo: se espera un poco.
                 // La canción llega por streaming y puede tardar en sonar: se espera hasta 20 s y, si aun así
                 // no ha arrancado, se habla igualmente en vez de quedarse mudo.
@@ -230,6 +251,13 @@ internal class AndroidDjAnnouncer(
                 if (dataStoreManager.aiDj.first() != DataStoreManager.TRUE) return@launch
                 var ducked = false
                 try {
+                    if (voiceClip != null) {
+                        player.sleepFadeFactor = DUCKED_LEVEL
+                        ducked = true
+                        delay(150)
+                        playClip(voiceClip)
+                        return@launch
+                    }
                     val engine =
                         ensureTts() ?: run {
                             showToast("DJ: el teléfono no tiene un motor de voz (TTS) disponible.")
@@ -260,6 +288,9 @@ internal class AndroidDjAnnouncer(
                             override fun onError(utteranceId: String?) {
                                 if (utteranceId?.startsWith(stamp) == true) {
                                     Logger.w(TAG, "El motor de voz devolvió error en $utteranceId")
+                                    // Puede ser una voz de red sin conexión: la próxima vez se eligen solo voces instaladas.
+                                    offlineVoicesOnly = true
+                                    ttsLanguageCode = null
                                     scope.launch { showToast("DJ: el motor de voz del teléfono dio un error al hablar.") }
                                     done.complete(Unit)
                                 }
@@ -298,6 +329,50 @@ internal class AndroidDjAnnouncer(
                     }
                 }
             }
+    }
+
+    /** Genera la voz neuronal; si falla, avisa una vez por sesión y el DJ sigue con la voz del teléfono. */
+    private suspend fun synthesizeWithNotice(text: String): SpeechClip? {
+        val clip = neuralVoice.synthesize(text)
+        val problem = neuralVoice.lastError
+        if (clip == null && problem != null && !voiceProblemShown) {
+            voiceProblemShown = true
+            showToast("DJ: la voz de Gemini falló ($problem). Uso la voz del teléfono.")
+        }
+        return clip
+    }
+
+    /** Reproduce el audio de la voz neuronal (PCM) y espera a que termine. */
+    private suspend fun playClip(clip: SpeechClip) {
+        val format =
+            AudioFormat
+                .Builder()
+                .setSampleRate(clip.sampleRate)
+                .setEncoding(AudioFormat.ENCODING_PCM_16BIT)
+                .setChannelMask(AudioFormat.CHANNEL_OUT_MONO)
+                .build()
+        val attributes =
+            AudioAttributes
+                .Builder()
+                .setUsage(AudioAttributes.USAGE_MEDIA)
+                .setContentType(AudioAttributes.CONTENT_TYPE_SPEECH)
+                .build()
+        val track =
+            AudioTrack
+                .Builder()
+                .setAudioAttributes(attributes)
+                .setAudioFormat(format)
+                .setBufferSizeInBytes(clip.pcm.size)
+                .setTransferMode(AudioTrack.MODE_STATIC)
+                .build()
+        try {
+            track.write(clip.pcm, 0, clip.pcm.size)
+            track.play()
+            delay(clip.durationMs + 300)
+        } finally {
+            runCatching { track.stop() }
+            track.release()
+        }
     }
 
     /** Parte el texto en frases (por . ! ? …) para hablarlas una a una. */
@@ -362,9 +437,9 @@ internal class AndroidDjAnnouncer(
     }
 
     /**
-     * La mejor voz instalada para el idioma: mayor calidad, sin pedir internet (así nunca se queda
-     * mudo sin conexión) y, a igualdad, la de la misma región que el teléfono (es-MX antes que es-ES
-     * si el teléfono está en México, etc.).
+     * La mejor voz para el idioma: mayor calidad (las voces de red de Google, más naturales, entran;
+     * el DJ ya necesita internet para pedir el texto a la IA) y, a igualdad, la de la misma región que
+     * el teléfono. Si una voz de red falla, [offlineVoicesOnly] la descarta y se usan solo las instaladas.
      */
     private fun pickBestVoice(
         engine: TextToSpeech,
@@ -377,7 +452,7 @@ internal class AndroidDjAnnouncer(
                 .orEmpty()
                 .filter { it.locale.language == locale.language }
                 .filter { !it.features.orEmpty().contains(TextToSpeech.Engine.KEY_FEATURE_NOT_INSTALLED) }
-                .filter { !it.isNetworkConnectionRequired }
+                .filter { !offlineVoicesOnly || !it.isNetworkConnectionRequired }
         return candidates.maxWithOrNull(
             compareBy<Voice>(
                 { it.quality },

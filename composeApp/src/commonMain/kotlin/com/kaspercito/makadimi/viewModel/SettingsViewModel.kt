@@ -169,6 +169,9 @@ class SettingsViewModel(
     val updateChannel: StateFlow<String> = _updateChannel
     private val _aiProvider = MutableStateFlow<String>(DataStoreManager.AI_PROVIDER_OPENAI)
     val aiProvider: StateFlow<String> = _aiProvider
+    private val _hasDjVoiceKey = MutableStateFlow(false)
+    val hasDjVoiceKey: StateFlow<Boolean> = _hasDjVoiceKey
+
     private val _isHasApiKey = MutableStateFlow<Boolean>(false)
     val isHasApiKey: StateFlow<Boolean> = _isHasApiKey
     private val _useAITranslation = MutableStateFlow<Boolean>(false)
@@ -879,6 +882,13 @@ class SettingsViewModel(
         viewModelScope.launch {
             dataStoreManager.aiDj.collect { _aiDj.value = it == DataStoreManager.TRUE }
         }
+        viewModelScope.launch {
+            dataStoreManager.djVoiceApiKey.collect { _hasDjVoiceKey.value = it.isNotBlank() }
+        }
+    }
+
+    fun setDjVoiceApiKey(apiKey: String) {
+        viewModelScope.launch { dataStoreManager.setDjVoiceApiKey(apiKey) }
     }
 
     fun setDataSaver(enabled: Boolean) {

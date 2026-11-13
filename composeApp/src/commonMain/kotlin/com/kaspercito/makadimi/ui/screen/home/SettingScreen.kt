@@ -208,6 +208,10 @@ import makadimi.composeapp.generated.resources.about_us
 import makadimi.composeapp.generated.resources.add_an_account
 import makadimi.composeapp.generated.resources.ai
 import makadimi.composeapp.generated.resources.ai_api_key
+import makadimi.composeapp.generated.resources.dj_voice_key
+import makadimi.composeapp.generated.resources.dj_voice_key_message
+import makadimi.composeapp.generated.resources.dj_voice_key_off
+import makadimi.composeapp.generated.resources.dj_voice_key_on
 import makadimi.composeapp.generated.resources.ai_provider
 import makadimi.composeapp.generated.resources.anonymous
 import makadimi.composeapp.generated.resources.app_log
@@ -582,6 +586,7 @@ fun SettingScreen(
     val dataSaver by viewModel.dataSaver.collectAsStateWithLifecycle()
     val aiProvider by viewModel.aiProvider.collectAsStateWithLifecycle()
     val isHasApiKey by viewModel.isHasApiKey.collectAsStateWithLifecycle()
+    val hasDjVoiceKey by viewModel.hasDjVoiceKey.collectAsStateWithLifecycle()
     val useAITranslation by viewModel.useAITranslation.collectAsStateWithLifecycle()
     val translationLanguage by viewModel.translationLanguage.collectAsStateWithLifecycle()
     val customModelId by viewModel.customModelId.collectAsStateWithLifecycle()
@@ -1986,6 +1991,30 @@ fun SettingScreen(
                                 confirm =
                                     runBlocking { getString(Res.string.set) } to { state ->
                                         viewModel.setCustomModelId(state.textField?.value ?: "")
+                                    },
+                                dismiss = runBlocking { getString(Res.string.cancel) },
+                            ),
+                        )
+                    },
+                )
+                SettingItem(
+                    title = stringResource(Res.string.dj_voice_key),
+                    subtitle = stringResource(if (hasDjVoiceKey) Res.string.dj_voice_key_on else Res.string.dj_voice_key_off),
+                    onClick = {
+                        viewModel.setAlertData(
+                            SettingAlertState(
+                                title = runBlocking { getString(Res.string.dj_voice_key) },
+                                textField =
+                                    SettingAlertState.TextFieldData(
+                                        label = runBlocking { getString(Res.string.dj_voice_key) },
+                                        value = "",
+                                        // Vacío = quitar la clave y volver a la voz del teléfono.
+                                        verifyCodeBlock = { true to null },
+                                    ),
+                                message = runBlocking { getString(Res.string.dj_voice_key_message) },
+                                confirm =
+                                    runBlocking { getString(Res.string.set) } to { state ->
+                                        viewModel.setDjVoiceApiKey(state.textField?.value ?: "")
                                     },
                                 dismiss = runBlocking { getString(Res.string.cancel) },
                             ),
