@@ -345,6 +345,20 @@ internal class MediaServiceHandlerImpl(
         getSkipSegmentsJob = Job()
         getFormatJob = Job()
         jobWatchtime = Job()
+        // Locutor DJ con IA (voz TTS del teléfono). Cualquier fallo deja el reproductor intacto.
+        runCatching {
+            com.kaspercito.data.dj
+                .AndroidDjAnnouncer(
+                    context = context,
+                    dataStoreManager = dataStoreManager,
+                    aiClient = getKoin().get(),
+                    player = player,
+                    nowPlaying = nowPlaying,
+                    isPlaying = { _controlState.value.isPlaying },
+                    isSleepTimerActive = { _sleepTimerState.value.timeRemaining > 0 && !_sleepTimerState.value.isDone },
+                    scope = backgroundScope,
+                ).start()
+        }.onFailure { Logger.w(TAG, "Locutor DJ no disponible: ${it.message}") }
         skipSilent = runBlocking { dataStoreManager.skipSilent.first() == TRUE }
         endlessQueueEnabled = runBlocking { dataStoreManager.endlessQueue.first() == TRUE }
         backgroundScope.launch {

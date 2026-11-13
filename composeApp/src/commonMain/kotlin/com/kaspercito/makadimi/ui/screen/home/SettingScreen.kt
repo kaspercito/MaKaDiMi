@@ -102,6 +102,8 @@ import com.kaspercito.common.SUPPORTED_LANGUAGE
 import com.kaspercito.common.SUPPORTED_LOCATION
 import com.kaspercito.common.SponsorBlockType
 import com.kaspercito.common.VIDEO_QUALITY
+import com.kaspercito.makadimi.ui.icon.Movie
+import com.kaspercito.makadimi.ui.icon.GraphicEq
 import com.kaspercito.domain.extension.now
 import com.kaspercito.domain.data.model.lyrics.RomanizationDictionaryState
 import com.kaspercito.domain.data.model.lyrics.RomanizationLanguage
@@ -138,6 +140,20 @@ import com.kaspercito.makadimi.ui.icon.Error
 import com.kaspercito.makadimi.ui.icon.PeopleAlt
 import com.kaspercito.makadimi.ui.icon.PlaylistAdd
 import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.Tune
+import com.kaspercito.makadimi.ui.icon.LibraryMusic
+import com.kaspercito.makadimi.ui.icon.Headphones
+import com.kaspercito.makadimi.ui.icon.PlayCircle
+import com.kaspercito.makadimi.ui.icon.History
+import com.kaspercito.makadimi.ui.icon.Lyrics
+import com.kaspercito.makadimi.ui.icon.Sensors
+import com.kaspercito.makadimi.ui.icon.Groups
+import com.kaspercito.makadimi.ui.icon.Insights
+import com.kaspercito.makadimi.ui.icon.FastForward
+import com.kaspercito.makadimi.ui.icon.Download
+import com.kaspercito.makadimi.ui.icon.Sync
+import com.kaspercito.makadimi.ui.icon.Info
+import com.kaspercito.makadimi.ui.icon.Settings
 import com.kaspercito.makadimi.ui.navigation.destination.home.AppLogDestination
 import com.kaspercito.makadimi.ui.navigation.destination.home.CreditDestination
 import com.kaspercito.makadimi.ui.navigation.destination.login.DiscordLoginDestination
@@ -653,6 +669,7 @@ fun SettingScreen(
     }
 
     val settingListState = rememberLazyListState()
+    val hubScope = androidx.compose.runtime.rememberCoroutineScope()
     // The toolbar is part of the list and scrolls away with it; a pinned, frosted copy takes over
     // once the Devices group has gone under it — Playlist's and Artist's way. The group's height
     // (top padding, header, card) is the scroll that carries it fully under the bar.
@@ -709,6 +726,35 @@ fun SettingScreen(
                             layout(constraints.maxWidth, placeable.height) { placeable.place(-bleed, 0) }
                         },
                 )
+                run {
+                    val isAndroid = getPlatform() == Platform.Android
+                    val hubEntries =
+                        buildList {
+                            add(SettingsHubEntry("user_interface", stringResource(Res.string.user_interface), SimpIcons.Tune))
+                            add(SettingsHubEntry("content", stringResource(Res.string.content), SimpIcons.LibraryMusic))
+                            if (isAndroid) add(SettingsHubEntry("audio", stringResource(Res.string.audio), SimpIcons.Headphones))
+                            add(SettingsHubEntry("playback", stringResource(Res.string.playback), SimpIcons.PlayCircle))
+                            add(SettingsHubEntry("listening_history", stringResource(Res.string.listening_history), SimpIcons.History))
+                            add(SettingsHubEntry("lyrics", stringResource(Res.string.lyrics), SimpIcons.Lyrics))
+                            add(SettingsHubEntry("AI", stringResource(Res.string.ai), SimpIcons.GraphicEq))
+                            add(SettingsHubEntry("spotify", stringResource(Res.string.spotify), SimpIcons.Sensors))
+                            add(SettingsHubEntry("discord", stringResource(Res.string.discord_integration), SimpIcons.Groups))
+                            if (viewModel.lastfmAvailable) add(SettingsHubEntry("lastfm", stringResource(Res.string.lastfm_integration), SimpIcons.Insights))
+                            add(SettingsHubEntry("sponsor_block", stringResource(Res.string.sponsorBlock), SimpIcons.FastForward))
+                            if (isAndroid) add(SettingsHubEntry("storage", stringResource(Res.string.storage), SimpIcons.Download))
+                            add(SettingsHubEntry("backup", stringResource(Res.string.backup), SimpIcons.Sync))
+                            add(SettingsHubEntry("about_us", stringResource(Res.string.about_us), SimpIcons.Info))
+                            add(SettingsHubEntry("developer_option", stringResource(Res.string.developer_option), SimpIcons.Settings))
+                        }
+                    SettingsHub(
+                        entries = hubEntries,
+                        onJump = { key ->
+                            // Mismo orden y mismas condiciones que los items de la lista.
+                            val index = hubEntries.indexOfFirst { it.key == key }
+                            if (index >= 0) hubScope.launch { settingListState.animateScrollToItem(index) }
+                        },
+                    )
+                }
                 // Above every section, and inside item 0 rather than an item of its own, for the
                 // glow reason above.
                 SettingGroup(
@@ -1118,6 +1164,7 @@ fun SettingScreen(
                     },
                 )
                 SettingItem(
+                    icon = SimpIcons.Movie,
                     title = stringResource(Res.string.video_quality),
                     subtitle = videoQuality ?: "",
                     onClick = {
@@ -1851,15 +1898,13 @@ fun SettingScreen(
         }
         item(key = "AI") {
             SettingGroup(title = stringResource(Res.string.ai)) {
-                // El locutor solo existe en el escritorio (usa la voz de Windows).
-                if (getPlatform() == Platform.Desktop) {
-                    SettingItem(
-                        title = stringResource(Res.string.ai_dj),
-                        subtitle = stringResource(Res.string.ai_dj_description),
-                        smallSubtitle = true,
-                        switch = (aiDj to { viewModel.setAiDj(it) }),
-                    )
-                }
+                SettingItem(
+                    icon = SimpIcons.GraphicEq,
+                    title = stringResource(Res.string.ai_dj),
+                    subtitle = stringResource(Res.string.ai_dj_description),
+                    smallSubtitle = true,
+                    switch = (aiDj to { viewModel.setAiDj(it) }),
+                )
                 SettingItem(
                     title = stringResource(Res.string.ai_provider),
                     subtitle =

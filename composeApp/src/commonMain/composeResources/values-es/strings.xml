@@ -996,5 +996,19 @@
     <string name="data_saver">Ahorro de datos</string>
     <string name="data_saver_description">Reproduce el audio a la calidad más baja para gastar menos datos. Las descargas no cambian.</string>
     <string name="ai_dj">Locutor DJ con IA</string>
-    <string name="ai_dj_description">Una voz presenta las canciones entre temas (solo Windows). Necesita una clave de IA; la voz es la del sistema, así que no gasta datos extra.</string>
+    <string name="ai_dj_description">Una voz presenta las canciones entre temas. Necesita una clave de IA; la voz es la de tu dispositivo, así que no gasta datos extra.</string>
+    <string name="quick_playback_title">Video y calidad</string>
+    <string name="quick_playback_subtitle">Controles rápidos de reproducción</string>
+    <string name="quick_video_mode">Modo vídeo</string>
+    <string name="quick_video_mode_desc">Ver el vídeo de esta pista en lugar de solo escucharla</string>
+    <string name="quick_video_quality">Calidad de vídeo</string>
+    <string name="quick_audio_quality">Calidad de audio</string>
+    <string name="quick_ai_dj_desc">Una voz presenta las canciones entre temas</string>
+    <string name="quick_apply_now">Aplicar ahora</string>
+    <string name="quick_apply_now_desc">Recarga esta pista desde el mismo punto</string>
+    <string name="quick_applied">Recargando pista…</string>
+    <string name="hub_search">Buscar en ajustes…</string>
+    <string name="hub_categories">CATEGORÍAS</string>
+    <string name="hub_no_results">Sin resultados</string>
+    <string name="home_history">Historial</string>
 </resources>

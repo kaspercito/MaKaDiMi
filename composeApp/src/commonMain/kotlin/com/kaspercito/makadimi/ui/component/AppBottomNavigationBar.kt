@@ -59,6 +59,8 @@ import com.kaspercito.makadimi.ui.theme.typo
 import org.jetbrains.compose.resources.painterResource
 import org.jetbrains.compose.resources.stringResource
 import makadimi.composeapp.generated.resources.*
+import androidx.compose.foundation.interaction.collectIsPressedAsState
+import androidx.compose.ui.graphics.graphicsLayer
 import kotlin.math.roundToInt
 import kotlin.reflect.KClass
 
@@ -153,20 +155,23 @@ private fun NeonDock(
 ) {
     val cs = MaterialTheme.colorScheme
     val brush = auroraBrush()
-    val dockShape = RoundedCornerShape(30.dp)
-    val tabShape = RoundedCornerShape(topStart = 20.dp, topEnd = 6.dp, bottomEnd = 20.dp, bottomStart = 6.dp)
+    val haptics = androidx.compose.ui.platform.LocalHapticFeedback.current
+    val dockShape = RoundedCornerShape(32.dp)
+    val tabShape = RoundedCornerShape(topStart = 22.dp, topEnd = 7.dp, bottomEnd = 22.dp, bottomStart = 7.dp)
     Box(
         Modifier
             .fillMaxWidth()
             .windowInsetsPadding(NavigationBarDefaults.windowInsets)
-            .padding(horizontal = 16.dp, vertical = 8.dp),
+            .padding(horizontal = 14.dp, vertical = 10.dp),
     ) {
         Row(
             modifier =
                 Modifier
                     .fillMaxWidth()
+                    // Resplandor suave detrás del dock: se siente "flotando" sobre el contenido.
+                    .neonGlow(cs.primary.copy(alpha = 0.16f), 18.dp)
                     .clip(dockShape)
-                    .glassPanel(dockShape, tint = cs.surfaceContainerHigh, alpha = 0.78f)
+                    .glassPanel(dockShape, tint = cs.surfaceContainerHigh, alpha = 0.82f, borderAlpha = 0.9f)
                     .padding(horizontal = 8.dp, vertical = 8.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
@@ -177,15 +182,33 @@ private fun NeonDock(
                     if (selected) cs.onPrimary else cs.onSurfaceVariant,
                     label = "dockTabColor",
                 )
+                val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
+                val pressed by interaction.collectIsPressedAsState()
+                val pressScale by androidx.compose.animation.core.animateFloatAsState(
+                    if (pressed) 0.9f else 1f,
+                    animationSpec = androidx.compose.animation.core.spring(dampingRatio = 0.55f, stiffness = 500f),
+                    label = "dockTabPress",
+                )
                 Row(
                     modifier =
                         Modifier
-                            .animateContentSize()
-                            .height(46.dp)
+                            .animateContentSize(
+                                androidx.compose.animation.core.spring(
+                                    dampingRatio = 0.7f,
+                                    stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow,
+                                ),
+                            ).graphicsLayer {
+                                scaleX = pressScale
+                                scaleY = pressScale
+                            }.height(48.dp)
+                            .then(if (selected) Modifier.neonGlow(cs.primary.copy(alpha = 0.45f), 10.dp) else Modifier)
                             .clip(tabShape)
                             .then(if (selected) Modifier.background(brush) else Modifier)
-                            .clickable { onTabSelected(screen) }
-                            .padding(horizontal = if (selected) 18.dp else 14.dp),
+                            .clickable(interactionSource = interaction, indication = null) {
+                                // Vibración ligera al cambiar de pestaña, como una tecla de verdad.
+                                if (!selected) haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+                                onTabSelected(screen)
+                            }.padding(horizontal = if (selected) 20.dp else 15.dp),
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp),
                 ) {
@@ -198,9 +221,9 @@ private fun NeonDock(
                             style =
                                 typo().labelSmall.copy(
                                     fontFamily = monoFontFamily(),
-                                    fontWeight = FontWeight.Normal,
+                                    fontWeight = FontWeight.Bold,
                                     fontSize = 11.sp,
-                                    letterSpacing = 1.sp,
+                                    letterSpacing = 1.2.sp,
                                 ),
                             color = contentColor,
                             maxLines = 1,

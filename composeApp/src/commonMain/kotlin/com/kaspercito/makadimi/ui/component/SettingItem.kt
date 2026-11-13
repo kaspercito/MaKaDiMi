@@ -53,6 +53,7 @@ fun SettingItem(
     onClick: (() -> Unit)? = null,
     switch: Pair<Boolean, ((Boolean) -> Unit)>? = null,
     otherView: @Composable (() -> Unit)? = null,
+    icon: androidx.compose.ui.graphics.vector.ImageVector? = null,
 ) {
     // isEnable only greys the row out; it deliberately writes nothing.
     //
@@ -104,6 +105,24 @@ fun SettingItem(
                     ),
             verticalAlignment = Alignment.CenterVertically,
         ) {
+            if (icon != null) {
+                Box(
+                    modifier =
+                        Modifier
+                            .size(40.dp)
+                            .clip(com.kaspercito.makadimi.ui.theme.LeafShapeSmall)
+                            .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.12f)),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    androidx.compose.material3.Icon(
+                        imageVector = icon,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(22.dp),
+                    )
+                }
+                Spacer(Modifier.width(14.dp))
+            }
             Column(
                 modifier = Modifier.weight(1f),
                 horizontalAlignment = Alignment.Start,

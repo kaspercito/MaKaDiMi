@@ -54,6 +54,11 @@
         </intent>
     </queries>
     <queries>
+        <intent>
+            <action android:name="android.intent.action.TTS_SERVICE" />
+        </intent>
+    </queries>
+    <queries>
         <package android:name="com.makadimi.app" />
     </queries>
     <queries>

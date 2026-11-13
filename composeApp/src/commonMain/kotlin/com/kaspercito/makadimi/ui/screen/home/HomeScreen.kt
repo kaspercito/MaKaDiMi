@@ -147,6 +147,16 @@ import com.kaspercito.makadimi.ui.component.homeCardAspectRatio
 import com.kaspercito.makadimi.ui.component.rememberHolderPainter
 import com.kaspercito.makadimi.ui.icon.Groups
 import com.kaspercito.makadimi.ui.icon.History
+import com.kaspercito.makadimi.ui.icon.Favorite
+import com.kaspercito.makadimi.ui.icon.DownloadForOffline
+import com.kaspercito.makadimi.ui.icon.TrendingUp
+import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.material3.Icon
+import makadimi.composeapp.generated.resources.favorite
+import makadimi.composeapp.generated.resources.downloaded
+import makadimi.composeapp.generated.resources.most_played
+import makadimi.composeapp.generated.resources.home_history
 import com.kaspercito.makadimi.ui.icon.Notifications
 import com.kaspercito.makadimi.ui.icon.Settings
 import com.kaspercito.makadimi.ui.icon.SimpIcons
@@ -777,6 +787,10 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                                         )
                                         Spacer(Modifier.height(8.dp))
                                     }
+                                    if (index == 0) {
+                                        HomeQuickAccess(navController = navController)
+                                        Spacer(Modifier.height(14.dp))
+                                    }
                                     if (item.title == stringResource(Res.string.quick_picks)) {
                                         AnimatedVisibility(
                                             visible =
@@ -1115,6 +1129,67 @@ fun HomeTopAppBar(navController: NavController) {
                 containerColor = Color.Transparent,
             ),
     )
+}
+
+/**
+ * Accesos rápidos de la pantalla de inicio: cuatro tarjetas de cristal (Favoritos, Descargas, Más
+ * escuchadas, Historial) para llegar a lo de siempre sin pasar por la biblioteca.
+ */
+@Composable
+fun HomeQuickAccess(navController: NavController) {
+    val cs = MaterialTheme.colorScheme
+    val shape = RoundedCornerShape(topStart = 20.dp, topEnd = 6.dp, bottomEnd = 20.dp, bottomStart = 6.dp)
+    val items =
+        listOf(
+            Triple(SimpIcons.Favorite, stringResource(Res.string.favorite)) {
+                navController.navigate(LibraryDynamicPlaylistDestination(type = LibraryDynamicPlaylistType.Favorite.toStringParams()))
+            },
+            Triple(SimpIcons.DownloadForOffline, stringResource(Res.string.downloaded)) {
+                navController.navigate(LibraryDynamicPlaylistDestination(type = LibraryDynamicPlaylistType.Downloaded.toStringParams()))
+            },
+            Triple(SimpIcons.TrendingUp, stringResource(Res.string.most_played)) {
+                navController.navigate(LibraryDynamicPlaylistDestination(type = LibraryDynamicPlaylistType.MostPlayed.toStringParams()))
+            },
+            Triple(SimpIcons.History, stringResource(Res.string.home_history)) {
+                navController.navigate(RecentlySongsDestination)
+            },
+        )
+    Row(
+        modifier = Modifier.fillMaxWidth(),
+        horizontalArrangement = Arrangement.spacedBy(8.dp),
+    ) {
+        items.forEach { (icon, label, onClick) ->
+            Column(
+                modifier =
+                    Modifier
+                        .weight(1f)
+                        .clip(shape)
+                        .glassPanel(shape, alpha = 0.55f)
+                        .clickable { onClick() }
+                        .padding(vertical = 14.dp, horizontal = 4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                Box(
+                    modifier =
+                        Modifier
+                            .size(38.dp)
+                            .clip(RoundedCornerShape(topStart = 14.dp, topEnd = 4.dp, bottomEnd = 14.dp, bottomStart = 4.dp))
+                            .background(Brush.linearGradient(listOf(cs.primary.copy(alpha = 0.30f), cs.secondary.copy(alpha = 0.18f)))),
+                    contentAlignment = Alignment.Center,
+                ) {
+                    Icon(icon, contentDescription = label, tint = cs.primary, modifier = Modifier.size(21.dp))
+                }
+                Spacer(Modifier.height(7.dp))
+                Text(
+                    text = label,
+                    style = typo().bodySmall.copy(fontSize = 11.sp, fontWeight = FontWeight.SemiBold),
+                    color = cs.onBackground,
+                    maxLines = 1,
+                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
+                )
+            }
+        }
+    }
 }
 
 @Composable

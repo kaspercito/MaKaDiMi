@@ -1036,5 +1036,19 @@ Built with ❤️ on top of the open source project SimpMusic by Tuan Minh Nguye
     <string name="data_saver">Data saver</string>
     <string name="data_saver_description">Streams audio at the lowest quality to use less data. Downloads are not affected.</string>
     <string name="ai_dj">AI DJ</string>
-    <string name="ai_dj_description">A voice introduces songs between tracks (Windows only). Needs an AI API key; the voice comes from the system, so it uses no extra data.</string>
+    <string name="ai_dj_description">A voice introduces songs between tracks. Needs an AI API key; the voice comes from your device, so it uses no extra data.</string>
+    <string name="quick_playback_title">Video &amp; quality</string>
+    <string name="quick_playback_subtitle">Quick playback controls</string>
+    <string name="quick_video_mode">Video mode</string>
+    <string name="quick_video_mode_desc">Watch the video of this track instead of only listening</string>
+    <string name="quick_video_quality">Video quality</string>
+    <string name="quick_audio_quality">Audio quality</string>
+    <string name="quick_ai_dj_desc">A voice introduces songs between tracks</string>
+    <string name="quick_apply_now">Apply now</string>
+    <string name="quick_apply_now_desc">Reloads this track from the same position</string>
+    <string name="quick_applied">Reloading track…</string>
+    <string name="hub_search">Search settings…</string>
+    <string name="hub_categories">CATEGORIES</string>
+    <string name="hub_no_results">No results</string>
+    <string name="home_history">History</string>
 </resources>

@@ -87,6 +87,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.unit.sp
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.RectangleShape
@@ -190,6 +191,9 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import makadimi.composeapp.generated.resources.Res
+import com.kaspercito.makadimi.ui.theme.neonBorder
+import makadimi.composeapp.generated.resources.quick_playback_title
+import com.kaspercito.makadimi.ui.icon.Movie
 import makadimi.composeapp.generated.resources.add_to_a_playlist
 import makadimi.composeapp.generated.resources.add_to_queue
 import makadimi.composeapp.generated.resources.add_to_queue_disabled_endless
@@ -1357,6 +1361,7 @@ fun NowPlayingBottomSheet(
     var sleepTimerWarning by remember { mutableStateOf(false) }
     var isBottomSheetVisible by rememberSaveable { mutableStateOf(false) }
     var changePlaybackSpeedPitch by remember { mutableStateOf(false) }
+    var quickPlayback by remember { mutableStateOf(false) }
     val crossfadeEnabled by dataStoreManager.crossfadeEnabled.collectAsState(DataStoreManager.FALSE)
 
     LaunchedEffect(uiState) {
@@ -1367,6 +1372,10 @@ fun NowPlayingBottomSheet(
 
     LaunchedEffect(key1 = song) {
         viewModel.setSongEntity(song)
+    }
+
+    if (quickPlayback) {
+        QuickPlaybackSheet(onDismiss = { quickPlayback = false })
     }
 
     if (changePlaybackSpeedPitch) {
@@ -1581,17 +1590,14 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                     modifier = Modifier.verticalScroll(rememberScrollState()),
                 ) {
                     Spacer(modifier = Modifier.height(8.dp))
-                    Card(
+                    Box(
                         modifier =
                             Modifier
-                                .width(32.dp)
-                                .height(4.dp),
-                        colors =
-                            CardDefaults.cardColors().copy(
-                                containerColor = rememberSurfaceDarkColors().handle,
-                            ),
-                        shape = RoundedCornerShape(50),
-                    ) {}
+                                .width(40.dp)
+                                .height(4.dp)
+                                .clip(RoundedCornerShape(50))
+                                .background(com.kaspercito.makadimi.ui.theme.neonBrush()),
+                    )
                     Spacer(modifier = Modifier.height(6.dp))
                     Row(
                         modifier =
@@ -1617,8 +1623,8 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                             modifier =
                                 Modifier
                                     .align(Alignment.CenterVertically)
-                                    .size(44.dp)
-                                    .clip(RoundedCornerShape(6.dp)),
+                                    .size(52.dp)
+                                    .clip(com.kaspercito.makadimi.ui.theme.LeafShapeSmall),
                         )
                         Spacer(modifier = Modifier.width(12.dp))
                         Column(verticalArrangement = Arrangement.spacedBy(1.dp)) {
@@ -1657,6 +1663,57 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                         thickness = 1.dp,
                     )
                     Spacer(modifier = Modifier.height(2.dp))
+                    Row(
+                        modifier =
+                            Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                    ) {
+                        val downloaded = uiState.songUIState.downloadState == DownloadState.STATE_DOWNLOADED
+                        ActionTile(
+                            icon =
+                                when (uiState.songUIState.downloadState) {
+                                    DownloadState.STATE_DOWNLOADING, DownloadState.STATE_PREPARING -> SimpIcons.Downloading
+                                    DownloadState.STATE_DOWNLOADED -> SimpIcons.DownloadForOffline
+                                    else -> SimpIcons.DownloadForOfflineOutlined
+                                },
+                            label =
+                                when (uiState.songUIState.downloadState) {
+                                    DownloadState.STATE_DOWNLOADING, DownloadState.STATE_PREPARING -> Res.string.downloading
+                                    DownloadState.STATE_DOWNLOADED -> Res.string.downloaded
+                                    else -> Res.string.download
+                                },
+                            highlighted = downloaded,
+                            modifier = Modifier.weight(1f),
+                        ) { viewModel.onUIEvent(NowPlayingBottomSheetUIEvent.Download) }
+                        ActionTile(
+                            icon = SimpIcons.PlaylistAdd,
+                            label = Res.string.add_to_a_playlist,
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            viewModel.resetPlaylists()
+                            addToAPlaylist = true
+                        }
+                        ActionTile(
+                            icon = SimpIcons.Sensors,
+                            label = Res.string.start_radio,
+                            modifier = Modifier.weight(1f),
+                        ) {
+                            viewModel.onUIEvent(
+                                NowPlayingBottomSheetUIEvent.StartRadio(
+                                    videoId = uiState.songUIState.videoId,
+                                    name = "\"${uiState.songUIState.title}\" ${runBlocking { getString(Res.string.radio) }}",
+                                ),
+                            )
+                            hideModalBottomSheet()
+                        }
+                        ActionTile(
+                            icon = SimpIcons.Share,
+                            label = Res.string.share,
+                            modifier = Modifier.weight(1f),
+                        ) { viewModel.onUIEvent(NowPlayingBottomSheetUIEvent.Share) }
+                    }
                     if (queuePosition != null) {
                         QueueItemActions(position = queuePosition, onDone = hideModalBottomSheet)
                     }
@@ -1689,41 +1746,6 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                             viewModel.onUIEvent(NowPlayingBottomSheetUIEvent.ToggleLike)
                         },
                     )
-                    ActionButton(
-                        icon =
-                            when (uiState.songUIState.downloadState) {
-                                DownloadState.STATE_NOT_DOWNLOADED -> SimpIcons.DownloadForOfflineOutlined
-                                DownloadState.STATE_DOWNLOADING -> SimpIcons.Downloading
-                                DownloadState.STATE_DOWNLOADED -> SimpIcons.DownloadForOffline
-                                DownloadState.STATE_PREPARING -> SimpIcons.Downloading
-                                else -> SimpIcons.DownloadForOfflineOutlined
-                            },
-                        // The old baseline_downloaded.xml carried #FF00A0CB baked in; the shared
-                        // symbol is neutral, so the "done" state has to say the colour out loud.
-                        iconColor =
-                            if (uiState.songUIState.downloadState == DownloadState.STATE_DOWNLOADED) {
-                                Color(0xFF00A0CB)
-                            } else {
-                                Color.Unspecified
-                            },
-                        text =
-                            when (uiState.songUIState.downloadState) {
-                                DownloadState.STATE_NOT_DOWNLOADED -> Res.string.download
-                                DownloadState.STATE_DOWNLOADING -> Res.string.downloading
-                                DownloadState.STATE_DOWNLOADED -> Res.string.downloaded
-                                DownloadState.STATE_PREPARING -> Res.string.downloading
-                                else -> Res.string.download
-                            },
-                    ) {
-                        viewModel.onUIEvent(NowPlayingBottomSheetUIEvent.Download)
-                    }
-                    ActionButton(
-                        icon = SimpIcons.PlaylistAdd,
-                        text = Res.string.add_to_a_playlist,
-                    ) {
-                        viewModel.resetPlaylists()
-                        addToAPlaylist = true
-                    }
                     // A queue row is already in the queue: its own rows above move it instead.
                     if (queuePosition == null) {
                         ActionButton(
@@ -1774,18 +1796,6 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                             onNavigateToOtherScreen()
                             navController.navigate(AlbumDestination(browseId = id))
                         }
-                    }
-                    ActionButton(
-                        icon = SimpIcons.Sensors,
-                        text = Res.string.start_radio,
-                    ) {
-                        viewModel.onUIEvent(
-                            NowPlayingBottomSheetUIEvent.StartRadio(
-                                videoId = uiState.songUIState.videoId,
-                                name = "\"${uiState.songUIState.title}\" ${runBlocking { getString(Res.string.radio) }}",
-                            ),
-                        )
-                        hideModalBottomSheet()
                     }
                     Crossfade(targetState = changeMainLyricsProviderEnable) {
                         if (it) {
@@ -1846,11 +1856,15 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                             }
                         }
                     }
-                    ActionButton(
-                        icon = SimpIcons.Share,
-                        text = Res.string.share,
-                    ) {
-                        viewModel.onUIEvent(NowPlayingBottomSheetUIEvent.Share)
+                    Crossfade(targetState = setSleepTimerEnable) {
+                        if (it) {
+                            ActionButton(
+                                icon = SimpIcons.Movie,
+                                text = Res.string.quick_playback_title,
+                            ) {
+                                quickPlayback = true
+                            }
+                        }
                     }
                     EndOfModalBottomSheet()
                 }
@@ -1914,10 +1928,13 @@ fun ActionButton(
                 modifier =
                     Modifier
                         .padding(vertical = 6.dp)
-                        .size(40.dp)
+                        .size(42.dp)
                         .background(
-                            MaterialTheme.colorScheme.primary.copy(alpha = 0.10f),
+                            MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
                             RoundedCornerShape(topStart = 14.dp, topEnd = 4.dp, bottomEnd = 14.dp, bottomStart = 4.dp),
+                        ).neonBorder(
+                            RoundedCornerShape(topStart = 14.dp, topEnd = 4.dp, bottomEnd = 14.dp, bottomStart = 4.dp),
+                            alpha = 0.45f,
                         ),
                 contentAlignment = Alignment.Center,
             ) {
@@ -1935,14 +1952,53 @@ fun ActionButton(
             }
             Text(
                 text = if (text != null) stringResource(text) else textString ?: "",
-                style = typo().labelSmall,
+                style = typo().labelMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Medium),
                 color = if (enable) textColor ?: c.content else c.disabled,
                 modifier =
                     Modifier
-                        .padding(start = 10.dp)
+                        .padding(start = 12.dp)
                         .wrapContentHeight(Alignment.CenterVertically),
             )
         }
+    }
+}
+
+/** Tarjeta de acción rápida (cuadrícula superior del menú de una canción). */
+@Composable
+private fun ActionTile(
+    icon: ImageVector,
+    label: StringResource,
+    modifier: Modifier = Modifier,
+    highlighted: Boolean = false,
+    onClick: () -> Unit,
+) {
+    val c = rememberSurfaceDarkColors()
+    val tint = if (highlighted) Color(0xFF00A0CB) else MaterialTheme.colorScheme.primary
+    Column(
+        modifier =
+            modifier
+                .clip(com.kaspercito.makadimi.ui.theme.LeafShapeSmall)
+                .background(MaterialTheme.colorScheme.primary.copy(alpha = 0.10f))
+                .neonBorder(com.kaspercito.makadimi.ui.theme.LeafShapeSmall, alpha = 0.5f)
+                .clickable { onClick() }
+                .padding(vertical = 12.dp, horizontal = 4.dp),
+        horizontalAlignment = Alignment.CenterHorizontally,
+    ) {
+        Image(
+            imageVector = icon,
+            contentDescription = stringResource(label),
+            modifier = Modifier.size(24.dp),
+            colorFilter = ColorFilter.tint(tint),
+        )
+        Spacer(Modifier.height(6.dp))
+        Text(
+            text = stringResource(label),
+            style = typo().bodySmall,
+            color = c.content,
+            maxLines = 2,
+            textAlign = androidx.compose.ui.text.style.TextAlign.Center,
+            fontSize = 11.sp,
+        )
     }
 }
 
