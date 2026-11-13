@@ -96,18 +96,41 @@ class AiClient {
         }
     }
 
-    /** Frase de locutor DJ para presentar [next] tras [previous]. Falla en silencio: el DJ es opcional. */
+    /**
+     * Frase de locutor DJ para presentar [next] tras [previous]. Falla en silencio: el DJ es opcional.
+     *
+     * [taste] resume los gustos del oyente para personalizar el comentario; [avoid] son las últimas
+     * frases que ya dijo el DJ, para que no se repita.
+     */
     suspend fun djLine(
         previous: String?,
         next: String,
         language: String,
+        localTime: String? = null,
+        taste: String? = null,
+        avoid: List<String> = emptyList(),
     ): Result<String> {
         val service = aiService ?: return Result.failure(IllegalStateException("AI service is not initialized."))
         return try {
             val prompt =
                 buildString {
                     append("Idioma de la respuesta: ").append(language).append('\n')
-                    if (!previous.isNullOrBlank()) append("Acaba de sonar: ").append(previous).append('\n')
+                    if (!taste.isNullOrBlank()) {
+                        append("Gustos del oyente: ").append(taste).append('\n')
+                    }
+                    if (avoid.isNotEmpty()) {
+                        append("Frases que ya dijiste (no las repitas): ")
+                        append(avoid.joinToString(" | ")).append('\n')
+                    }
+                    if (!previous.isNullOrBlank()) {
+                        append("Acaba de sonar: ").append(previous).append('\n')
+                    } else {
+                        // Sin canción anterior = arranque de la sesión: intro de DJ, un poco más larga.
+                        append("INTRO DE LA SESIÓN (máximo 55 palabras): saluda según la hora local")
+                        if (!localTime.isNullOrBlank()) append(" (").append(localTime).append(')')
+                        append(", preséntate como DJ MaKa, di que hoy pones música pensada para el oyente y ")
+                        append("presenta la primera canción con entusiasmo.\n")
+                    }
                     append("Va a sonar ahora: ").append(next)
                 }
             val line = service.djLine(prompt)

@@ -137,6 +137,8 @@ import com.kaspercito.makadimi.ui.component.hasTiming
 import com.kaspercito.makadimi.ui.component.lyrics.ShareLyricsSheet
 import com.kaspercito.makadimi.ui.component.lyrics.toShareLyricsLines
 import com.kaspercito.makadimi.ui.component.rememberHolderPainter
+import com.kaspercito.makadimi.ui.component.VideoMenuState
+import com.kaspercito.makadimi.ui.component.VideoQualityButton
 import com.kaspercito.makadimi.ui.icon.AddCircleOutline
 import com.kaspercito.makadimi.ui.icon.AvTimer
 import com.kaspercito.makadimi.ui.icon.CheckCircle
@@ -254,8 +256,8 @@ fun NowPlayingContentSpotify(
         mutableStateOf(false)
     }
 
-    LaunchedEffect(key1 = showHideFullscreenOverlay) {
-        if (showHideFullscreenOverlay) {
+    LaunchedEffect(key1 = showHideFullscreenOverlay, key2 = VideoMenuState.open) {
+        if (showHideFullscreenOverlay && !VideoMenuState.open) {
             delay(3000)
             showHideFullscreenOverlay = false
         }
@@ -609,7 +611,7 @@ fun NowPlayingContentSpotify(
                                         modifier = Modifier.align(Alignment.Center),
                                     ) {
                                         var internalShowSubtitle by rememberSaveable {
-                                            mutableStateOf(true)
+                                            mutableStateOf(false)
                                         }
                                         // The frame takes the video's own shape, fitted into the
                                         // square slot: a wide video spans its width, a tall one
@@ -735,6 +737,7 @@ fun NowPlayingContentSpotify(
                                                                     )
                                                                 }
                                                             }
+                                                            VideoQualityButton(modifier = Modifier.align(Alignment.BottomEnd).padding(end = if (state.screenData.lyricsData != null) 48.dp else 0.dp))
                                                             if (state.screenData.lyricsData != null) {
                                                                 IconButton(
                                                                     onClick = {

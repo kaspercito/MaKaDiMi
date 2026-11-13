@@ -47,7 +47,6 @@ import com.kaspercito.common.QUALITY
 import com.kaspercito.common.VIDEO_QUALITY
 import com.kaspercito.domain.manager.DataStoreManager
 import com.kaspercito.domain.mediaservice.handler.MediaPlayerHandler
-import com.kaspercito.makadimi.ui.icon.GraphicEq
 import com.kaspercito.makadimi.ui.icon.Headphones
 import com.kaspercito.makadimi.ui.icon.Movie
 import com.kaspercito.makadimi.ui.icon.MovieOff
@@ -62,8 +61,6 @@ import com.kaspercito.makadimi.ui.theme.typo
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import makadimi.composeapp.generated.resources.Res
-import makadimi.composeapp.generated.resources.ai_dj
-import makadimi.composeapp.generated.resources.quick_ai_dj_desc
 import makadimi.composeapp.generated.resources.quick_apply_now
 import makadimi.composeapp.generated.resources.quick_apply_now_desc
 import makadimi.composeapp.generated.resources.quick_audio_quality
@@ -93,7 +90,6 @@ fun QuickPlaybackSheet(
     val watchVideo by dataStoreManager.watchVideoInsteadOfPlayingAudio.collectAsState(DataStoreManager.FALSE)
     val videoQuality by dataStoreManager.videoQuality.collectAsState("720p")
     val audioQuality by dataStoreManager.quality.collectAsState(QUALITY.items.first().toString())
-    val aiDj by dataStoreManager.aiDj.collectAsState(DataStoreManager.FALSE)
 
     var dirty by remember { mutableStateOf(false) }
     var reloading by remember { mutableStateOf(false) }
@@ -187,18 +183,6 @@ fun QuickPlaybackSheet(
                 )
             }
 
-            Spacer(Modifier.height(12.dp))
-
-            // --- Locutor DJ ---
-            QuickCard {
-                QuickSwitchRow(
-                    icon = SimpIcons.GraphicEq,
-                    title = stringResource(Res.string.ai_dj),
-                    subtitle = stringResource(Res.string.quick_ai_dj_desc),
-                    checked = aiDj == DataStoreManager.TRUE,
-                    onChange = { scope.launch { dataStoreManager.setAiDj(it) } },
-                )
-            }
 
             // --- Aplicar ahora ---
             if (dirty) {
@@ -243,7 +227,7 @@ fun QuickPlaybackSheet(
 }
 
 /** Recarga la pista en curso (se vuelve a resolver el stream con los ajustes nuevos) sin perder el punto. */
-private suspend fun reloadCurrentTrack(handler: MediaPlayerHandler) {
+internal suspend fun reloadCurrentTrack(handler: MediaPlayerHandler) {
     val player = handler.player
     val index = player.currentMediaItemIndex
     val item = player.getMediaItemAt(index) ?: return

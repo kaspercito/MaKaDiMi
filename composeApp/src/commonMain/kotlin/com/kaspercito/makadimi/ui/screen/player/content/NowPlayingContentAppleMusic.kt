@@ -90,6 +90,8 @@ import com.kaspercito.makadimi.ui.component.LyricText
 import com.kaspercito.makadimi.ui.component.ExplicitBadge
 import com.kaspercito.makadimi.ui.component.LiquidGlassIconButton
 import com.kaspercito.makadimi.ui.component.rememberHolderPainter
+import com.kaspercito.makadimi.ui.component.VideoMenuState
+import com.kaspercito.makadimi.ui.component.VideoQualityButton
 import com.kaspercito.makadimi.ui.icon.Forward5
 import com.kaspercito.makadimi.ui.icon.Fullscreen
 import com.kaspercito.makadimi.ui.icon.Replay5
@@ -381,11 +383,11 @@ private fun AppleMusicMainView(
     )
 
     // Over-video controls, exactly like Classic/M3E: hidden by default, a tap on the video shows
-    // them, and they auto-hide again after 3s. Subtitles default on, toggled from that overlay.
+    // them, and they auto-hide again after 3s. Subtitles default off, toggled from that overlay.
     var showVideoOverlay by rememberSaveable { mutableStateOf(false) }
-    var showSubtitle by rememberSaveable { mutableStateOf(true) }
-    LaunchedEffect(showVideoOverlay) {
-        if (showVideoOverlay) {
+    var showSubtitle by rememberSaveable { mutableStateOf(false) }
+    LaunchedEffect(showVideoOverlay, VideoMenuState.open) {
+        if (showVideoOverlay && !VideoMenuState.open) {
             delay(3000)
             showVideoOverlay = false
         }
@@ -1087,6 +1089,7 @@ private fun AppleMusicArtworkPage(
                                                 )
                                             }
                                         }
+                                        VideoQualityButton(modifier = Modifier.align(Alignment.BottomEnd).padding(end = if (state.screenData.lyricsData != null) 48.dp else 0.dp))
                                         if (state.screenData.lyricsData != null) {
                                             IconButton(
                                                 onClick = { onToggleSubtitle() },

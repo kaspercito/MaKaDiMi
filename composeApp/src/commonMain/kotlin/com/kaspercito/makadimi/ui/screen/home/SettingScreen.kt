@@ -224,8 +224,6 @@ import makadimi.composeapp.generated.resources.auto_backup
 import makadimi.composeapp.generated.resources.auto_backup_description
 import makadimi.composeapp.generated.resources.auto_check_for_update
 import makadimi.composeapp.generated.resources.auto_check_for_update_description
-import makadimi.composeapp.generated.resources.ai_dj
-import makadimi.composeapp.generated.resources.ai_dj_description
 import makadimi.composeapp.generated.resources.data_saver
 import makadimi.composeapp.generated.resources.data_saver_description
 import makadimi.composeapp.generated.resources.auto_download_liked_songs
@@ -582,7 +580,6 @@ fun SettingScreen(
     val proxyPassword by viewModel.proxyPassword.collectAsStateWithLifecycle()
     val autoCheckUpdate by viewModel.autoCheckUpdate.collectAsStateWithLifecycle()
     val dataSaver by viewModel.dataSaver.collectAsStateWithLifecycle()
-    val aiDj by viewModel.aiDj.collectAsStateWithLifecycle()
     val aiProvider by viewModel.aiProvider.collectAsStateWithLifecycle()
     val isHasApiKey by viewModel.isHasApiKey.collectAsStateWithLifecycle()
     val useAITranslation by viewModel.useAITranslation.collectAsStateWithLifecycle()
@@ -1898,13 +1895,6 @@ fun SettingScreen(
         }
         item(key = "AI") {
             SettingGroup(title = stringResource(Res.string.ai)) {
-                SettingItem(
-                    icon = SimpIcons.GraphicEq,
-                    title = stringResource(Res.string.ai_dj),
-                    subtitle = stringResource(Res.string.ai_dj_description),
-                    smallSubtitle = true,
-                    switch = (aiDj to { viewModel.setAiDj(it) }),
-                )
                 SettingItem(
                     title = stringResource(Res.string.ai_provider),
                     subtitle =

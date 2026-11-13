@@ -99,6 +99,7 @@ import com.kaspercito.makadimi.ui.component.ExplicitBadge
 import com.kaspercito.makadimi.ui.component.heartBurst
 import com.kaspercito.makadimi.ui.component.rememberHeartBurstState
 import com.kaspercito.makadimi.ui.component.rememberHolderPainter
+import com.kaspercito.makadimi.ui.component.VideoMenuState
 import com.kaspercito.makadimi.ui.icon.AddCircleOutline
 import com.kaspercito.makadimi.ui.icon.CheckCircle
 import com.kaspercito.makadimi.ui.icon.Favorite
@@ -280,8 +281,8 @@ private fun NowPlayingM3ExpressiveLayout(
     var showHideFullscreenOverlay by rememberSaveable {
         mutableStateOf(false)
     }
-    LaunchedEffect(key1 = showHideFullscreenOverlay) {
-        if (showHideFullscreenOverlay) {
+    LaunchedEffect(key1 = showHideFullscreenOverlay, key2 = VideoMenuState.open) {
+        if (showHideFullscreenOverlay && !VideoMenuState.open) {
             delay(3000)
             showHideFullscreenOverlay = false
         }

@@ -97,6 +97,7 @@ import com.kaspercito.makadimi.ui.component.hasTiming
 import com.kaspercito.makadimi.ui.component.lyrics.ShareLyricsSheet
 import com.kaspercito.makadimi.ui.component.lyrics.toShareLyricsLines
 import com.kaspercito.makadimi.ui.component.rememberHolderPainter
+import com.kaspercito.makadimi.ui.component.VideoQualityButton
 import com.kaspercito.makadimi.ui.icon.AvTimer
 import com.kaspercito.makadimi.ui.icon.Forward5
 import com.kaspercito.makadimi.ui.icon.Fullscreen
@@ -367,7 +368,7 @@ internal fun ExpressiveArtworkCardPage(
                         modifier = Modifier.align(Alignment.Center),
                     ) {
                         var internalShowSubtitle by rememberSaveable {
-                            mutableStateOf(true)
+                            mutableStateOf(false)
                         }
                         // The card already has the video's shape, so this simply fills it.
                         Box(
@@ -488,6 +489,7 @@ internal fun ExpressiveArtworkCardPage(
                                                     )
                                                 }
                                             }
+                                            VideoQualityButton(modifier = Modifier.align(Alignment.BottomEnd).padding(end = if (state.screenData.lyricsData != null) 48.dp else 0.dp))
                                             if (state.screenData.lyricsData != null) {
                                                 IconButton(
                                                     onClick = {

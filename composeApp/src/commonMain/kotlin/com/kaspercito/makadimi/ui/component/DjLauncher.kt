@@ -45,6 +45,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaspercito.common.Config.SONG_CLICK
+import com.kaspercito.domain.data.entities.SongEntity
+import com.kaspercito.domain.dj.DjSession
 import com.kaspercito.domain.manager.DataStoreManager
 import com.kaspercito.domain.repository.SongRepository
 import com.kaspercito.domain.utils.toTrack
@@ -217,18 +219,23 @@ fun DjSheet(
                             message = needKeyText
                             return@launch
                         }
-                        val seed =
-                            (
-                                songRepository.getLikedSongs().first().ifEmpty {
-                                    songRepository.getMostPlayedSongs().first()
-                                }
-                            ).randomOrNull()
+                        val liked = songRepository.getLikedSongs().first()
+                        val played = songRepository.getMostPlayedSongs().first()
+                        val seed = liked.ifEmpty { played }.randomOrNull()
                         if (seed == null) {
                             message = noSongsText
                             return@launch
                         }
                         message = null
+                        // Tus gustos: el DJ los usa para que sus comentarios suenen a ti.
+                        DjSession.tasteProfile = buildTasteProfile(liked, played)
+                        // Si ya estaba encendido, se apaga un instante para que vuelva a "encenderse" y saludar.
+                        if (active) {
+                            dataStoreManager.setAiDj(false)
+                            kotlinx.coroutines.delay(400)
+                        }
                         dataStoreManager.setAiDj(true)
+                        kotlinx.coroutines.delay(200)
                         sharedViewModel.loadMediaItemFromTrack(seed.toTrack(), SONG_CLICK)
                         onDismiss()
                     }
@@ -248,4 +255,37 @@ fun DjSheet(
             Spacer(Modifier.height(16.dp))
         }
     }
+}
+
+/**
+ * Resumen de los gustos del oyente para el locutor: sus artistas más repetidos y algunas de sus
+ * canciones favoritas (o, si aún no tiene favoritas, las más escuchadas).
+ */
+private fun buildTasteProfile(
+    liked: List<SongEntity>,
+    played: List<SongEntity>,
+): String? {
+    val topArtists =
+        (liked + played)
+            .flatMap { it.artistName.orEmpty() }
+            .map { it.trim() }
+            .filter { it.isNotEmpty() }
+            .groupingBy { it }
+            .eachCount()
+            .entries
+            .sortedByDescending { it.value }
+            .take(8)
+            .map { it.key }
+    val favoriteSongs =
+        liked
+            .ifEmpty { played }
+            .shuffled()
+            .take(5)
+            .map { it.title }
+    val text =
+        buildString {
+            if (topArtists.isNotEmpty()) append("artistas que más escucha: ").append(topArtists.joinToString(", ")).append(". ")
+            if (favoriteSongs.isNotEmpty()) append("canciones que le gustan: ").append(favoriteSongs.joinToString(", ")).append('.')
+        }.trim()
+    return text.ifEmpty { null }
 }

@@ -72,6 +72,8 @@ import com.kaspercito.makadimi.extension.rememberIsInPipMode
 import com.kaspercito.makadimi.extension.smoothScrimBrush
 import com.kaspercito.makadimi.ui.component.NowPlayingBottomSheet
 import com.kaspercito.makadimi.ui.component.RippleIconButton
+import com.kaspercito.makadimi.ui.component.VideoMenuState
+import com.kaspercito.makadimi.ui.component.VideoQualityButton
 import com.kaspercito.makadimi.ui.icon.ArrowBackIosNew
 import com.kaspercito.makadimi.ui.icon.Forward5
 import com.kaspercito.makadimi.ui.icon.FullscreenExit
@@ -147,8 +149,8 @@ fun FullscreenPlayer(
         }
     }
 
-    LaunchedEffect(key1 = showHideFullscreenOverlay, key2 = isSliding) {
-        if (showHideFullscreenOverlay && !isSliding) {
+    LaunchedEffect(key1 = showHideFullscreenOverlay, key2 = isSliding, key3 = VideoMenuState.open) {
+        if (showHideFullscreenOverlay && !isSliding && !VideoMenuState.open) {
             delay(3000)
             showHideFullscreenOverlay = false
         }
@@ -180,7 +182,7 @@ fun FullscreenPlayer(
     }
 
     var shouldShowSubtitle by rememberSaveable {
-        mutableStateOf(true)
+        mutableStateOf(false)
     }
 
     Box {
@@ -681,6 +683,8 @@ fun FullscreenPlayer(
                                         .align(Alignment.CenterEnd),
                                     verticalAlignment = Alignment.Top,
                                 ) {
+                                    VideoQualityButton()
+                                    Spacer(Modifier.width(4.dp))
                                     FilledTonalIconButton(
                                         colors =
                                             IconButtonDefaults.iconButtonColors().copy(

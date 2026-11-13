@@ -1,6 +1,7 @@
 package com.kaspercito.data.dj
 
 import com.kaspercito.domain.data.player.GenericMediaItem
+import com.kaspercito.domain.dj.DjSession
 import com.kaspercito.domain.manager.DataStoreManager
 import com.kaspercito.domain.mediaservice.player.MediaPlayerInterface
 import com.kaspercito.logger.Logger
@@ -12,7 +13,9 @@ import kotlinx.coroutines.NonCancellable
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.flow.distinctUntilChangedBy
+import kotlinx.coroutines.flow.drop
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
@@ -67,8 +70,29 @@ internal class DjAnnouncer(
     private var sinceLastComment = 0
     private var lastDescription: String? = null
 
+    /** Verdadero hasta que el DJ salude: así la sesión arranca con voz y no en silencio. */
+    private var introPending = false
+
+    /** Últimas frases dichas, para pedirle a la IA que no se repita. */
+    private val recentLines = ArrayDeque<String>()
+
     fun start() {
         if (!WindowsSpeech.isSupported) return
+        // El DJ solo suena si TÚ lo enciendes con el botón DJ. El interruptor se guarda en disco,
+        // así que al abrir la app se deja apagado (una sola vez por proceso).
+        if (DjSession.consumeFreshProcess()) {
+            scope.launch { dataStoreManager.setAiDj(false) }
+        }
+        // Al ENCENDER el DJ, la siguiente canción llega con saludo; al APAGARLO se calla en el acto.
+        scope.launch {
+            dataStoreManager.aiDj
+                .drop(1)
+                .distinctUntilChanged()
+                .collect { on ->
+                    introPending = on == DataStoreManager.TRUE
+                    if (!introPending) shutUp()
+                }
+        }
         scope.launch {
             nowPlaying
                 .filterNotNull()
@@ -76,6 +100,24 @@ internal class DjAnnouncer(
                 .collect { onTrackStarted(it) }
         }
     }
+
+    /** Corta la voz actual y descarta lo preparado (DJ apagado). */
+    private fun shutUp() {
+        prepareJob?.cancel()
+        prepared?.wav?.delete()
+        prepared = null
+        sinceLastComment = 0
+        speakJob?.cancel()
+    }
+
+    private fun remember(line: String) {
+        synchronized(recentLines) {
+            recentLines.addLast(line)
+            while (recentLines.size > 4) recentLines.removeFirst()
+        }
+    }
+
+    private fun recentSnapshot(): List<String> = synchronized(recentLines) { recentLines.toList() }
 
     private suspend fun onTrackStarted(item: GenericMediaItem) {
         val ready = prepared
@@ -91,7 +133,14 @@ internal class DjAnnouncer(
 
         if (ready != null && ready.forMediaId == item.mediaId) {
             sinceLastComment = 0
+            introPending = false
             speak(ready)
+        } else if (introPending) {
+            // Primera canción con el DJ encendido: saluda y la presenta (no hay comentario preparado).
+            ready?.wav?.delete()
+            introPending = false
+            sinceLastComment = 0
+            prepareJob = scope.launch(Dispatchers.IO) { introFor(item) }
         } else {
             ready?.wav?.delete()
             sinceLastComment++
@@ -120,13 +169,14 @@ internal class DjAnnouncer(
         val languageName = Locale.forLanguageTag(languageCode).getDisplayLanguage(Locale.ENGLISH)
 
         val line =
-            aiClient.djLine(previous, nextDescription, languageName).getOrElse {
+            aiClient.djLine(previous, nextDescription, languageName, taste = DjSession.tasteProfile, avoid = recentSnapshot()).getOrElse {
                 Logger.w(TAG, "La IA no pudo escribir el comentario: ${it.message}")
                 return
             }
         val spoken = sanitize(line)
         if (spoken.isEmpty()) return
 
+        remember(spoken)
         val wav = File.createTempFile("makadimi-dj", ".wav").apply { deleteOnExit() }
         val ok = WindowsSpeech.synthesizeToWav(spoken, wav, languageCode)
         // Si mientras tanto se cambió de canción, esta preparación ya no vale.
@@ -139,11 +189,53 @@ internal class DjAnnouncer(
         }
     }
 
+    /** Saludo de arranque de la sesión: se escribe, se sintetiza y se dice sobre la primera canción. */
+    private suspend fun introFor(item: GenericMediaItem) {
+        val description = describe(item) ?: return
+        val languageCode = runCatching { dataStoreManager.language.first().take(2) }.getOrDefault("es").ifBlank { "es" }
+        val languageName = Locale.forLanguageTag(languageCode).getDisplayLanguage(Locale.ENGLISH)
+        val line =
+            aiClient
+                .djLine(
+                    null,
+                    description,
+                    languageName,
+                    localTime = localTimeLabel(),
+                    taste = DjSession.tasteProfile,
+                    avoid = recentSnapshot(),
+                ).getOrElse {
+                    Logger.w(TAG, "La IA no pudo escribir la intro: ${it.message}")
+                    return
+                }
+        val spoken = sanitize(line, max = 420)
+        if (spoken.isEmpty()) return
+        remember(spoken)
+        val wav = File.createTempFile("makadimi-dj", ".wav").apply { deleteOnExit() }
+        val ok = WindowsSpeech.synthesizeToWav(spoken, wav, languageCode)
+        currentCoroutineContext().ensureActive()
+        if (ok && dataStoreManager.aiDj.first() == DataStoreManager.TRUE) {
+            speak(Prepared(item.mediaId, wav))
+        } else {
+            wav.delete()
+        }
+    }
+
+    /** Hora local, para que el saludo sea "buenos días / tardes / noches" de verdad. */
+    private fun localTimeLabel(): String {
+        val cal = java.util.Calendar.getInstance()
+        return "%02d:%02d".format(cal.get(java.util.Calendar.HOUR_OF_DAY), cal.get(java.util.Calendar.MINUTE))
+    }
+
     private fun speak(ready: Prepared) {
         speakJob?.cancel()
         speakJob =
             scope.launch(Dispatchers.IO) {
-                if (!isPlaying() || isSleepTimerActive()) {
+                // La intro puede estar lista antes de que la canción arranque del todo: se espera un poco.
+                val playing = kotlinx.coroutines.withTimeoutOrNull(4_000L) {
+                    while (!isPlaying()) delay(150)
+                    true
+                } ?: false
+                if (!playing || isSleepTimerActive()) {
                     ready.wav.delete()
                     return@launch
                 }
@@ -199,11 +291,17 @@ internal class DjAnnouncer(
         return if (artist != null) "$title - $artist" else title
     }
 
-    /** Lo que se le pasa al sintetizador: una línea, sin formato ni símbolos que SAPI lea en voz alta. */
-    private fun sanitize(raw: String): String =
+    /** Lo que se le pasa al sintetizador: una línea, sin formato ni símbolos que se lean en voz alta. */
+    private fun sanitize(
+        raw: String,
+        max: Int = 300,
+    ): String =
         raw
-            .replace(Regex("[*_#`>\"“”]"), "")
+            .replace(Regex("\\([^)]*\\)"), " ")
+            .replace("&", " y ")
+            .replace(Regex("[*_#`>\"“”«»\\[\\]]"), "")
+            .replace(Regex("\\s+[-–—]\\s+"), ", ")
             .replace(Regex("\\s+"), " ")
             .trim()
-            .take(300)
+            .take(max)
 }
