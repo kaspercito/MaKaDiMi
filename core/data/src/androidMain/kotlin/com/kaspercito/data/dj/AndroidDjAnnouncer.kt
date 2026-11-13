@@ -65,6 +65,9 @@ internal class AndroidDjAnnouncer(
     private var speakJob: Job? = null
     private var sinceLastComment = 0
 
+    /** Verdadero hasta que el DJ salude: así la sesión arranca con voz y no en silencio. */
+    private var introPending = true
+
     @Volatile
     private var tts: TextToSpeech? = null
 
@@ -90,12 +93,19 @@ internal class AndroidDjAnnouncer(
         val enabled = dataStoreManager.aiDj.first() == DataStoreManager.TRUE
         if (!enabled) {
             sinceLastComment = 0
+            introPending = true
             return
         }
 
         if (ready != null && ready.forMediaId == item.mediaId) {
             sinceLastComment = 0
+            introPending = false
             speak(ready.text)
+        } else if (introPending) {
+            // Primera canción con el DJ encendido: saluda y la presenta (no hay comentario preparado).
+            introPending = false
+            sinceLastComment = 0
+            scope.launch(Dispatchers.IO) { introFor(item) }
         } else {
             sinceLastComment++
         }
@@ -126,6 +136,19 @@ internal class AndroidDjAnnouncer(
         val spoken = sanitize(line)
         if (spoken.isEmpty()) return
         prepared = Prepared(next.mediaId, spoken)
+    }
+
+    private suspend fun introFor(item: GenericMediaItem) {
+        val description = describe(item) ?: return
+        val languageCode = runCatching { dataStoreManager.language.first().take(2) }.getOrDefault("es").ifBlank { "es" }
+        val languageName = Locale.forLanguageTag(languageCode).getDisplayLanguage(Locale.ENGLISH)
+        val line =
+            aiClient.djLine(null, description, languageName).getOrElse {
+                Logger.w(TAG, "La IA no pudo escribir la intro: ${it.message}")
+                return
+            }
+        val spoken = sanitize(line)
+        if (spoken.isNotEmpty()) speak(spoken)
     }
 
     private fun speak(text: String) {

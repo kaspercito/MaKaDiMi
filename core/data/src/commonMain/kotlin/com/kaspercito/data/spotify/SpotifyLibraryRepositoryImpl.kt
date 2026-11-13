@@ -43,6 +43,8 @@ private const val MATCH_CONCURRENCY = 4
 private const val SONG_BATCH_SIZE = 500
 
 private const val MAX_RATE_LIMIT_RETRIES = 3
+private const val MAX_SHORT_READ_RETRIES = 3
+private const val SHORT_READ_PAUSE_SECONDS = 6L
 private const val MAX_RATE_LIMIT_WAIT_SECONDS = 20L
 private const val MAX_REMEMBERED_WAIT_SECONDS = 3600L
 private val CACHE_TTL = 5.minutes
@@ -100,20 +102,37 @@ internal class SpotifyLibraryRepositoryImpl(
     ): Flow<SpotifyImportProgress> =
         channelFlow {
             send(SpotifyImportProgress.ReadingTracks(0, playlist.trackCount))
-            val tracks =
+            // Si la lectura llega corta (límite de Spotify o solo la página "embed" de 100 canciones),
+            // se reintenta con pausa y se conserva la lectura más completa, para no importar a medias.
+            var tracks: List<SpotifyTrack> = emptyList()
+            var attempt = 0
+            while (true) {
                 // No rate-limit memory here: Spotify.getPlaylistTracks already falls back from the web
                 // player's route to the public API and the embed page, and remembers by itself when
                 // the public API is refusing. A shared gate would also have kept the (working)
                 // playlist listing waiting for an hour after one failed import.
-                withSpotifyToken(null) { token ->
-                    spotify.getPlaylistTracks(token, playlist.id, tokens.clientToken().getOrNull()) { read, total ->
-                        trySend(SpotifyImportProgress.ReadingTracks(read, total))
+                val read =
+                    withSpotifyToken(null) { token ->
+                        spotify.getPlaylistTracks(token, playlist.id, tokens.clientToken().getOrNull()) { readSoFar, total ->
+                            trySend(SpotifyImportProgress.ReadingTracks(maxOf(readSoFar, tracks.size), maxOf(total, playlist.trackCount)))
+                        }
                     }
-                }.getOrElse {
-                    Logger.e(TAG, "reading '${playlist.name}' failed: ${it.message}")
-                    send(SpotifyImportProgress.Error(it.toFailure()))
-                    return@channelFlow
-                }.distinctBy { it.id ?: "${it.title}|${it.artists}" }
+                val got = read.getOrNull()?.distinctBy { it.id ?: "${it.title}|${it.artists}" }
+                if (got != null && got.size > tracks.size) tracks = got
+                val complete = tracks.isNotEmpty() && (playlist.trackCount <= 0 || tracks.size >= playlist.trackCount)
+                if (complete || attempt >= MAX_SHORT_READ_RETRIES) {
+                    if (tracks.isEmpty()) {
+                        val error = read.exceptionOrNull()
+                        Logger.e(TAG, "reading '${playlist.name}' failed: ${error?.message}")
+                        send(SpotifyImportProgress.Error(error?.toFailure() ?: SpotifyFailure.UNKNOWN))
+                        return@channelFlow
+                    }
+                    break
+                }
+                attempt++
+                Logger.w(TAG, "'${playlist.name}': read ${tracks.size} of ${playlist.trackCount}, retry $attempt/$MAX_SHORT_READ_RETRIES")
+                delay(SHORT_READ_PAUSE_SECONDS * attempt * 1000L)
+            }
 
             // Spotify's own count wins when the read came back short (a rate limit cut it, or only the
             // embed page's first 100 could be read): the result then says "47 of 250", not "47 of 47".

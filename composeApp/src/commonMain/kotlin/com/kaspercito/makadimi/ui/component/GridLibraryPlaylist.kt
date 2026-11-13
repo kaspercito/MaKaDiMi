@@ -25,6 +25,14 @@ import androidx.compose.foundation.lazy.grid.LazyGridState
 import androidx.compose.foundation.lazy.grid.rememberLazyGridState
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.saveable.rememberSaveable
+import androidx.compose.runtime.setValue
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -69,6 +77,8 @@ import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.stringResource
 import makadimi.composeapp.generated.resources.Res
 import makadimi.composeapp.generated.resources.create
+import makadimi.composeapp.generated.resources.search_playlists
+import makadimi.composeapp.generated.resources.sort_az
 import kotlin.math.roundToInt
 
 /**
@@ -97,6 +107,22 @@ internal object LibraryGridCells : GridCells {
         return List(count) { usable / count + if (it < usable % count) 1 else 0 }
     }
 }
+
+/** Título visible de cualquier tipo de playlist de la biblioteca, para buscar y ordenar. */
+internal fun playlistTitleOf(item: Any?): String =
+    when (item) {
+        is LocalPlaylistEntity -> item.title
+        is PlaylistsResult -> item.title
+        is PlaylistEntity -> item.title
+        is AlbumEntity -> item.title
+        is PodcastsEntity -> item.title
+        is ChartItem -> item.name
+        is MonthlyRecapItem -> item.title
+        else -> ""
+    }
+
+/** A partir de cuántas playlists aparece el buscador (con pocas no hace falta). */
+internal const val LIBRARY_SEARCH_MIN_ITEMS = 6
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -154,7 +180,18 @@ internal inline fun <reified T> GridLibraryPlaylist(
         },
     ) {
         Crossfade(targetState = data) { data ->
-            val list = (data as? LocalResource.Success)?.data ?: emptyList()
+            val fullList = (data as? LocalResource.Success)?.data ?: emptyList()
+            var query by rememberSaveable { mutableStateOf("") }
+            var sortAz by rememberSaveable { mutableStateOf(false) }
+            val searchable = fullList.size >= LIBRARY_SEARCH_MIN_ITEMS
+            val list =
+                remember(fullList, query, sortAz) {
+                    var result: List<T> = fullList
+                    val q = query.trim()
+                    if (q.isNotEmpty()) result = result.filter { playlistTitleOf(it).contains(q, ignoreCase = true) }
+                    if (sortAz) result = result.sortedBy { playlistTitleOf(it).lowercase() }
+                    result
+                }
             // A header counts as content: a tab whose list is empty but whose header is the
             // point of the tab must not fall through to the empty text and hide it.
             if ((data is LocalResource.Success && list.isNotEmpty()) || createNewPlaylist != null || header != null) {
@@ -166,6 +203,28 @@ internal inline fun <reified T> GridLibraryPlaylist(
                     if (header != null) {
                         item(span = { GridItemSpan(maxLineSpan) }) {
                             header()
+                        }
+                    }
+                    if (searchable) {
+                        item(span = { GridItemSpan(maxLineSpan) }) {
+                            Row(
+                                modifier = Modifier.fillMaxWidth().padding(horizontal = 10.dp, vertical = 6.dp),
+                                verticalAlignment = Alignment.CenterVertically,
+                                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            ) {
+                                OutlinedTextField(
+                                    value = query,
+                                    onValueChange = { query = it },
+                                    singleLine = true,
+                                    placeholder = { Text(stringResource(Res.string.search_playlists)) },
+                                    modifier = Modifier.weight(1f),
+                                )
+                                FilterChip(
+                                    selected = sortAz,
+                                    onClick = { sortAz = !sortAz },
+                                    label = { Text(stringResource(Res.string.sort_az)) },
+                                )
+                            }
                         }
                     }
                     if (createNewPlaylist != null) {

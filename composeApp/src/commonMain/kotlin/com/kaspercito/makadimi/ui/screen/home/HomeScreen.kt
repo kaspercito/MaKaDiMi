@@ -742,7 +742,8 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                         itemsIndexed(homeData, key = { _, item ->
                             item.hashCode().toString() + (mainHomeThumbnail ?: "nothumb")
                         }) { index, item ->
-                            Box {
+                            Column {
+                                Box {
                                 if (index == 0) {
                                     Box(
                                         modifier =
@@ -844,6 +845,8 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                                         )
                                     }
                                 }
+                                }
+                                if (index == 0) com.kaspercito.makadimi.ui.component.DjHeroCard()
                             }
                         }
                         item {

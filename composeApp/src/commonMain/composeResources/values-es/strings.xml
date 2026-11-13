@@ -1011,4 +1011,14 @@
     <string name="hub_categories">CATEGORÍAS</string>
     <string name="hub_no_results">Sin resultados</string>
     <string name="home_history">Historial</string>
+    <string name="search_playlists">Buscar playlist</string>
+    <string name="sort_az">A–Z</string>
+    <string name="dj_title">DJ MaKa</string>
+    <string name="dj_card_subtitle">Tu locutor con IA: pon música y deja que te la presente</string>
+    <string name="dj_active">El DJ está en el aire: comentará entre canciones</string>
+    <string name="dj_description">Empieza una sesión con tu música y el DJ te presenta las canciones con su voz, como en la radio.</string>
+    <string name="dj_start">Empezar DJ</string>
+    <string name="dj_stop">Apagar DJ</string>
+    <string name="dj_need_key">Primero pon tu clave de IA en Ajustes (Proveedor de IA).</string>
+    <string name="dj_no_songs">Aún no tienes canciones favoritas ni escuchadas. Reproduce o dale ♥ a algunas y vuelve.</string>
 </resources>

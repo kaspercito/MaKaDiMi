@@ -23,6 +23,8 @@ import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.collectAsState
+import org.koin.compose.koinInject
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -157,6 +159,10 @@ private fun NeonDock(
     val brush = auroraBrush()
     val haptics = androidx.compose.ui.platform.LocalHapticFeedback.current
     val dockShape = RoundedCornerShape(32.dp)
+    var showDj by remember { mutableStateOf(false) }
+    val aiDjValue by koinInject<com.kaspercito.domain.manager.DataStoreManager>().aiDj
+        .collectAsState(com.kaspercito.domain.manager.DataStoreManager.FALSE)
+    val djActive = aiDjValue == com.kaspercito.domain.manager.DataStoreManager.TRUE
     val tabShape = RoundedCornerShape(topStart = 22.dp, topEnd = 7.dp, bottomEnd = 22.dp, bottomStart = 7.dp)
     Box(
         Modifier
@@ -176,7 +182,7 @@ private fun NeonDock(
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            tabs.forEach { screen ->
+            val renderTab: @Composable (BottomNavScreen) -> Unit = { screen ->
                 val selected = screen.ordinal == selectedIndex
                 val contentColor by animateColorAsState(
                     if (selected) cs.onPrimary else cs.onSurfaceVariant,
@@ -231,8 +237,14 @@ private fun NeonDock(
                     }
                 }
             }
+            // El DJ vive en el centro del dock: tabs a la izquierda, orbe, tabs a la derecha.
+            val half = (tabs.size + 1) / 2
+            tabs.take(half).forEach { renderTab(it) }
+            DjOrb(active = djActive, size = 34.dp, onClick = { showDj = true })
+            tabs.drop(half).forEach { renderTab(it) }
         }
     }
+    if (showDj) DjSheet(onDismiss = { showDj = false })
 }
 
 /**
