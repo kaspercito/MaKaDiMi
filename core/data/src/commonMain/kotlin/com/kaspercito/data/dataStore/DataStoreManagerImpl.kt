@@ -1373,6 +1373,32 @@ internal class DataStoreManagerImpl(
             preferences[DJ_VOICE_API_KEY] ?: ""
         }
 
+    override suspend fun setDjVoiceDeepgramKey(apiKey: String) {
+        withContext(Dispatchers.IO) {
+            settingsDataStore.edit { settings ->
+                settings[DJ_VOICE_DEEPGRAM_KEY] = apiKey.trim()
+            }
+        }
+    }
+
+    override val djVoiceDeepgramKey: Flow<String> =
+        settingsDataStore.data.map { preferences ->
+            preferences[DJ_VOICE_DEEPGRAM_KEY] ?: ""
+        }
+
+    override suspend fun setDjEveryTracks(tracks: Int) {
+        withContext(Dispatchers.IO) {
+            settingsDataStore.edit { settings ->
+                settings[DJ_EVERY_TRACKS] = tracks.coerceIn(1, 20).toString()
+            }
+        }
+    }
+
+    override val djEveryTracks: Flow<Int> =
+        settingsDataStore.data.map { preferences ->
+            preferences[DJ_EVERY_TRACKS]?.toIntOrNull()?.coerceIn(1, 20) ?: 3
+        }
+
     override val useAITranslation: Flow<String> =
         settingsDataStore.data.map { preferences ->
             preferences[USE_AI_TRANSLATION] ?: FALSE
@@ -1917,6 +1943,8 @@ internal class DataStoreManagerImpl(
         val AI_PROVIDER = stringPreferencesKey("ai_provider")
         val AI_API_KEY = stringPreferencesKey("ai_gemini_api_key")
         val DJ_VOICE_API_KEY = stringPreferencesKey("dj_voice_gemini_api_key")
+        val DJ_EVERY_TRACKS = stringPreferencesKey("dj_every_tracks")
+        val DJ_VOICE_DEEPGRAM_KEY = stringPreferencesKey("dj_voice_deepgram_api_key")
 
         val CUSTOM_MODEL_ID = stringPreferencesKey("custom_model_id")
         val CUSTOM_OPENAI_BASE_URL = stringPreferencesKey("custom_openai_base_url")

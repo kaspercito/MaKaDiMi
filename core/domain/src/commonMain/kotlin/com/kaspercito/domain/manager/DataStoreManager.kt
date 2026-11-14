@@ -423,6 +423,16 @@ interface DataStoreManager {
 
     val djVoiceApiKey: Flow<String>
 
+    /** Clave de Deepgram para la voz natural del DJ (la principal; vacía = no se usa). */
+    suspend fun setDjVoiceDeepgramKey(apiKey: String)
+
+    val djVoiceDeepgramKey: Flow<String>
+
+    /** Cada cuántas canciones comenta el DJ (1 a 20; por defecto 3). */
+    suspend fun setDjEveryTracks(tracks: Int)
+
+    val djEveryTracks: Flow<Int>
+
     val useAITranslation: Flow<String>
 
     suspend fun setUseAITranslation(use: Boolean)

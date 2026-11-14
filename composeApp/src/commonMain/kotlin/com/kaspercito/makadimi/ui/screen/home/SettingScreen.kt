@@ -208,6 +208,12 @@ import makadimi.composeapp.generated.resources.about_us
 import makadimi.composeapp.generated.resources.add_an_account
 import makadimi.composeapp.generated.resources.ai
 import makadimi.composeapp.generated.resources.ai_api_key
+import makadimi.composeapp.generated.resources.dj_every_tracks
+import makadimi.composeapp.generated.resources.dj_every_tracks_invalid
+import makadimi.composeapp.generated.resources.dj_every_tracks_message
+import makadimi.composeapp.generated.resources.dj_every_tracks_value
+import makadimi.composeapp.generated.resources.dj_voice_deepgram_key
+import makadimi.composeapp.generated.resources.dj_voice_deepgram_key_message
 import makadimi.composeapp.generated.resources.dj_voice_key
 import makadimi.composeapp.generated.resources.dj_voice_key_message
 import makadimi.composeapp.generated.resources.dj_voice_key_off
@@ -587,6 +593,8 @@ fun SettingScreen(
     val aiProvider by viewModel.aiProvider.collectAsStateWithLifecycle()
     val isHasApiKey by viewModel.isHasApiKey.collectAsStateWithLifecycle()
     val hasDjVoiceKey by viewModel.hasDjVoiceKey.collectAsStateWithLifecycle()
+    val djEveryTracks by viewModel.djEveryTracks.collectAsStateWithLifecycle()
+    val hasDjDeepgramKey by viewModel.hasDjDeepgramKey.collectAsStateWithLifecycle()
     val useAITranslation by viewModel.useAITranslation.collectAsStateWithLifecycle()
     val translationLanguage by viewModel.translationLanguage.collectAsStateWithLifecycle()
     val customModelId by viewModel.customModelId.collectAsStateWithLifecycle()
@@ -1998,6 +2006,30 @@ fun SettingScreen(
                     },
                 )
                 SettingItem(
+                    title = stringResource(Res.string.dj_voice_deepgram_key),
+                    subtitle = stringResource(if (hasDjDeepgramKey) Res.string.dj_voice_key_on else Res.string.dj_voice_key_off),
+                    onClick = {
+                        viewModel.setAlertData(
+                            SettingAlertState(
+                                title = runBlocking { getString(Res.string.dj_voice_deepgram_key) },
+                                textField =
+                                    SettingAlertState.TextFieldData(
+                                        label = runBlocking { getString(Res.string.dj_voice_deepgram_key) },
+                                        value = "",
+                                        // Vacío = quitar la clave.
+                                        verifyCodeBlock = { true to null },
+                                    ),
+                                message = runBlocking { getString(Res.string.dj_voice_deepgram_key_message) },
+                                confirm =
+                                    runBlocking { getString(Res.string.set) } to { state ->
+                                        viewModel.setDjVoiceDeepgramKey(state.textField?.value ?: "")
+                                    },
+                                dismiss = runBlocking { getString(Res.string.cancel) },
+                            ),
+                        )
+                    },
+                )
+                SettingItem(
                     title = stringResource(Res.string.dj_voice_key),
                     subtitle = stringResource(if (hasDjVoiceKey) Res.string.dj_voice_key_on else Res.string.dj_voice_key_off),
                     onClick = {
@@ -2015,6 +2047,36 @@ fun SettingScreen(
                                 confirm =
                                     runBlocking { getString(Res.string.set) } to { state ->
                                         viewModel.setDjVoiceApiKey(state.textField?.value ?: "")
+                                    },
+                                dismiss = runBlocking { getString(Res.string.cancel) },
+                            ),
+                        )
+                    },
+                )
+                SettingItem(
+                    title = stringResource(Res.string.dj_every_tracks),
+                    subtitle = stringResource(Res.string.dj_every_tracks_value, djEveryTracks.toString()),
+                    onClick = {
+                        viewModel.setAlertData(
+                            SettingAlertState(
+                                title = runBlocking { getString(Res.string.dj_every_tracks) },
+                                message = runBlocking { getString(Res.string.dj_every_tracks_message) },
+                                textField =
+                                    SettingAlertState.TextFieldData(
+                                        label = runBlocking { getString(Res.string.dj_every_tracks) },
+                                        value = djEveryTracks.toString(),
+                                        verifyCodeBlock = {
+                                            (it.trim().toIntOrNull() in 1..20) to
+                                                runBlocking { getString(Res.string.dj_every_tracks_invalid) }
+                                        },
+                                    ),
+                                confirm =
+                                    runBlocking { getString(Res.string.change) } to { state ->
+                                        state.textField
+                                            ?.value
+                                            ?.trim()
+                                            ?.toIntOrNull()
+                                            ?.let { viewModel.setDjEveryTracks(it) }
                                     },
                                 dismiss = runBlocking { getString(Res.string.cancel) },
                             ),

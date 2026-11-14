@@ -169,6 +169,12 @@ class SettingsViewModel(
     val updateChannel: StateFlow<String> = _updateChannel
     private val _aiProvider = MutableStateFlow<String>(DataStoreManager.AI_PROVIDER_OPENAI)
     val aiProvider: StateFlow<String> = _aiProvider
+    private val _hasDjDeepgramKey = MutableStateFlow(false)
+    val hasDjDeepgramKey: StateFlow<Boolean> = _hasDjDeepgramKey
+
+    private val _djEveryTracks = MutableStateFlow(3)
+    val djEveryTracks: StateFlow<Int> = _djEveryTracks
+
     private val _hasDjVoiceKey = MutableStateFlow(false)
     val hasDjVoiceKey: StateFlow<Boolean> = _hasDjVoiceKey
 
@@ -885,6 +891,20 @@ class SettingsViewModel(
         viewModelScope.launch {
             dataStoreManager.djVoiceApiKey.collect { _hasDjVoiceKey.value = it.isNotBlank() }
         }
+        viewModelScope.launch {
+            dataStoreManager.djEveryTracks.collect { _djEveryTracks.value = it }
+        }
+        viewModelScope.launch {
+            dataStoreManager.djVoiceDeepgramKey.collect { _hasDjDeepgramKey.value = it.isNotBlank() }
+        }
+    }
+
+    fun setDjVoiceDeepgramKey(apiKey: String) {
+        viewModelScope.launch { dataStoreManager.setDjVoiceDeepgramKey(apiKey) }
+    }
+
+    fun setDjEveryTracks(tracks: Int) {
+        viewModelScope.launch { dataStoreManager.setDjEveryTracks(tracks) }
     }
 
     fun setDjVoiceApiKey(apiKey: String) {

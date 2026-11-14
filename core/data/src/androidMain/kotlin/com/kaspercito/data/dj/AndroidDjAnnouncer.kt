@@ -35,7 +35,7 @@ import java.util.Locale
 private const val TAG = "AndroidDjAnnouncer"
 
 /** Un comentario cada tantas canciones: pocas peticiones a la IA y la voz no cansa. */
-private const val TRACKS_PER_COMMENT = 3
+private const val DEFAULT_TRACKS_PER_COMMENT = 3
 
 /** Volumen de la música (0..1) mientras habla el locutor. */
 private const val DUCKED_LEVEL = 0.25f
@@ -77,7 +77,11 @@ internal class AndroidDjAnnouncer(
         val clip: SpeechClip?,
     )
 
-    private val neuralVoice = GeminiVoice(dataStoreManager)
+    private val neuralVoice = NeuralVoice(context, dataStoreManager)
+
+    /** Cada cuántas canciones comenta el DJ (se cambia en Ajustes). */
+    @Volatile
+    private var everyTracks = DEFAULT_TRACKS_PER_COMMENT
 
     @Volatile
     private var voiceProblemShown = false
@@ -123,6 +127,9 @@ internal class AndroidDjAnnouncer(
                     introPending = on == DataStoreManager.TRUE
                     if (!introPending) shutUp()
                 }
+        }
+        scope.launch {
+            dataStoreManager.djEveryTracks.collect { everyTracks = it.coerceIn(1, 20) }
         }
         scope.launch {
             nowPlaying
@@ -176,7 +183,7 @@ internal class AndroidDjAnnouncer(
         val justPlayed = describe(item)
 
         // Si la SIGUIENTE canción es la que toca anunciar, se prepara ya, durante esta.
-        if (sinceLastComment >= TRACKS_PER_COMMENT - 1) {
+        if (sinceLastComment >= everyTracks - 1) {
             prepareJob = scope.launch(Dispatchers.IO) { prepareFor(previous = justPlayed) }
         }
     }
@@ -333,11 +340,17 @@ internal class AndroidDjAnnouncer(
 
     /** Genera la voz neuronal; si falla, avisa una vez por sesión y el DJ sigue con la voz del teléfono. */
     private suspend fun synthesizeWithNotice(text: String): SpeechClip? {
-        val clip = neuralVoice.synthesize(text)
+        val languageCode = runCatching { dataStoreManager.language.first().take(2) }.getOrDefault("es").ifBlank { "es" }
+        val clip = neuralVoice.synthesize(text, languageCode)
         val problem = neuralVoice.lastError
-        if (clip == null && problem != null && !voiceProblemShown) {
-            voiceProblemShown = true
-            showToast("DJ: la voz de Gemini falló ($problem). Uso la voz del teléfono.")
+        if (clip == null && !voiceProblemShown) {
+            if (neuralVoice.dailyQuotaExhausted) {
+                voiceProblemShown = true
+                showToast("DJ: se acabó la cuota diaria de la voz natural (Gemini). Sigo con la voz del teléfono; se renueva en la madrugada.")
+            } else if (problem != null) {
+                voiceProblemShown = true
+                showToast("DJ: la voz natural falló ($problem). Uso la voz del teléfono.")
+            }
         }
         return clip
     }
