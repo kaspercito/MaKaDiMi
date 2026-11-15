@@ -25,6 +25,7 @@ import io.ktor.websocket.CloseReason
 import io.ktor.websocket.Frame
 import io.ktor.websocket.close
 import io.ktor.websocket.readText
+import kotlinx.coroutines.CancellationException
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.DelicateCoroutinesApi
 import kotlinx.coroutines.Dispatchers
@@ -35,7 +36,6 @@ import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.isActive
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withTimeoutOrNull
 import kotlinx.serialization.json.Json
 import kotlinx.serialization.json.decodeFromJsonElement
@@ -62,7 +62,18 @@ open class DiscordWebSocket(
     private var heartbeatInterval = 0L
     private var resumeGatewayUrl: String? = null
     private var heartbeatJob: Job? = null
+    @Volatile
     private var connected = false
+
+    // True from the moment connect() is called until the socket is open (or the attempt failed).
+    // Closes the window where two callers could both open a gateway session.
+    @Volatile
+    private var connecting = false
+
+    // False once a heartbeat is sent and until Discord ACKs it: two beats in a row without an ACK means
+    // the connection is a zombie (e.g. wifi -> mobile data switch) and must be rebuilt.
+    @Volatile
+    private var awaitingAck = false
     private var client: HttpClient =
         HttpClient {
             install(WebSockets)
@@ -73,21 +84,25 @@ open class DiscordWebSocket(
             encodeDefaults = true
         }
 
-    private var reconnectionJob: Job? = null
+    // The live gateway session (collect loop). Separate from [retryJob] so that scheduling a retry
+    // from INSIDE a failed session no longer sees its own job as "already retrying" and gives up.
+    private var connectionJob: Job? = null
+    private var retryJob: Job? = null
     private var currentReconnectDelay = INITIAL_RECONNECT_DELAY
 
     override val coroutineContext: CoroutineContext
         get() = SupervisorJob() + Dispatchers.Default
 
     fun connect() {
-        if (connected || websocket?.isActive == true) {
-            // `websocket?.isActive` guards the mid-handshake window: the socket is open but not yet
-            // READY, so `connected` is still false — without this a second session would be opened.
+        if (connected || connecting || websocket?.isActive == true) {
+            // `connecting` / `websocket?.isActive` guard the mid-handshake window: the socket is open
+            // but not yet READY, so `connected` is still false — without them a second session would open.
             Logger.i(TAG, "Gateway already connected.")
             return
         }
-        reconnectionJob?.cancel()
-        reconnectionJob =
+        connecting = true
+        connectionJob?.cancel()
+        connectionJob =
             launch {
                 try {
                     val url = resumeGatewayUrl ?: gatewayUrl
@@ -103,6 +118,8 @@ open class DiscordWebSocket(
                     // sendActivity spin-waits on `connected`, and a presence sent before IDENTIFY→READY
                     // completes is rejected by the gateway and tears down the fresh connection (#2236).
                     Logger.i(TAG, "Successfully connected to Discord Gateway.")
+                    awaitingAck = false
+                    connecting = false
                     currentReconnectDelay = INITIAL_RECONNECT_DELAY
                     // start receiving messages
                     websocket!!
@@ -119,7 +136,13 @@ open class DiscordWebSocket(
                             }
                         }
                     handleClose()
+                } catch (e: CancellationException) {
+                    // close() (or a newer connect()) cancelled this session on purpose: do NOT schedule a
+                    // reconnection, otherwise every closeRPC() would resurrect a ghost connection.
+                    // `connecting` is left alone: a newer connect() may already own it.
+                    throw e
                 } catch (e: Exception) {
+                    connecting = false
                     Logger.e(TAG, "Gateway connection error: ${e.stackTraceToString()}")
                     scheduleReconnection()
                 }
@@ -127,18 +150,26 @@ open class DiscordWebSocket(
     }
 
     private fun scheduleReconnection() {
-        if (reconnectionJob?.isActive == true) {
+        if (retryJob?.isActive == true) {
             return
         }
         heartbeatJob?.cancel()
         connected = false
-        reconnectionJob =
+        retryJob =
             launch {
                 delay(currentReconnectDelay)
                 Logger.i(TAG, "Attempting to reconnect...")
-                connect()
                 currentReconnectDelay = (currentReconnectDelay * 2).coerceAtMost(MAX_RECONNECT_DELAY)
+                connect()
             }
+    }
+
+    /** Throws the current socket away without waiting for a close handshake that may never come. */
+    private fun dropConnection() {
+        connected = false
+        val ws = websocket
+        websocket = null
+        runCatching { ws?.cancel() }
     }
 
     private suspend fun handleClose() {
@@ -146,6 +177,7 @@ open class DiscordWebSocket(
         connected = false
         val close = websocket?.closeReason?.await()
         val code = close?.code?.toInt() ?: -1
+        websocket = null
         Logger.w(TAG, "Gateway closed with code: $code, reason: ${close?.message}")
         when (code) {
             // Generic/expected close → reconnect immediately.
@@ -181,6 +213,9 @@ open class DiscordWebSocket(
             }
             HEARTBEAT -> {
                 sendHeartBeat()
+            }
+            OpCode.HEARTBEAT_ACK -> {
+                awaitingAck = false
             }
             RECONNECT -> {
                 reconnectWebSocket()
@@ -282,7 +317,15 @@ open class DiscordWebSocket(
         heartbeatJob =
             launch {
                 while (isActive) {
-                    sendHeartBeat()
+                    if (awaitingAck) {
+                        Logger.w(TAG, "Gateway: no heartbeat ACK, the connection looks dead — rebuilding it")
+                        dropConnection()
+                        scheduleReconnection()
+                        return@launch
+                    }
+                    awaitingAck = true
+                    runCatching { sendHeartBeat() }
+                        .onFailure { if (it is CancellationException) throw it }
                     delay(interval)
                 }
             }
@@ -315,20 +358,32 @@ open class DiscordWebSocket(
     }
 
     fun close() {
-        reconnectionJob?.cancel()
+        retryJob?.cancel()
+        retryJob = null
+        connectionJob?.cancel()
+        connectionJob = null
         heartbeatJob?.cancel()
         heartbeatJob = null
-        this.cancel()
         resumeGatewayUrl = null
         sessionId = null
+        sequence = 0
         connected = false
-        runBlocking {
-            websocket?.close()
-            Logger.e(TAG, "Gateway: Connection to gateway closed")
+        connecting = false
+        awaitingAck = false
+        // Forget the socket right away so an immediate connect() (pause → play) opens a fresh one
+        // instead of being refused because the old session job is still winding down.
+        val ws = websocket
+        websocket = null
+        if (ws != null) {
+            launch(Dispatchers.IO) {
+                runCatching { withTimeoutOrNull(2.seconds) { ws.close() } }
+                runCatching { ws.cancel() }
+                Logger.i(TAG, "Gateway: Connection to gateway closed")
+            }
         }
     }
 
-    suspend fun sendActivity(presence: Presence) {
+    suspend fun sendActivity(presence: Presence): Boolean {
         // Bounded wait for IDENTIFY→READY (or RESUME→RESUMED) to complete. A non-blank but invalid
         // token closes with a non-recoverable code and is never retried (see NON_RECOVERABLE_CLOSE_CODES),
         // so an unbounded spin-wait here would hang this coroutine forever.
@@ -340,14 +395,15 @@ open class DiscordWebSocket(
                 true
             } ?: false
         if (!ready) {
-            Logger.w(TAG, "Gateway not connected within 30s — dropping presence update")
-            return
+            Logger.w(TAG, "Gateway not connected within 30s — presence update not delivered")
+            return false
         }
         Logger.i(TAG, "Gateway: Sending $PRESENCE_UPDATE")
         send(
             op = PRESENCE_UPDATE,
             d = presence,
         )
+        return true
     }
 
     companion object {

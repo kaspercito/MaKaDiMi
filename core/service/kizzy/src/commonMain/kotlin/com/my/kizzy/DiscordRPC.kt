@@ -29,7 +29,7 @@ class DiscordRPC(
         val songUrl = "https://music.youtube.com/watch?v=${song.videoId}"
         val artists = song.artistName?.filter { it.isNotBlank() }?.joinToString(", ")
 
-        setActivity(
+        val delivered = setActivity(
             name = APP_NAME,
             details = song.title,
             detailsUrl = songUrl,
@@ -49,6 +49,8 @@ class DiscordRPC(
             endTime = currentTime + adjustedRemainingDuration,
             applicationId = APPLICATION_ID,
         )
+        // Surface a dropped update as a failure so the caller retries instead of silently showing nothing.
+        check(delivered) { "Discord gateway not ready, presence not delivered" }
     }
 
     companion object {

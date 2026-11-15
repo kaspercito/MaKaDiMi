@@ -120,6 +120,13 @@ import kotlin.math.pow
 
 private val TAG = "Media3ServiceHandlerImpl"
 
+// Discord Rich Presence tuning (see scheduleRpcPauseCleanup and the sender in the init block).
+private const val RPC_MAX_ATTEMPTS = 4
+private const val RPC_RETRY_DELAY_MS = 2_000L
+private const val RPC_WATCHDOG_MS = 30_000L
+private const val RPC_CLEAR_AFTER_PAUSE_MS = 8_000L
+private const val RPC_DISCONNECT_AFTER_PAUSE_MS = 5 * 60_000L
+
 internal class MediaServiceHandlerImpl(
     private val dataStoreManager: DataStoreManager,
     private val songRepository: SongRepository,
@@ -349,7 +356,15 @@ internal class MediaServiceHandlerImpl(
         val durationMs: Long,
         val speed: Float,
         val seq: Long,
+        // When the position was sampled, so a retried send can advance it instead of showing a stale bar.
+        val createdAtMs: Long = System.currentTimeMillis(),
     )
+
+    @Volatile
+    private var rpcPauseJob: Job? = null
+
+    @Volatile
+    private var rpcWatchdogJob: Job? = null
 
     private val rpcSnapshotFlow = MutableStateFlow<RpcSnapshot?>(null)
 
@@ -643,10 +658,34 @@ internal class MediaServiceHandlerImpl(
                                             // its snapshot lands here after onIsPlayingChanged(false)
                                             // already closed the RPC (Fix 1). controlState.value is a
                                             // safe field read from Dispatchers.IO, unlike player.isPlaying.
-                                            if (!controlState.value.isPlaying) return@collectLatest
-                                            discordRPC
-                                                ?.updateSong(snap.progressMs, snap.durationMs, snap.speed, snap.song)
-                                                ?.onFailure { if (it !is CancellationException) Logger.e(TAG, "Discord RPC update failed: ${it.message}") }
+                                            // Retry a few times: right after a (re)connect the gateway may not be
+                                            // READY yet, and a single dropped update used to mean no card at all.
+                                            var attempt = 0
+                                            while (attempt < RPC_MAX_ATTEMPTS) {
+                                                if (!controlState.value.isPlaying) return@collectLatest
+                                                val rpc = discordRPC ?: return@collectLatest
+                                                val elapsedMs = (System.currentTimeMillis() - snap.createdAtMs).coerceAtLeast(0L)
+                                                val progressMs = snap.progressMs + (elapsedMs * snap.speed).toLong()
+                                                val result = rpc.updateSong(progressMs, snap.durationMs, snap.speed, snap.song)
+                                                if (result.isSuccess) return@collectLatest
+                                                val error = result.exceptionOrNull()
+                                                if (error is CancellationException) throw error
+                                                Logger.e(TAG, "Discord RPC update failed (attempt ${attempt + 1}): ${error?.message}")
+                                                attempt++
+                                                delay(RPC_RETRY_DELAY_MS * attempt)
+                                            }
+                                        }
+                                    }
+                                // Watchdog: if playback is running but the gateway dropped (network switch,
+                                // Discord closing the session...), rebuild the connection and republish.
+                                rpcWatchdogJob?.cancel()
+                                rpcWatchdogJob =
+                                    coroutineScope.launch(Dispatchers.IO) {
+                                        while (true) {
+                                            delay(RPC_WATCHDOG_MS)
+                                            if (controlState.value.isPlaying && discordRPC?.isRpcRunning() != true) {
+                                                nowPlayingState.value.songEntity?.let { updateDiscordRpc(it) }
+                                            }
                                         }
                                     }
                                 nowPlayingState.value.songEntity?.let { song ->
@@ -662,6 +701,10 @@ internal class MediaServiceHandlerImpl(
                             withContext(NonCancellable) {
                                 rpcSenderJob?.cancel()
                                 rpcSenderJob = null
+                                rpcWatchdogJob?.cancel()
+                                rpcWatchdogJob = null
+                                rpcPauseJob?.cancel()
+                                rpcPauseJob = null
                                 if (discordRPC?.isRpcRunning() == true) {
                                     discordRPC?.closeRPC()
                                 }
@@ -2757,6 +2800,10 @@ internal class MediaServiceHandlerImpl(
             getDataOfNowPlayingTrackStateJob = null
             rpcSenderJob?.cancel()
             rpcSenderJob = null
+            rpcWatchdogJob?.cancel()
+            rpcWatchdogJob = null
+            rpcPauseJob?.cancel()
+            rpcPauseJob = null
 
             // Cancel coroutine scope
             coroutineScope.cancel()
@@ -2814,14 +2861,13 @@ internal class MediaServiceHandlerImpl(
         _controlState.value = _controlState.value.copy(isPlaying = isPlaying)
         if (isPlaying) {
             startProgressUpdate()
+            rpcPauseJob?.cancel()
             nowPlayingState.value.songEntity?.let { updateDiscordRpc(it) }
         } else {
             stopProgressUpdate()
             mayBeSaveRecentSong()
             mayBeSavePlaybackState()
-            if (discordRPC?.isRpcRunning() == true) {
-                discordRPC?.closeRPC()
-            }
+            scheduleRpcPauseCleanup()
         }
         updateNextPreviousTrackAvailability()
     }
@@ -2921,6 +2967,27 @@ internal class MediaServiceHandlerImpl(
                     Logger.d(TAG, "Inserted playback event for ${song.title}: $it")
                 }
         }
+    }
+
+    /**
+     * Pausing no longer tears the gateway down on the spot. Between tracks, while buffering, or when the DJ's
+     * voice takes audio focus, playback pauses for a moment: closing and reopening the socket each time
+     * raced with the reconnect and cost a fresh IDENTIFY (which Discord rate-limits), so the card often
+     * never came back. Now: short pause -> keep everything; ~8s -> hide the card; ~5 min -> disconnect.
+     */
+    private fun scheduleRpcPauseCleanup() {
+        rpcPauseJob?.cancel()
+        rpcPauseJob =
+            coroutineScope.launch(Dispatchers.IO) {
+                delay(RPC_CLEAR_AFTER_PAUSE_MS)
+                if (controlState.value.isPlaying) return@launch
+                runCatching { discordRPC?.clearPresence() }
+                delay(RPC_DISCONNECT_AFTER_PAUSE_MS)
+                if (controlState.value.isPlaying) return@launch
+                if (discordRPC?.isRpcRunning() == true) {
+                    discordRPC?.closeRPC()
+                }
+            }
     }
 
     private fun updateDiscordRpc(song: SongEntity) {

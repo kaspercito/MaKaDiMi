@@ -65,6 +65,15 @@ open class KizzyRPC(
         discordWebSocket.sendActivity(presence)
     }
 
+    /**
+     * Removes the presence card but keeps the gateway session alive, so resuming playback right
+     * away needs no new connection (and no new IDENTIFY, which Discord rate-limits).
+     */
+    suspend fun clearPresence(): Boolean {
+        if (!isRpcRunning()) return true
+        return discordWebSocket.sendActivity(Presence(activities = emptyList()))
+    }
+
     suspend fun setActivity(
         name: String,
         state: String?,
@@ -84,7 +93,7 @@ open class KizzyRPC(
         applicationId: String? = null,
         status: String? = "online",
         since: Long? = null,
-    ) {
+    ): Boolean {
         if (!isRpcRunning()) {
             discordWebSocket.connect()
         }
@@ -134,7 +143,7 @@ open class KizzyRPC(
                 since = since,
                 status = status ?: "online",
             )
-        discordWebSocket.sendActivity(presence)
+        return discordWebSocket.sendActivity(presence)
     }
 
     enum class Type(

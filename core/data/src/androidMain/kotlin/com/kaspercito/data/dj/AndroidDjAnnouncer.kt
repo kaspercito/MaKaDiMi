@@ -500,10 +500,13 @@ internal class AndroidDjAnnouncer(
         }
     }
 
+    /**
+     * Los avisos del DJ ("preparando el saludo", errores de voz o de la IA...) ya no se muestran en pantalla:
+     * solo se escriben en el log. El DJ sigue funcionando igual y cae a la voz del teléfono si algo falla.
+     */
+    @Suppress("RedundantSuspendModifier")
     private suspend fun showToast(message: String) {
-        withContext(Dispatchers.Main) {
-            runCatching { android.widget.Toast.makeText(context.applicationContext, message, android.widget.Toast.LENGTH_LONG).show() }
-        }
+        Logger.i(TAG, message)
     }
 
     private fun describe(item: GenericMediaItem): String? {
