@@ -32,11 +32,11 @@ fun rememberSurfaceDarkColors(): SurfaceDarkColors {
     val cs = MaterialTheme.colorScheme
     return if (LocalForceDarkText.current) {
         SurfaceDarkColors(
-            container = Color(0xFF0F1222),
-            handle = Color(0xFF3A4075),
+            container = Color(0xFF0B1713),
+            handle = Color(0xFF2E5A48),
             content = Color.White,
-            subtitle = Color(0xFF9EA4CC),
-            disabled = Color(0xFF5B6296),
+            subtitle = Color(0xFF9BBFAF),
+            disabled = Color(0xFF4F7A68),
         )
     } else {
         SurfaceDarkColors(

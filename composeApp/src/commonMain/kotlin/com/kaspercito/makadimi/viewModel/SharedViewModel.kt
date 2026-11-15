@@ -134,6 +134,9 @@ private const val SPOTIFY_LYRICS_KEY = "spotify"
 /** Past this a provider is skipped, so one that hangs cannot hold back the others. */
 private const val LYRICS_PROVIDER_TIMEOUT_MS = 15_000L
 
+/** Tipo de carga de la sesión del DJ: pone la canción inicial sin pedir la radio relacionada. */
+private const val DJ_SESSION = "DJ_SESSION"
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class SharedViewModel(
     private val dataStoreManager: DataStoreManager,
@@ -963,6 +966,49 @@ class SharedViewModel(
                         loadPlaylistOrAlbum(index = index)
                     }
                 }
+            }
+        }
+    }
+
+    /**
+     * Arranca una sesión del DJ con una cola armada con TUS gustos, sin pasar por la radio
+     * relacionada de YouTube Music (que se iba derivando a otros géneros).
+     *
+     * Suena [seed] de inmediato; luego se encolan, intercaladas, canciones tuyas ([own]) y las que
+     * la IA propone ([suggestions]) a medida que se van encontrando.
+     */
+    fun startDjSession(
+        seed: Track,
+        own: List<Track>,
+        suggestions: Flow<Track>,
+    ) {
+        viewModelScope.launch {
+            // DJ_SESSION no hace nada en el `when` de loadMediaItemFromTrack: así no se pide la radio.
+            loadMediaItemFromTrack(seed, DJ_SESSION)
+            // Espera a que la canción inicial esté puesta antes de añadir el resto.
+            withTimeoutOrNull(10_000) { mediaPlayerHandler.nowPlaying.first { it?.mediaId == seed.videoId } }
+            val ownQueue = ArrayDeque(own.filter { it.videoId != seed.videoId }.distinctBy { it.videoId })
+            // Primero un par tuyas para que siempre haya "siguiente" aunque la IA tarde.
+            val firstBatch = ArrayList<Track>()
+            repeat(2) { ownQueue.removeFirstOrNull()?.let(firstBatch::add) }
+            if (firstBatch.isNotEmpty()) mediaPlayerHandler.loadMoreCatalog(ArrayList(firstBatch), false)
+            val pending = ArrayList<Track>()
+            val added = HashSet<String>().apply { add(seed.videoId); firstBatch.forEach { add(it.videoId) } }
+            suggestions.collect { track ->
+                if (!added.add(track.videoId)) return@collect
+                pending.add(track)
+                // De 3 en 3, con una canción tuya en medio: ancla la sesión a tu estilo.
+                if (pending.size >= 3) {
+                    ownQueue.removeFirstOrNull()?.takeIf { added.add(it.videoId) }?.let { pending.add(1, it) }
+                    mediaPlayerHandler.loadMoreCatalog(ArrayList(pending), false)
+                    pending.clear()
+                }
+            }
+            if (pending.isNotEmpty()) mediaPlayerHandler.loadMoreCatalog(ArrayList(pending), false)
+            // Si la IA no dio nada (sin red o sin cuota), la cola sigue siendo tuya, no de la radio.
+            if (added.size <= 3) {
+                val rest = ownQueue.filter { added.add(it.videoId) }.take(30)
+                if (rest.isNotEmpty()) mediaPlayerHandler.loadMoreCatalog(ArrayList(rest), false)
             }
         }
     }
@@ -1814,6 +1860,30 @@ class SharedViewModel(
     fun getThemeColorSource() = dataStoreManager.themeColorSource
 
     fun getCustomThemeColor() = dataStoreManager.customThemeColor
+
+    fun getBackgroundStyle() = dataStoreManager.backgroundStyle
+
+    fun getBackgroundGlowColor() = dataStoreManager.backgroundGlowColor
+
+    fun getBackgroundIntensity() = dataStoreManager.backgroundIntensity
+
+    fun getBackgroundImageUri() = dataStoreManager.backgroundImageUri
+
+    fun setBackgroundStyle(style: String) {
+        viewModelScope.launch { dataStoreManager.setBackgroundStyle(style) }
+    }
+
+    fun setBackgroundGlowColor(hex: String) {
+        viewModelScope.launch { dataStoreManager.setBackgroundGlowColor(hex) }
+    }
+
+    fun setBackgroundIntensity(value: Int) {
+        viewModelScope.launch { dataStoreManager.setBackgroundIntensity(value) }
+    }
+
+    fun setBackgroundImageUri(uri: String) {
+        viewModelScope.launch { dataStoreManager.setBackgroundImageUri(uri) }
+    }
 
     fun getNowPlayingStyle() = dataStoreManager.nowPlayingStyle
 

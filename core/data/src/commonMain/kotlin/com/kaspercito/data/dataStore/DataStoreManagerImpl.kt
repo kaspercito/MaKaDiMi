@@ -976,6 +976,58 @@ internal class DataStoreManagerImpl(
         }
     }
 
+    override val backgroundStyle =
+        settingsDataStore.data.map { preferences ->
+            preferences[BACKGROUND_STYLE] ?: DataStoreManager.BACKGROUND_STYLE_GRID
+        }
+
+    override suspend fun setBackgroundStyle(style: String) {
+        withContext(Dispatchers.IO) {
+            settingsDataStore.edit { settings ->
+                settings[BACKGROUND_STYLE] = style
+            }
+        }
+    }
+
+    override val backgroundGlowColor =
+        settingsDataStore.data.map { preferences ->
+            preferences[BACKGROUND_GLOW_COLOR] ?: ""
+        }
+
+    override suspend fun setBackgroundGlowColor(hex: String) {
+        withContext(Dispatchers.IO) {
+            settingsDataStore.edit { settings ->
+                settings[BACKGROUND_GLOW_COLOR] = hex
+            }
+        }
+    }
+
+    override val backgroundIntensity =
+        settingsDataStore.data.map { preferences ->
+            preferences[BACKGROUND_INTENSITY] ?: DataStoreManager.DEFAULT_BACKGROUND_INTENSITY
+        }
+
+    override suspend fun setBackgroundIntensity(value: Int) {
+        withContext(Dispatchers.IO) {
+            settingsDataStore.edit { settings ->
+                settings[BACKGROUND_INTENSITY] = value.coerceIn(0, 100)
+            }
+        }
+    }
+
+    override val backgroundImageUri =
+        settingsDataStore.data.map { preferences ->
+            preferences[BACKGROUND_IMAGE_URI] ?: ""
+        }
+
+    override suspend fun setBackgroundImageUri(uri: String) {
+        withContext(Dispatchers.IO) {
+            settingsDataStore.edit { settings ->
+                settings[BACKGROUND_IMAGE_URI] = uri
+            }
+        }
+    }
+
     override val nowPlayingStyle =
         settingsDataStore.data.map { preferences ->
             preferences[NOW_PLAYING_STYLE] ?: DataStoreManager.NOW_PLAYING_STYLE_SPOTIFY
@@ -1917,6 +1969,10 @@ internal class DataStoreManagerImpl(
         val THEME_MODE = stringPreferencesKey("theme_mode")
         val THEME_COLOR_SOURCE = stringPreferencesKey("theme_color_source")
         val CUSTOM_THEME_COLOR = stringPreferencesKey("custom_theme_color")
+        val BACKGROUND_STYLE = stringPreferencesKey("background_style")
+        val BACKGROUND_GLOW_COLOR = stringPreferencesKey("background_glow_color")
+        val BACKGROUND_INTENSITY = intPreferencesKey("background_intensity")
+        val BACKGROUND_IMAGE_URI = stringPreferencesKey("background_image_uri")
         val NOW_PLAYING_STYLE = stringPreferencesKey("now_playing_style")
         val LYRICS_STYLE = stringPreferencesKey("lyrics_style")
         val ROMANIZATION_LANGUAGES = stringPreferencesKey("romanization_languages")

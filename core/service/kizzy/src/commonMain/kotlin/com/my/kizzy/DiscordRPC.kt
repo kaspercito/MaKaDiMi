@@ -24,19 +24,26 @@ class DiscordRPC(
         val remainingDuration = durationMillis - currentPlaybackTimeMillis
         val adjustedRemainingDuration = (remainingDuration / playbackSpeed).toLong()
 
+        // Enlace al tema en YouTube Music: al tocar el título en Discord se abre la canción.
+        // Reemplaza al antiguo botón "Visit MaKaDiMi", que ya no se muestra.
+        val songUrl = "https://music.youtube.com/watch?v=${song.videoId}"
+        val artists = song.artistName?.filter { it.isNotBlank() }?.joinToString(", ")
+
         setActivity(
             name = APP_NAME,
             details = song.title,
-            state = song.artistName?.joinToString(", "),
+            detailsUrl = songUrl,
+            state = artists,
             largeImage = song.thumbnails?.let { RpcImage.ExternalImage(it) },
             smallImage = RpcImage.ExternalImage(APP_ICON),
-            largeText = song.albumName,
-            smallText = song.artistName?.firstOrNull(),
-            buttons =
-                listOf(
-                    "Visit MaKaDiMi" to "https://github.com/kaspercito/MaKaDiMi",
-                ),
+            // Al pasar el cursor sobre la carátula se ve el álbum (o el título si no hay álbum).
+            largeText = song.albumName?.takeIf { it.isNotBlank() } ?: song.title,
+            smallText = "Escuchando en $APP_NAME",
+            // Sin botones: la tarjeta queda limpia, solo carátula, título, artista y la barra de tiempo.
+            buttons = null,
             type = Type.LISTENING,
+            // En la lista de miembros de Discord se lee "Escuchando <artista>" en vez de solo "MaKaDiMi".
+            statusDisplayType = StatusDisplayType.STATE,
             since = currentTime,
             startTime = calculatedStartTime,
             endTime = currentTime + adjustedRemainingDuration,

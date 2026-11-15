@@ -88,46 +88,46 @@ fun parseThemeColorHex(hex: String): Color? {
 }
 
 /**
- * Superficies claras "Pearl": perla lavanda con una rampa fría muy sutil. Con el color de marca
- * por defecto, el acento pasa a un índigo profundo legible sobre fondo claro; con color propio o
+ * Superficies claras "Menta": blanco-menta con una rampa verde fría muy sutil. Con el color de marca
+ * por defecto, el acento pasa a un verde profundo legible sobre fondo claro; con color propio o
  * de fondo de pantalla se respeta el del usuario.
  */
 private fun ColorScheme.withPearlLightSurfaces(brand: Boolean): ColorScheme {
     val base =
         copy(
-            background = Color(0xFFF4F3FF),
-            onBackground = Color(0xFF14152B),
-            surface = Color(0xFFF4F3FF),
-            onSurface = Color(0xFF14152B),
-            surfaceVariant = Color(0xFFE2E1F4),
-            onSurfaceVariant = Color(0xFF4A4C73),
+            background = Color(0xFFF1FBF6),
+            onBackground = Color(0xFF0B1F17),
+            surface = Color(0xFFF1FBF6),
+            onSurface = Color(0xFF0B1F17),
+            surfaceVariant = Color(0xFFDDEFE5),
+            onSurfaceVariant = Color(0xFF3C5A4C),
             surfaceTint = primary,
             surfaceBright = Color(0xFFFFFFFF),
-            surfaceDim = Color(0xFFDAD9EC),
+            surfaceDim = Color(0xFFD3E6DB),
             surfaceContainerLowest = Color(0xFFFFFFFF),
-            surfaceContainerLow = Color(0xFFF8F7FF),
-            surfaceContainer = Color(0xFFEFEEFC),
-            surfaceContainerHigh = Color(0xFFE9E8F8),
-            surfaceContainerHighest = Color(0xFFE2E1F4),
-            outline = Color(0xFF787BA8),
-            outlineVariant = Color(0xFFC9CAE6),
-            inverseSurface = Color(0xFF23244A),
-            inverseOnSurface = Color(0xFFF1F0FF),
+            surfaceContainerLow = Color(0xFFF6FDF9),
+            surfaceContainer = Color(0xFFEAF6EF),
+            surfaceContainerHigh = Color(0xFFE3F1E9),
+            surfaceContainerHighest = Color(0xFFDCECE2),
+            outline = Color(0xFF6D8E7D),
+            outlineVariant = Color(0xFFBFD8CB),
+            inverseSurface = Color(0xFF16302A),
+            inverseOnSurface = Color(0xFFE9FFF4),
         )
     return if (brand) {
         base.copy(
-            primary = Color(0xFF5B47F0),
+            primary = Color(0xFF00875A),
             onPrimary = Color(0xFFFFFFFF),
-            primaryContainer = Color(0xFFE2DDFF),
-            onPrimaryContainer = Color(0xFF1B0F6B),
-            secondary = Color(0xFF008C84),
+            primaryContainer = Color(0xFFB5F5D2),
+            onPrimaryContainer = Color(0xFF00210F),
+            secondary = Color(0xFF00727F),
             onSecondary = Color(0xFFFFFFFF),
-            secondaryContainer = Color(0xFFB6F5EE),
-            onSecondaryContainer = Color(0xFF00201E),
-            tertiary = Color(0xFFC21E92),
+            secondaryContainer = Color(0xFFB3F1F8),
+            onSecondaryContainer = Color(0xFF001F24),
+            tertiary = Color(0xFF557300),
             onTertiary = Color(0xFFFFFFFF),
-            tertiaryContainer = Color(0xFFFFD8F1),
-            onTertiaryContainer = Color(0xFF3B002A),
+            tertiaryContainer = Color(0xFFD7F27F),
+            onTertiaryContainer = Color(0xFF161F00),
         )
     } else {
         base
@@ -135,44 +135,59 @@ private fun ColorScheme.withPearlLightSurfaces(brand: Boolean): ColorScheme {
 }
 
 /**
- * Superficies oscuras "Obsidian": negro-índigo profundo con una rampa azulada para tarjetas, hojas
- * y diálogos. Con el color de marca por defecto el acento es violeta eléctrico, el secundario aqua
- * y el terciario magenta; con color propio solo se tocan las superficies.
+ * Superficies oscuras "Obsidiana": negro-verdoso profundo con una rampa verde fría para tarjetas,
+ * hojas y diálogos. Con el color de marca por defecto el acento es verde neón, el secundario cian
+ * y el terciario lima; con color propio las superficies pasan a un grafito neutro (no tiñen).
  */
 private fun ColorScheme.withObsidianDarkSurfaces(brand: Boolean): ColorScheme {
     val base =
         copy(
-            background = Color(0xFF05060E),
-            surface = Color(0xFF05060E),
-            onBackground = Color(0xFFEDEEFF),
-            onSurface = Color(0xFFEDEEFF),
-            surfaceDim = Color(0xFF03040A),
-            surfaceBright = Color(0xFF252B52),
-            surfaceContainerLowest = Color(0xFF03040A),
-            surfaceContainerLow = Color(0xFF0A0C18),
-            surfaceContainer = Color(0xFF0F1222),
-            surfaceContainerHigh = Color(0xFF151934),
-            surfaceContainerHighest = Color(0xFF1C2142),
-            surfaceVariant = Color(0xFF1C2142),
-            onSurfaceVariant = Color(0xFF9EA4CC),
-            outline = Color(0xFF5B6296),
-            outlineVariant = Color(0xFF262B52),
-            tertiary = Color(0xFFFF6AD5),
-            onTertiary = Color(0xFF4A0036),
-            tertiaryContainer = Color(0xFF6B0F52),
-            onTertiaryContainer = Color(0xFFFFD8F1),
+            background = Color(0xFF050606),
+            surface = Color(0xFF050606),
+            onBackground = Color(0xFFEDF1EF),
+            onSurface = Color(0xFFEDF1EF),
+            surfaceDim = Color(0xFF030404),
+            surfaceBright = Color(0xFF2A2F2D),
+            surfaceContainerLowest = Color(0xFF030404),
+            surfaceContainerLow = Color(0xFF0A0C0B),
+            surfaceContainer = Color(0xFF101312),
+            surfaceContainerHigh = Color(0xFF171B19),
+            surfaceContainerHighest = Color(0xFF1F2422),
+            surfaceVariant = Color(0xFF1F2422),
+            onSurfaceVariant = Color(0xFFA5ADAA),
+            outline = Color(0xFF626B67),
+            outlineVariant = Color(0xFF2A302D),
         )
     return if (brand) {
         base.copy(
-            primary = Color(0xFF9C8CFF),
-            onPrimary = Color(0xFF1A0F57),
-            primaryContainer = Color(0xFF3A2FA0),
-            onPrimaryContainer = Color(0xFFE4DFFF),
-            secondary = Color(0xFF42F0E0),
-            onSecondary = Color(0xFF00322E),
-            secondaryContainer = Color(0xFF0B4E49),
-            onSecondaryContainer = Color(0xFFB8FFF6),
-            surfaceTint = Color(0xFF9C8CFF),
+            primary = Color(0xFF3DFFA2),
+            onPrimary = Color(0xFF00391F),
+            primaryContainer = Color(0xFF00522F),
+            onPrimaryContainer = Color(0xFFB6FFD6),
+            secondary = Color(0xFF2BE4F0),
+            onSecondary = Color(0xFF00363B),
+            secondaryContainer = Color(0xFF004F56),
+            onSecondaryContainer = Color(0xFFB3F6FF),
+            tertiary = Color(0xFFC8FF3D),
+            onTertiary = Color(0xFF273600),
+            tertiaryContainer = Color(0xFF3B5000),
+            onTertiaryContainer = Color(0xFFE3FF9A),
+            surfaceTint = Color(0xFF3DFFA2),
+            background = Color(0xFF030807),
+            surface = Color(0xFF030807),
+            onBackground = Color(0xFFE6FFF3),
+            onSurface = Color(0xFFE6FFF3),
+            surfaceDim = Color(0xFF020605),
+            surfaceBright = Color(0xFF1B2D26),
+            surfaceContainerLowest = Color(0xFF020605),
+            surfaceContainerLow = Color(0xFF07100D),
+            surfaceContainer = Color(0xFF0B1713),
+            surfaceContainerHigh = Color(0xFF10201A),
+            surfaceContainerHighest = Color(0xFF152A22),
+            surfaceVariant = Color(0xFF152A22),
+            onSurfaceVariant = Color(0xFF9BBFAF),
+            outline = Color(0xFF4F7A68),
+            outlineVariant = Color(0xFF1D3A2E),
         )
     } else {
         base

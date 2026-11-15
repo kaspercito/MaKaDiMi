@@ -1,7 +1,10 @@
 package com.kaspercito.data.mediaservice
 
 import android.annotation.SuppressLint
+import android.app.Activity
 import android.app.ActivityManager
+import android.app.Application
+import android.os.Bundle
 import android.app.ActivityManager.RunningAppProcessInfo
 import android.content.Context
 import android.content.Intent
@@ -133,6 +136,45 @@ internal class MediaServiceHandlerImpl(
     @Volatile
     private var endlessQueueEnabled: Boolean = false
     private val context: Context = getKoin().get()
+
+    /**
+     * Cuántas pantallas de la app están a la vista. Con 0 la app está en segundo plano (por ejemplo,
+     * mientras juegas): no hay nadie mirando la barra de progreso, así que los bucles de abajo bajan
+     * de 20 actualizaciones por segundo a 2. Es lo que más CPU ahorra con música de fondo.
+     */
+    private val startedActivities = java.util.concurrent.atomic.AtomicInteger(0)
+    private val appInForeground: Boolean get() = startedActivities.get() > 0
+
+    init {
+        // Este handler puede crearse cuando la pantalla ya está abierta, y entonces nunca vería el
+        // onActivityStarted. Se parte de lo que dice el sistema para no empezar "en segundo plano".
+        runCatching {
+            val info = RunningAppProcessInfo()
+            ActivityManager.getMyMemoryState(info)
+            if (info.importance <= RunningAppProcessInfo.IMPORTANCE_VISIBLE) startedActivities.set(1)
+        }
+        (context.applicationContext as? Application)?.registerActivityLifecycleCallbacks(
+            object : Application.ActivityLifecycleCallbacks {
+                override fun onActivityStarted(activity: Activity) {
+                    startedActivities.incrementAndGet()
+                }
+
+                override fun onActivityStopped(activity: Activity) {
+                    startedActivities.updateAndGet { (it - 1).coerceAtLeast(0) }
+                }
+
+                override fun onActivityCreated(activity: Activity, savedInstanceState: Bundle?) = Unit
+
+                override fun onActivityResumed(activity: Activity) = Unit
+
+                override fun onActivityPaused(activity: Activity) = Unit
+
+                override fun onActivitySaveInstanceState(activity: Activity, outState: Bundle) = Unit
+
+                override fun onActivityDestroyed(activity: Activity) = Unit
+            },
+        )
+    }
     override val player: MediaPlayerInterface = getKoin().get()
 
     @Volatile
@@ -991,9 +1033,14 @@ internal class MediaServiceHandlerImpl(
                 val positionPersistIntervalMs = 5_000L
                 // Named so the persist counter below cannot drift out of step with it, which is
                 // what a second hardcoded copy of the number did.
-                val tickIntervalMs = 50L
+                // 100 ms (10/s) bastan para la barra y la letra, y es la mitad de recomposiciones que antes.
+                val foregroundTickMs = 100L
+                // En segundo plano nadie dibuja la barra: 500 ms bastan para el seguimiento de
+                // SponsorBlock, el tiempo de reproducción y el guardado de posición.
+                val backgroundTickMs = 500L
                 var sinceLastPositionSaveMs = 0L
                 while (true) {
+                    val tickIntervalMs = if (appInForeground) foregroundTickMs else backgroundTickMs
                     delay(tickIntervalMs)
                     _simpleMediaState.value = SimpleMediaState.Progress(player.currentPosition)
                     sinceLastPositionSaveMs += tickIntervalMs
@@ -1017,7 +1064,7 @@ internal class MediaServiceHandlerImpl(
         bufferedJob =
             coroutineScope.launch {
                 while (true) {
-                    delay(500)
+                    delay(if (appInForeground) 500L else 2_000L)
                     _simpleMediaState.value =
                         SimpleMediaState.Loading(player.bufferedPercentage, player.duration)
                     val current = nowPlayingState.value.songEntity

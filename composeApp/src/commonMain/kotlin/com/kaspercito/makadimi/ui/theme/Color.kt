@@ -8,34 +8,34 @@ import androidx.compose.ui.graphics.Color
  * Brand seed color. The whole Material 3 ColorScheme is generated from this
  * color at runtime — see [AppTheme].
  */
-val seed = Color(0xFF8B7BFF)
+val seed = Color(0xFF1FE58F)
 
 // ===== Semantic colors (not derivable from the color scheme) =====
 
 /** Liked/favorite state (heart buttons, favorite tiles). */
-val favoriteColor = Color(0xFFFF4FD8)
+val favoriteColor = Color(0xFF5CFF9D)
 
 /** Currently playing lyric line. */
-val lyricActiveColor = Color(0xFFB9FFF4)
+val lyricActiveColor = Color(0xFFC8FFE3)
 
-val shimmerBackground = Color(0x7E1A1E3A)
-val shimmerLine = Color(0xFF2E3566)
+val shimmerBackground = Color(0x7E10241C)
+val shimmerLine = Color(0xFF1E4034)
 
 // Light-theme counterparts of the shimmer tokens.
 val shimmerBackgroundLight = Color(0x7EDCD8D8)
 val shimmerLineLight = Color(0xFFCFC8C8)
 
-val overlay = Color(0x3205060E)
-val blackMoreOverlay = Color(0x8F05060E)
+val overlay = Color(0x32030807)
+val blackMoreOverlay = Color(0x8F030807)
 
 // ===== Desktop shell =====
 // Spotify-style layering for the desktop window: the window itself takes the extreme, panels
 // step one shade back towards the middle so they read as raised. The light panel is not here —
 // it comes from colorScheme.surfaceContainer, which already sits at the right distance.
 
-val desktopWindowDark = Color(0xFF05060E)
+val desktopWindowDark = Color(0xFF030807)
 val desktopWindowLight = Color(0xFFFFFFFF)
-val desktopPanelDark = Color(0xFF0C0F20)
+val desktopPanelDark = Color(0xFF0A1511)
 
 // ===== Desktop window controls =====
 // The macOS traffic lights. Fixed by convention rather than by theme — users read these by
@@ -58,9 +58,10 @@ val windowMaximiseButtonHover = Color(0xFF00B344)
 val md_theme_dark_primary = Color(0xFFB2C5FF)
 
 
-// ===== Aurora / Obsidian palette (identidad MaKaDiMi) =====
-val ObsidianBase = Color(0xFF05060E)
-val AuroraViolet = Color(0xFF9C8CFF)
-val AuroraAqua = Color(0xFF42F0E0)
-val AuroraMagenta = Color(0xFFFF6AD5)
-val PearlBase = Color(0xFFF4F3FF)
+// ===== Paleta "Neón verde" (identidad MaKaDiMi) =====
+// Los nombres Aurora* se conservan por compatibilidad; ahora son verde neón / cian / lima.
+val ObsidianBase = Color(0xFF030807)
+val AuroraViolet = Color(0xFF3DFFA2) // acento principal: verde neón
+val AuroraAqua = Color(0xFF2BE4F0) // secundario: cian
+val AuroraMagenta = Color(0xFFC8FF3D) // terciario: lima eléctrico
+val PearlBase = Color(0xFFF1FBF6)

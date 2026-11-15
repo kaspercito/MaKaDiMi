@@ -5,7 +5,7 @@
     android:height="200dp">
   <path
       android:pathData="M82 50A32 32 0 0 1 18 50A32 32 0 0 1 82 50Z"
-      android:strokeColor="#B2C5FF"
+      android:strokeColor="#3DFFA2"
       android:strokeWidth="8"
       android:strokeLineCap="round" />
 </vector>

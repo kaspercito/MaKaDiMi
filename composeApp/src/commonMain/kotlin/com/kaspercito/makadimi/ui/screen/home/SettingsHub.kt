@@ -5,8 +5,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
-import androidx.compose.foundation.layout.ExperimentalLayoutApi
-import androidx.compose.foundation.layout.FlowRow
+import androidx.compose.foundation.layout.IntrinsicSize
+import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -30,6 +30,8 @@ import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.SolidColor
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaspercito.makadimi.ui.icon.Close
@@ -58,7 +60,6 @@ data class SettingsHubEntry(
  * Cabecera "centro de mando" de Ajustes: buscador y cuadrícula de categorías. Tocar una categoría
  * lleva directo a su sección, así no hay que recorrer toda la lista para encontrar algo.
  */
-@OptIn(ExperimentalLayoutApi::class)
 @Composable
 fun SettingsHub(
     entries: List<SettingsHubEntry>,
@@ -126,45 +127,55 @@ fun SettingsHub(
             )
         }
 
-        FlowRow(
-            modifier = Modifier.fillMaxWidth(),
-            horizontalArrangement = Arrangement.spacedBy(10.dp),
-            verticalArrangement = Arrangement.spacedBy(10.dp),
-            maxItemsInEachRow = 3,
-        ) {
-            filtered.forEach { entry ->
-                Column(
-                    modifier =
-                        Modifier
-                            .weight(1f)
-                            .clip(LeafShapeSmall)
-                            .glassPanel(LeafShapeSmall, alpha = 0.5f)
-                            .clickable { onJump(entry.key) }
-                            .padding(vertical = 14.dp, horizontal = 8.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
+        // Filas de 3 con altura igual: antes un FlowRow con `maxLines = 1` cortaba los nombres largos
+        // ("Historial d…", "Integració…") y repartía mal las filas. Ahora el nombre puede ocupar
+        // dos líneas, centrado, y todas las tarjetas de una fila miden lo mismo.
+        val columns = 3
+        Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
+            filtered.chunked(columns).forEach { rowEntries ->
+                Row(
+                    modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max),
+                    horizontalArrangement = Arrangement.spacedBy(10.dp),
                 ) {
-                    Box(
-                        modifier =
-                            Modifier
-                                .size(40.dp)
-                                .clip(LeafShapeSmall)
-                                .background(Brush.linearGradient(listOf(cs.primary.copy(alpha = 0.28f), cs.secondary.copy(alpha = 0.18f)))),
-                        contentAlignment = Alignment.Center,
-                    ) {
-                        Icon(entry.icon, contentDescription = null, tint = cs.primary, modifier = Modifier.size(22.dp))
+                    rowEntries.forEach { entry ->
+                        Column(
+                            modifier =
+                                Modifier
+                                    .weight(1f)
+                                    .fillMaxHeight()
+                                    .clip(LeafShapeSmall)
+                                    .glassPanel(LeafShapeSmall, alpha = 0.5f)
+                                    .clickable { onJump(entry.key) }
+                                    .padding(top = 14.dp, bottom = 12.dp, start = 6.dp, end = 6.dp),
+                            horizontalAlignment = Alignment.CenterHorizontally,
+                        ) {
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .size(40.dp)
+                                        .clip(LeafShapeSmall)
+                                        .background(Brush.linearGradient(listOf(cs.primary.copy(alpha = 0.28f), cs.secondary.copy(alpha = 0.18f)))),
+                                contentAlignment = Alignment.Center,
+                            ) {
+                                Icon(entry.icon, contentDescription = null, tint = cs.primary, modifier = Modifier.size(22.dp))
+                            }
+                            Spacer(Modifier.height(8.dp))
+                            Text(
+                                text = entry.title,
+                                style = typo().labelSmall.copy(fontWeight = FontWeight.SemiBold, lineHeight = 14.sp),
+                                color = cs.onSurface,
+                                textAlign = TextAlign.Center,
+                                // Dos líneas como máximo; una palabra muy larga se parte en vez de cortarse con "…".
+                                maxLines = 2,
+                                softWrap = true,
+                                overflow = TextOverflow.Clip,
+                            )
+                        }
                     }
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = entry.title,
-                        style = typo().labelSmall.copy(fontWeight = FontWeight.SemiBold),
-                        color = cs.onSurface,
-                        maxLines = 1,
-                        overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                    )
+                    // Relleno para que la última fila no estire sus tarjetas.
+                    repeat(columns - rowEntries.size) { Spacer(Modifier.weight(1f)) }
                 }
             }
-            // Relleno para que la última fila no estire sus tarjetas.
-            repeat((3 - filtered.size % 3) % 3) { Spacer(Modifier.weight(1f)) }
         }
         // Línea de luz bajo el hub
         Spacer(Modifier.height(18.dp))

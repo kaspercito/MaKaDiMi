@@ -8,11 +8,6 @@ import androidx.compose.animation.Animatable
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateContentSize
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.expandVertically
 import androidx.compose.animation.fadeIn
@@ -115,6 +110,7 @@ import com.kaspercito.makadimi.Platform
 import com.kaspercito.makadimi.expect.ui.MediaPlayerView
 import com.kaspercito.makadimi.expect.ui.MediaPlayerViewWithSubtitle
 import com.kaspercito.makadimi.expect.ui.toImageBitmap
+import com.kaspercito.makadimi.extension.rememberCrossfadeSweep
 import com.kaspercito.makadimi.extension.elapsedLabel
 import com.kaspercito.makadimi.extension.formatDuration
 import com.kaspercito.makadimi.extension.lengthLabel
@@ -2072,17 +2068,7 @@ internal fun ColumnScope.SpotifyPlaybackControls(
         // unconditionally: behind the crossfade check it would
         // restart from zero each time the label appears (same
         // rationale as MiniPlayer's crossfadeSweep).
-        val sweepTransition = rememberInfiniteTransition(label = "nowPlayingCrossfadeSweep")
-        val crossfadeSweep by sweepTransition.animateFloat(
-            initialValue = 0f,
-            targetValue = 1f,
-            animationSpec =
-                infiniteRepeatable(
-                    animation = tween(3200, easing = LinearEasing),
-                    repeatMode = RepeatMode.Restart,
-                ),
-            label = "nowPlayingSweepHead",
-        )
+        val crossfadeSweep = rememberCrossfadeSweep(state.timelineState.isCrossfading)
         AnimatedVisibility(
             enter = fadeIn(),
             exit = fadeOut(),

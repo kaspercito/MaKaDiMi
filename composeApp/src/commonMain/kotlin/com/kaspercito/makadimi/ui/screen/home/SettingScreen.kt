@@ -39,6 +39,7 @@ import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Slider
 import androidx.compose.material3.AlertDialogDefaults
 import androidx.compose.material3.BasicAlertDialog
 import androidx.compose.material3.Checkbox
@@ -119,6 +120,7 @@ import com.kaspercito.makadimi.expect.ui.fileSaverResult
 import com.kaspercito.makadimi.expect.ui.isLyricsBlurSupported
 import com.kaspercito.makadimi.expect.ui.isWallpaperDynamicColorSupported
 import com.kaspercito.makadimi.expect.ui.openEqResult
+import com.kaspercito.makadimi.expect.ui.photoPickerResult
 import com.kaspercito.makadimi.expect.ui.rememberLocalNetworkPermission
 import com.kaspercito.makadimi.extension.barBlurStyle
 import com.kaspercito.makadimi.extension.bytesToMB
@@ -618,6 +620,19 @@ fun SettingScreen(
     val romanizationStored by sharedViewModel.getRomanizationLanguages().collectAsStateWithLifecycle("")
     val japaneseDictionaryState by viewModel.japaneseDictionaryState.collectAsStateWithLifecycle()
     var showColorPickerDialog by rememberSaveable { mutableStateOf(false) }
+    val backgroundStyle by sharedViewModel.getBackgroundStyle().collectAsStateWithLifecycle(DataStoreManager.BACKGROUND_STYLE_GRID)
+    val backgroundGlowHex by sharedViewModel.getBackgroundGlowColor().collectAsStateWithLifecycle("")
+    val backgroundIntensity by sharedViewModel.getBackgroundIntensity().collectAsStateWithLifecycle(DataStoreManager.DEFAULT_BACKGROUND_INTENSITY)
+    val backgroundImageUri by sharedViewModel.getBackgroundImageUri().collectAsStateWithLifecycle("")
+    var showBackgroundColorDialog by rememberSaveable { mutableStateOf(false) }
+    var showBackgroundIntensityDialog by rememberSaveable { mutableStateOf(false) }
+    val backgroundPhotoPicker =
+        photoPickerResult { uri ->
+            if (uri != null) {
+                sharedViewModel.setBackgroundImageUri(uri)
+                sharedViewModel.setBackgroundStyle(DataStoreManager.BACKGROUND_STYLE_IMAGE)
+            }
+        }
     val discordLoggedIn by viewModel.discordLoggedIn.collectAsStateWithLifecycle()
     val loggedIn by viewModel.loggedIn.collectAsStateWithLifecycle()
     val syncFollowToYouTube by viewModel.syncFollowToYouTube.collectAsStateWithLifecycle()
@@ -1006,6 +1021,77 @@ fun SettingScreen(
                             subtitle = "#${customThemeColorHex.takeLast(6)}",
                             smallSubtitle = true,
                             onClick = { showColorPickerDialog = true },
+                        )
+                    }
+                    val backgroundStyleLabels =
+                        listOf(
+                            DataStoreManager.BACKGROUND_STYLE_GRID to stringResource(Res.string.background_style_grid),
+                            DataStoreManager.BACKGROUND_STYLE_AURORA to stringResource(Res.string.background_style_aurora),
+                            DataStoreManager.BACKGROUND_STYLE_DOTS to stringResource(Res.string.background_style_dots),
+                            DataStoreManager.BACKGROUND_STYLE_BLACK to stringResource(Res.string.background_style_black),
+                            DataStoreManager.BACKGROUND_STYLE_IMAGE to stringResource(Res.string.background_style_image),
+                        )
+                    SettingItem(
+                        title = stringResource(Res.string.app_background),
+                        subtitle = backgroundStyleLabels.firstOrNull { it.first == backgroundStyle }?.second ?: "",
+                        onClick = {
+                            viewModel.setAlertData(
+                                SettingAlertState(
+                                    title = runBlocking { getString(Res.string.app_background) },
+                                    selectOne =
+                                        SettingAlertState.SelectData(
+                                            listSelect = backgroundStyleLabels.map { (it.first == backgroundStyle) to it.second },
+                                        ),
+                                    confirm =
+                                        runBlocking { getString(Res.string.change) } to { state ->
+                                            val selected = state.selectOne?.getSelected()
+                                            backgroundStyleLabels.firstOrNull { it.second == selected }?.first?.let {
+                                                sharedViewModel.setBackgroundStyle(it)
+                                                // Sin foto elegida todavía: abre la galería directamente.
+                                                if (it == DataStoreManager.BACKGROUND_STYLE_IMAGE && backgroundImageUri.isBlank()) {
+                                                    backgroundPhotoPicker.launch()
+                                                }
+                                            }
+                                        },
+                                    dismiss = runBlocking { getString(Res.string.cancel) },
+                                ),
+                            )
+                        },
+                    )
+                    if (backgroundStyle == DataStoreManager.BACKGROUND_STYLE_IMAGE) {
+                        SettingItem(
+                            title = stringResource(Res.string.background_pick_image),
+                            subtitle =
+                                if (backgroundImageUri.isBlank()) {
+                                    stringResource(Res.string.background_no_image)
+                                } else {
+                                    stringResource(Res.string.background_change_image)
+                                },
+                            smallSubtitle = true,
+                            onClick = { backgroundPhotoPicker.launch() },
+                        )
+                    }
+                    if (backgroundStyle != DataStoreManager.BACKGROUND_STYLE_BLACK &&
+                        backgroundStyle != DataStoreManager.BACKGROUND_STYLE_IMAGE
+                    ) {
+                        SettingItem(
+                            title = stringResource(Res.string.background_glow_color),
+                            subtitle =
+                                if (backgroundGlowHex.isBlank()) {
+                                    stringResource(Res.string.background_glow_theme)
+                                } else {
+                                    "#${backgroundGlowHex.takeLast(6).uppercase()}"
+                                },
+                            smallSubtitle = true,
+                            onClick = { showBackgroundColorDialog = true },
+                        )
+                    }
+                    if (backgroundStyle != DataStoreManager.BACKGROUND_STYLE_BLACK) {
+                        SettingItem(
+                            title = stringResource(Res.string.background_intensity),
+                            subtitle = "$backgroundIntensity%",
+                            smallSubtitle = true,
+                            onClick = { showBackgroundIntensityDialog = true },
                         )
                     }
                 }
@@ -3030,6 +3116,104 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
             },
             dismissButton = {
                 TextButton(onClick = { showColorPickerDialog = false }) {
+                    Text(text = stringResource(Res.string.cancel))
+                }
+            },
+        )
+    }
+    if (showBackgroundColorDialog) {
+        val glowPresets =
+            listOf(
+                "3DFFA2",
+                "2BE4F0",
+                "C8FF3D",
+                "4D9BFF",
+                "FFB02B",
+                "FF4D4D",
+                "FFFFFF",
+            )
+        var pendingGlow by rememberSaveable { mutableStateOf(backgroundGlowHex.takeLast(6)) }
+        val parsedGlow = if (pendingGlow.isBlank()) null else parseThemeColorHex(pendingGlow)
+        AlertDialog(
+            onDismissRequest = { showBackgroundColorDialog = false },
+            title = { Text(text = stringResource(Res.string.background_glow_color), style = typo().titleSmall) },
+            text = {
+                Column {
+                    TextButton(onClick = { pendingGlow = "" }) {
+                        Text(text = stringResource(Res.string.background_glow_theme))
+                    }
+                    Row(modifier = Modifier.padding(vertical = 4.dp)) {
+                        glowPresets.forEach { hex ->
+                            val color = parseThemeColorHex(hex) ?: Color.Gray
+                            val isSelected = pendingGlow.equals(hex, ignoreCase = true)
+                            Box(
+                                modifier =
+                                    Modifier
+                                        .padding(2.dp)
+                                        .size(32.dp)
+                                        .clip(CircleShape)
+                                        .background(color)
+                                        .border(
+                                            width = if (isSelected) 3.dp else 0.dp,
+                                            color = if (isSelected) MaterialTheme.colorScheme.onSurface else Color.Transparent,
+                                            shape = CircleShape,
+                                        ).clickable { pendingGlow = hex },
+                            )
+                        }
+                    }
+                    Spacer(Modifier.height(12.dp))
+                    TextField(
+                        value = pendingGlow,
+                        onValueChange = { pendingGlow = it.removePrefix("#").take(6).uppercase() },
+                        label = { Text("HEX") },
+                        prefix = { Text("#") },
+                        singleLine = true,
+                        isError = pendingGlow.isNotBlank() && parsedGlow == null,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    enabled = pendingGlow.isBlank() || parsedGlow != null,
+                    onClick = {
+                        sharedViewModel.setBackgroundGlowColor(if (pendingGlow.isBlank()) "" else "FF${pendingGlow.uppercase()}")
+                        showBackgroundColorDialog = false
+                    },
+                ) { Text(text = stringResource(Res.string.change)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showBackgroundColorDialog = false }) {
+                    Text(text = stringResource(Res.string.cancel))
+                }
+            },
+        )
+    }
+    if (showBackgroundIntensityDialog) {
+        var pendingIntensity by rememberSaveable { mutableStateOf(backgroundIntensity.toFloat()) }
+        AlertDialog(
+            onDismissRequest = { showBackgroundIntensityDialog = false },
+            title = { Text(text = stringResource(Res.string.background_intensity), style = typo().titleSmall) },
+            text = {
+                Column {
+                    Text(text = "${pendingIntensity.toInt()}%", style = typo().bodyMedium)
+                    Slider(
+                        value = pendingIntensity,
+                        onValueChange = { pendingIntensity = it },
+                        valueRange = 0f..100f,
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        sharedViewModel.setBackgroundIntensity(pendingIntensity.toInt())
+                        showBackgroundIntensityDialog = false
+                    },
+                ) { Text(text = stringResource(Res.string.change)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { showBackgroundIntensityDialog = false }) {
                     Text(text = stringResource(Res.string.cancel))
                 }
             },

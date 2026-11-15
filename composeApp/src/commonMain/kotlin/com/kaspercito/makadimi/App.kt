@@ -103,7 +103,7 @@ import com.kaspercito.makadimi.ui.screen.other.UnofficialBuildScreen
 import com.kaspercito.makadimi.ui.screen.player.NowPlayingScreen
 import com.kaspercito.makadimi.ui.screen.player.NowPlayingScreenContent
 import com.kaspercito.makadimi.ui.theme.AppTheme
-import com.kaspercito.makadimi.ui.theme.auroraBackground
+import com.kaspercito.makadimi.ui.theme.appBackground
 import com.kaspercito.makadimi.ui.theme.ForceDarkContent
 import com.kaspercito.makadimi.ui.theme.desktopPanelDark
 import com.kaspercito.makadimi.ui.theme.desktopWindowDark
@@ -182,6 +182,10 @@ fun App(
     val themeMode by viewModel.getThemeMode().collectAsStateWithLifecycle(DataStoreManager.THEME_MODE_DARK)
     val themeColorSource by viewModel.getThemeColorSource().collectAsStateWithLifecycle(DataStoreManager.THEME_COLOR_DEFAULT)
     val customThemeColorHex by viewModel.getCustomThemeColor().collectAsStateWithLifecycle(DataStoreManager.DEFAULT_THEME_COLOR_HEX)
+    val backgroundStyle by viewModel.getBackgroundStyle().collectAsStateWithLifecycle(DataStoreManager.BACKGROUND_STYLE_GRID)
+    val backgroundGlowHex by viewModel.getBackgroundGlowColor().collectAsStateWithLifecycle("")
+    val backgroundIntensity by viewModel.getBackgroundIntensity().collectAsStateWithLifecycle(DataStoreManager.DEFAULT_BACKGROUND_INTENSITY)
+    val backgroundImageUri by viewModel.getBackgroundImageUri().collectAsStateWithLifecycle("")
     val isOfficialBuild by viewModel.isOfficialBuild.collectAsStateWithLifecycle()
     // MiniPlayer visibility: derived, never stored.
     //
@@ -525,7 +529,19 @@ fun App(
             // Watches for userStarted without consuming anything. Dialogs and sheets are windows or
             // layers of their own, so a press inside one (closing the update dialog, say) does not count.
             modifier =
-                (if (isDesktopShell) Modifier else Modifier.auroraBackground(MaterialTheme.colorScheme.background)).pointerInput(Unit) {
+                (
+                    if (isDesktopShell) {
+                        Modifier
+                    } else {
+                        Modifier.appBackground(
+                            style = backgroundStyle,
+                            glowColor = parseThemeColorHex(backgroundGlowHex),
+                            intensity = backgroundIntensity,
+                            imageUri = backgroundImageUri,
+                            base = MaterialTheme.colorScheme.background,
+                        )
+                    }
+                ).pointerInput(Unit) {
                     awaitPointerEventScope {
                         while (!userStarted) {
                             val type = awaitPointerEvent(PointerEventPass.Initial).type

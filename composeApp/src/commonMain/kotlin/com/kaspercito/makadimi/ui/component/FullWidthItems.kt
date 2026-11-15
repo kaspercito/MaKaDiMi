@@ -189,8 +189,13 @@ fun SongFullWidthItems(
                                 onClickListener?.invoke(itemVideoId)
                             }
                         },
+                        // Mantener pulsado abre directamente el menú de la canción (descargar, cola,
+                        // playlist...), igual que los "tres puntos". Ya no hace falta entrar a la canción.
+                        // La selección múltiple solo se usa si la pantalla no tiene menú.
                         onLongClick =
-                            if (onLongClick != null) {
+                            if (!selectionMode && onMoreClickListener != null) {
+                                { onMoreClickListener(itemVideoId) }
+                            } else if (onLongClick != null) {
                                 { onLongClick(itemVideoId) }
                             } else {
                                 null

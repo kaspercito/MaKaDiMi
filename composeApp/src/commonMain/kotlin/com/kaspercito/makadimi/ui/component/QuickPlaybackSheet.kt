@@ -103,7 +103,7 @@ fun QuickPlaybackSheet(
         containerColor = Color.Transparent,
         contentColor = Color.Transparent,
         dragHandle = null,
-        scrimColor = Color(0xFF05060E).copy(alpha = .72f),
+        scrimColor = Color(0xFF030807).copy(alpha = .72f),
         contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
     ) {
         Column(

@@ -1,5 +1,6 @@
 package com.kaspercito.makadimi.extension
 
+import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FloatSpringSpec
 import androidx.compose.animation.core.LinearEasing
@@ -864,4 +865,48 @@ fun hsvToColor(
         blue = (b + m).coerceIn(0f, 1f),
         alpha = 1f,
     )
+}
+
+/**
+ * Color arcoíris del slider durante un crossfade. La animación infinita SOLO existe mientras
+ * [active] es true: antes corría siempre (60 fps) y, al leerse en composición, recomponía toda la
+ * pantalla del reproductor y la de letras en cada cuadro aunque no hubiera crossfade — calor gratis.
+ */
+@Composable
+fun rememberCrossfadeRainbowColor(active: Boolean): Color {
+    if (!active) return Color.White
+    val transition = rememberInfiniteTransition(label = "crossfadeRainbow")
+    val hue by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 360f,
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(1000, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart,
+            ),
+        label = "rainbowHue",
+    )
+    return hsvToColor(hue, 1f, 1f)
+}
+
+/**
+ * Cabeza del brillo "Crossfading" (0..1). Igual que el arcoíris: la animación infinita solo existe
+ * mientras [active] es true. Antes los tres estilos del reproductor la dejaban corriendo todo el
+ * tiempo, sin que se viera, y mantenían la pantalla pidiendo cuadros a 60 fps.
+ */
+@Composable
+fun rememberCrossfadeSweep(active: Boolean): Float {
+    if (!active) return 0f
+    val transition = rememberInfiniteTransition(label = "crossfadeSweep")
+    val sweep by transition.animateFloat(
+        initialValue = 0f,
+        targetValue = 1f,
+        animationSpec =
+            infiniteRepeatable(
+                animation = tween(3200, easing = LinearEasing),
+                repeatMode = RepeatMode.Restart,
+            ),
+        label = "crossfadeSweepHead",
+    )
+    return sweep
 }

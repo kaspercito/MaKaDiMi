@@ -240,7 +240,7 @@ private fun NeonDock(
             // El DJ vive en el centro del dock: tabs a la izquierda, orbe, tabs a la derecha.
             val half = (tabs.size + 1) / 2
             tabs.take(half).forEach { renderTab(it) }
-            DjOrb(active = djActive, size = 34.dp, onClick = { showDj = true })
+            DjOrb(active = djActive, size = 44.dp, halo = 1.2f, onClick = { showDj = true })
             tabs.drop(half).forEach { renderTab(it) }
         }
     }

@@ -141,6 +141,35 @@ class AiService(
             ?.takeIf { it.isNotEmpty() }
     }
 
+    /**
+     * Sugerencias de canciones para la cola del DJ, como texto libre (un JSON de cadenas
+     * "Artista - Título"). Sin `responseFormat` por la misma razón que [describeTaste].
+     */
+    suspend fun suggestSongs(prompt: String): String? {
+        val request =
+            chatCompletionRequest {
+                this.model = this@AiService.model
+                messages {
+                    system {
+                        content = SUGGEST_SYSTEM_PROMPT
+                    }
+                    user {
+                        content {
+                            text(prompt)
+                        }
+                    }
+                }
+            }
+        return openAI
+            .chatCompletion(request)
+            .choices
+            .firstOrNull()
+            ?.message
+            ?.content
+            ?.trim()
+            ?.takeIf { it.isNotEmpty() }
+    }
+
     suspend fun translateLyrics(
         inputLyrics: Lyrics,
         targetLanguage: String,
@@ -265,6 +294,22 @@ class AiService(
                 "a veces relajado, a veces un guiño al estado de ánimo que crea la música. Si te dicen frases que ya " +
                 "dijiste, no repitas ni su estructura ni sus muletillas. No inventes datos que no conozcas con " +
                 "seguridad (años, premios, anécdotas). Responde en el idioma que se te pida."
+
+        private const val SUGGEST_SYSTEM_PROMPT =
+            "Eres un curador musical experto que arma la cola de una sesión de radio personal. " +
+                "Recibirás los gustos reales del oyente (artistas y canciones que ya escucha), la canción con la que " +
+                "arranca la sesión y una lista de canciones que NO debes repetir. " +
+                "Tu trabajo: proponer canciones que ENCAJEN con esos gustos y que el oyente disfrutaría de verdad. " +
+                "REGLAS ESTRICTAS: " +
+                "1) Mantente en el MISMO género, idioma, época y nivel de energía que la canción inicial y los gustos. " +
+                "Nunca saltes a un género distinto (si escucha trap latino, no propongas rock, baladas ni pop de otro estilo). " +
+                "2) Mezcla: más o menos la mitad de la lista debe ser de artistas que ya escucha o muy cercanos a ellos " +
+                "(colaboradores habituales, mismo movimiento o escena) y la otra mitad, éxitos del mismo estilo. " +
+                "3) Solo canciones reales, populares y fáciles de encontrar en YouTube Music; no inventes títulos. " +
+                "4) No repitas canciones de la lista prohibida ni la inicial; evita repetir el mismo artista más de dos veces. " +
+                "5) Ordena la lista como una buena sesión: alterna energías sin romper el estilo. " +
+                "FORMATO: responde SOLO con un arreglo JSON de cadenas con el formato \"Artista - Título\", " +
+                "sin texto extra, sin markdown, sin numeración."
 
         private val translationJsonSchema: JsonObject =
             buildJsonObject {

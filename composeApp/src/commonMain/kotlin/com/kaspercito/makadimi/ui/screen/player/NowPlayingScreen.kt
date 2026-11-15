@@ -9,11 +9,7 @@ import androidx.compose.animation.animateColorAsState
 import androidx.compose.animation.core.FastOutSlowInEasing
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.MutableTransitionState
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.tween
 import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
@@ -68,12 +64,12 @@ import com.kaspercito.domain.mediaservice.handler.MediaPlayerHandler
 import com.kaspercito.logger.Logger
 import com.kaspercito.makadimi.Platform
 import com.kaspercito.makadimi.expect.ui.rememberVideoAspectRatio
+import com.kaspercito.makadimi.extension.rememberCrossfadeRainbowColor
 import com.kaspercito.makadimi.extension.GradientAngle
 import com.kaspercito.makadimi.extension.GradientOffset
 import com.kaspercito.makadimi.extension.KeepScreenOn
 import com.kaspercito.makadimi.extension.getColorFromPalette
 import com.kaspercito.makadimi.extension.getScreenSizeInfo
-import com.kaspercito.makadimi.extension.hsvToColor
 import com.kaspercito.makadimi.extension.rememberIsInPipMode
 import com.kaspercito.makadimi.getPlatform
 import com.kaspercito.makadimi.ui.component.AddToPlaylistModalBottomSheet
@@ -483,19 +479,8 @@ fun NowPlayingScreenContent(
         }
     }
 
-    // Crossfade: RGB rainbow color cycling when transitioning between tracks
-    val infiniteTransition = rememberInfiniteTransition(label = "crossfadeRainbow")
-    val rainbowHue by infiniteTransition.animateFloat(
-        initialValue = 0f,
-        targetValue = 360f,
-        animationSpec =
-            infiniteRepeatable(
-                animation = tween(1000, easing = LinearEasing),
-                repeatMode = RepeatMode.Restart,
-            ),
-        label = "rainbowHue",
-    )
-    val rainbowColor = hsvToColor(rainbowHue, 1f, 1f)
+    // Crossfade: arcoíris solo mientras dura el crossfade (ver rememberCrossfadeRainbowColor)
+    val rainbowColor = rememberCrossfadeRainbowColor(timelineState.isCrossfading)
     val sliderTrackColor by animateColorAsState(
         targetValue = if (timelineState.isCrossfading) rainbowColor else Color.White,
         animationSpec = tween(300),

@@ -67,6 +67,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.geometry.Offset
+import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.StrokeCap
@@ -91,11 +92,11 @@ import com.kaspercito.makadimi.expect.ui.PlatformBackdrop
 import com.kaspercito.makadimi.expect.ui.isLyricsBlurSupported
 import com.kaspercito.makadimi.expect.ui.layerBackdrop
 import com.kaspercito.makadimi.expect.ui.rememberBackdrop
+import com.kaspercito.makadimi.extension.rememberCrossfadeRainbowColor
 import com.kaspercito.makadimi.extension.KeepScreenOn
 import com.kaspercito.makadimi.extension.formatDuration
 import com.kaspercito.makadimi.extension.lengthLabel
 import com.kaspercito.makadimi.extension.getScreenSizeInfo
-import com.kaspercito.makadimi.extension.hsvToColor
 import com.kaspercito.makadimi.getPlatform
 import com.kaspercito.makadimi.ui.component.lyrics.ShareLyricsSheet
 import com.kaspercito.makadimi.ui.component.lyrics.toShareLyricsLines
@@ -291,19 +292,8 @@ fun FullscreenLyricsContent(
                 )
             }
         } else {
-            // Crossfade: RGB rainbow color cycling when transitioning between tracks
-            val infiniteTransition = rememberInfiniteTransition(label = "crossfadeRainbow")
-            val rainbowHue by infiniteTransition.animateFloat(
-                initialValue = 0f,
-                targetValue = 360f,
-                animationSpec =
-                    infiniteRepeatable(
-                        animation = tween(1000, easing = LinearEasing),
-                        repeatMode = RepeatMode.Restart,
-                    ),
-                label = "rainbowHue",
-            )
-            val rainbowColor = hsvToColor(rainbowHue, 1f, 1f)
+            // Crossfade: arcoíris solo mientras dura el crossfade (ver rememberCrossfadeRainbowColor)
+            val rainbowColor = rememberCrossfadeRainbowColor(timelineState.isCrossfading)
             val sliderTrackColor by animateColorAsState(
                 targetValue = if (timelineState.isCrossfading) rainbowColor else Color.White,
                 animationSpec = tween(300),
@@ -1225,9 +1215,8 @@ internal fun AnimatedLyricsGradientBackground(
             ),
         label = "lyricsGradientOffsetY",
     )
-    val gradientAngle = animatedAngle
-    val gradientOffsetX = animatedOffsetX
-    val gradientOffsetY = animatedOffsetY
+    // Los valores animados se leen SOLO dentro de drawBehind (fase de dibujo): así cada cuadro
+    // redibuja el degradado sin recomponer todo el composable (antes lo recomponía a 60 fps).
 
     // Smooth color animation based on lyrics color
     LaunchedEffect(color) {
@@ -1261,27 +1250,32 @@ internal fun AnimatedLyricsGradientBackground(
         modifier =
             modifier
                 .fillMaxSize()
-                .background(
-                    Brush.linearGradient(
-                        colors =
-                            listOf(
-                                startColor.value,
-                                midColor1.value,
-                                midColor2.value,
-                                endColor.value.copy(alpha = 0.9f),
-                                endColor.value,
-                            ),
-                        start =
-                            Offset(
-                                x = gradientOffsetX + (cos(gradientAngle * PI.toFloat() / 180f) * 800f),
-                                y = gradientOffsetY + (sin(gradientAngle * PI.toFloat() / 180f) * 800f),
-                            ),
-                        end =
-                            Offset(
-                                x = gradientOffsetX + 2500f + (cos((gradientAngle + 180f) * PI.toFloat() / 180f) * 800f),
-                                y = gradientOffsetY + 2500f + (sin((gradientAngle + 180f) * PI.toFloat() / 180f) * 800f),
-                            ),
-                    ),
-                ),
+                .drawBehind {
+                    val gradientAngle = animatedAngle
+                    val gradientOffsetX = animatedOffsetX
+                    val gradientOffsetY = animatedOffsetY
+                    drawRect(
+                        Brush.linearGradient(
+                            colors =
+                                listOf(
+                                    startColor.value,
+                                    midColor1.value,
+                                    midColor2.value,
+                                    endColor.value.copy(alpha = 0.9f),
+                                    endColor.value,
+                                ),
+                            start =
+                                Offset(
+                                    x = gradientOffsetX + (cos(gradientAngle * PI.toFloat() / 180f) * 800f),
+                                    y = gradientOffsetY + (sin(gradientAngle * PI.toFloat() / 180f) * 800f),
+                                ),
+                            end =
+                                Offset(
+                                    x = gradientOffsetX + 2500f + (cos((gradientAngle + 180f) * PI.toFloat() / 180f) * 800f),
+                                    y = gradientOffsetY + 2500f + (sin((gradientAngle + 180f) * PI.toFloat() / 180f) * 800f),
+                                ),
+                        ),
+                    )
+                },
     )
 }

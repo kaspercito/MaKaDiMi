@@ -323,7 +323,7 @@ fun InfoPlayerBottomSheet(
         containerColor = rememberSurfaceDarkColors().container,
         contentColor = Color.Transparent,
         dragHandle = {},
-        scrimColor = Color(0xFF05060E).copy(alpha = .72f),
+        scrimColor = Color(0xFF030807).copy(alpha = .72f),
         sheetState = sheetState,
         modifier = Modifier.fillMaxHeight(),
         contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
@@ -1033,7 +1033,7 @@ fun QueueBottomSheet(
         containerColor = rememberSurfaceDarkColors().container,
         contentColor = Color.Transparent,
         dragHandle = {},
-        scrimColor = Color(0xFF05060E).copy(alpha = .72f),
+        scrimColor = Color(0xFF030807).copy(alpha = .72f),
         sheetState = sheetState,
         modifier = Modifier.fillMaxHeight(),
         contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
@@ -1574,7 +1574,7 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
             containerColor = Color.Transparent,
             contentColor = Color.Transparent,
             dragHandle = null,
-            scrimColor = Color(0xFF05060E).copy(alpha = .72f),
+            scrimColor = Color(0xFF030807).copy(alpha = .72f),
             contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
         ) {
             Card(
@@ -2117,7 +2117,7 @@ fun PlaybackSpeedPitchBottomSheet(
         containerColor = Color.Transparent,
         contentColor = Color.Transparent,
         dragHandle = null,
-        scrimColor = Color(0xFF05060E).copy(alpha = .72f),
+        scrimColor = Color(0xFF030807).copy(alpha = .72f),
         contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
     ) {
         Card(
@@ -2292,7 +2292,7 @@ fun SleepTimerBottomSheet(
         containerColor = Color.Transparent,
         contentColor = Color.Transparent,
         dragHandle = null,
-        scrimColor = Color(0xFF05060E).copy(alpha = .72f),
+        scrimColor = Color(0xFF030807).copy(alpha = .72f),
         contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
     ) {
         Card(
@@ -2566,7 +2566,7 @@ fun AddToPlaylistModalBottomSheet(
             containerColor = Color.Transparent,
             contentColor = Color.Transparent,
             dragHandle = null,
-            scrimColor = Color(0xFF05060E).copy(alpha = .72f),
+            scrimColor = Color(0xFF030807).copy(alpha = .72f),
             contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
         ) {
             Card(
@@ -2748,7 +2748,7 @@ fun ArtistModalBottomSheet(
             containerColor = Color.Transparent,
             contentColor = Color.Transparent,
             dragHandle = null,
-            scrimColor = Color(0xFF05060E).copy(alpha = .72f),
+            scrimColor = Color(0xFF030807).copy(alpha = .72f),
             contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
         ) {
             Card(
@@ -2841,7 +2841,7 @@ fun PlaylistBottomSheet(
             containerColor = Color.Transparent,
             contentColor = Color.Transparent,
             dragHandle = null,
-            scrimColor = Color(0xFF05060E).copy(alpha = .72f),
+            scrimColor = Color(0xFF030807).copy(alpha = .72f),
             contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
         ) {
             Card(
@@ -2897,7 +2897,7 @@ fun PlaylistBottomSheet(
         containerColor = Color.Transparent,
         contentColor = Color.Transparent,
         dragHandle = null,
-        scrimColor = Color(0xFF05060E).copy(alpha = .72f),
+        scrimColor = Color(0xFF030807).copy(alpha = .72f),
         contentWindowInsets = { WindowInsets(0) },
     ) {
         Card(
@@ -3033,7 +3033,7 @@ fun LocalPlaylistBottomSheet(
             containerColor = Color.Transparent,
             contentColor = Color.Transparent,
             dragHandle = null,
-            scrimColor = Color(0xFF05060E).copy(alpha = .72f),
+            scrimColor = Color(0xFF030807).copy(alpha = .72f),
             contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
         ) {
             Card(
@@ -3083,7 +3083,7 @@ fun LocalPlaylistBottomSheet(
             containerColor = Color.Transparent,
             contentColor = Color.Transparent,
             dragHandle = null,
-            scrimColor = Color(0xFF05060E).copy(alpha = .72f),
+            scrimColor = Color(0xFF030807).copy(alpha = .72f),
             contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
         ) {
             Card(
@@ -3181,7 +3181,7 @@ fun SortPlaylistBottomSheet(
         containerColor = Color.Transparent,
         contentColor = Color.Transparent,
         dragHandle = null,
-        scrimColor = Color(0xFF05060E).copy(alpha = .72f),
+        scrimColor = Color(0xFF030807).copy(alpha = .72f),
         contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
     ) {
         Card(
@@ -3262,7 +3262,7 @@ fun DevLogInBottomSheet(
         containerColor = Color.Transparent,
         contentColor = Color.Transparent,
         dragHandle = null,
-        scrimColor = Color(0xFF05060E).copy(alpha = .72f),
+        scrimColor = Color(0xFF030807).copy(alpha = .72f),
         contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
     ) {
         Card(
@@ -3326,7 +3326,7 @@ fun DevCookieLogInBottomSheet(
         containerColor = Color.Transparent,
         contentColor = Color.Transparent,
         dragHandle = null,
-        scrimColor = Color(0xFF05060E).copy(alpha = .72f),
+        scrimColor = Color(0xFF030807).copy(alpha = .72f),
         contentWindowInsets = { WindowInsets(0, 0, 0, 0) },
     ) {
         Card(

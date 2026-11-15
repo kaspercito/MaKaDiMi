@@ -2,13 +2,8 @@ package com.kaspercito.makadimi.ui.screen.player.content.applemusic
 
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
 import androidx.compose.animation.core.animateDpAsState
-import androidx.compose.animation.core.animateFloat
 import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
 import androidx.compose.animation.core.spring
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.background
@@ -80,6 +75,7 @@ import com.kaspercito.domain.mediaservice.handler.RepeatState
 import com.kaspercito.domain.repository.ListenTogetherRepository
 import com.kaspercito.makadimi.Platform
 import com.kaspercito.makadimi.expect.ui.DeviceVolumeController
+import com.kaspercito.makadimi.extension.rememberCrossfadeSweep
 import com.kaspercito.makadimi.extension.formatDuration
 import com.kaspercito.makadimi.getPlatform
 import com.kaspercito.makadimi.ui.component.ExplicitBadge
@@ -581,17 +577,7 @@ internal fun AppleMusicTimesRow(
             // Sweep head for the "Crossfading" shimmer, 0..1. Runs UNCONDITIONALLY — put behind the
             // crossfade check it would restart from zero every time the label appears, which is the
             // same reason the other two styles declare it outside their own visibility gate.
-            val sweepTransition = rememberInfiniteTransition(label = "appleMusicCrossfadeSweep")
-            val crossfadeSweep by sweepTransition.animateFloat(
-                initialValue = 0f,
-                targetValue = 1f,
-                animationSpec =
-                    infiniteRepeatable(
-                        animation = tween(3200, easing = LinearEasing),
-                        repeatMode = RepeatMode.Restart,
-                    ),
-                label = "appleMusicSweepHead",
-            )
+            val crossfadeSweep = rememberCrossfadeSweep(state.timelineState.isCrossfading)
             val quality = state.audioQualityLabel
             val crossfadeLabelAlpha by animateFloatAsState(
                 targetValue = if (state.timelineState.isCrossfading) 1f else 0f,

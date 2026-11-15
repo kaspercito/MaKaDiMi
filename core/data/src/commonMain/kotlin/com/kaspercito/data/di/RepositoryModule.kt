@@ -18,6 +18,7 @@ import com.kaspercito.data.repository.LocalPlaylistRepositoryImpl
 import com.kaspercito.data.repository.LyricsCanvasRepositoryImpl
 import com.kaspercito.data.repository.PlaylistRepositoryImpl
 import com.kaspercito.data.repository.PodcastRepositoryImpl
+import com.kaspercito.data.dj.DjQueueBuilder
 import com.kaspercito.data.repository.SearchRepositoryImpl
 import com.kaspercito.data.repository.SongRepositoryImpl
 import com.kaspercito.data.repository.StreamRepositoryImpl
@@ -114,6 +115,9 @@ val repositoryModule =
         single<SearchRepository>(createdAtStart = true) {
             SearchRepositoryImpl(get(), get())
         }
+
+        // Cola del DJ anclada a los gustos del oyente (no se crea al arrancar: solo al usar el DJ).
+        single { DjQueueBuilder(get(), get()) }
 
         single<SongRepository>(createdAtStart = true) {
             SongRepositoryImpl(get(), get(), get())

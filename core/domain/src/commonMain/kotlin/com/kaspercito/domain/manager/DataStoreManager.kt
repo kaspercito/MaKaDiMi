@@ -536,6 +536,26 @@ interface DataStoreManager {
 
     suspend fun setCustomThemeColor(argbHex: String)
 
+    /** One of [BACKGROUND_STYLE_GRID], [BACKGROUND_STYLE_AURORA], [BACKGROUND_STYLE_DOTS], [BACKGROUND_STYLE_BLACK], [BACKGROUND_STYLE_IMAGE]. */
+    val backgroundStyle: Flow<String>
+
+    suspend fun setBackgroundStyle(style: String)
+
+    /** Glow colour of the app background as "RRGGBB"/"AARRGGBB"; empty means "follow the theme". */
+    val backgroundGlowColor: Flow<String>
+
+    suspend fun setBackgroundGlowColor(hex: String)
+
+    /** Background strength 0..100 (glow strength, or how visible the picked image is). */
+    val backgroundIntensity: Flow<Int>
+
+    suspend fun setBackgroundIntensity(value: Int)
+
+    /** Picked background image (content Uri / file path); empty when none was chosen. */
+    val backgroundImageUri: Flow<String>
+
+    suspend fun setBackgroundImageUri(uri: String)
+
     /** One of [NOW_PLAYING_STYLE_SPOTIFY], [NOW_PLAYING_STYLE_M3_EXPRESSIVE], [NOW_PLAYING_STYLE_APPLE_MUSIC]. */
     val nowPlayingStyle: Flow<String>
 
@@ -663,7 +683,14 @@ interface DataStoreManager {
         const val THEME_COLOR_WALLPAPER = "WALLPAPER"
         const val THEME_COLOR_CUSTOM = "CUSTOM"
 
-        const val DEFAULT_THEME_COLOR_HEX = "FF8ECAE6"
+        const val DEFAULT_THEME_COLOR_HEX = "FF1FE58F"
+
+        const val BACKGROUND_STYLE_GRID = "GRID"
+        const val BACKGROUND_STYLE_AURORA = "AURORA"
+        const val BACKGROUND_STYLE_DOTS = "DOTS"
+        const val BACKGROUND_STYLE_BLACK = "BLACK"
+        const val BACKGROUND_STYLE_IMAGE = "IMAGE"
+        const val DEFAULT_BACKGROUND_INTENSITY = 60
 
         const val NOW_PLAYING_STYLE_SPOTIFY = "SPOTIFY"
         const val NOW_PLAYING_STYLE_M3_EXPRESSIVE = "M3_EXPRESSIVE"

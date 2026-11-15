@@ -218,7 +218,7 @@ internal class MusicDownloadService :
 
     companion object {
         /** Violeta Aurora, el mismo acento de la app. */
-        const val ACCENT_COLOR = 0xFF8B7BFF.toInt()
+        const val ACCENT_COLOR = 0xFF3DFFA2.toInt()
         const val ERROR_COLOR = 0xFFFF5C7A.toInt()
 
         /** Al tocar la notificación se abre la app. */

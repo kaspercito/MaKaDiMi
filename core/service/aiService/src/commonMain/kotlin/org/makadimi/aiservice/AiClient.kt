@@ -142,8 +142,70 @@ class AiClient {
         }
     }
 
+    /**
+     * Canciones sugeridas ("Artista - Título") para la cola del DJ, ancladas a los gustos del
+     * oyente y a la canción de arranque [seed]. [avoid] son canciones que no deben repetirse.
+     */
+    suspend fun suggestSongs(
+        taste: String,
+        seed: String,
+        avoid: List<String>,
+        count: Int = 24,
+    ): Result<List<String>> {
+        val service = aiService ?: return Result.failure(IllegalStateException("AI service is not initialized."))
+        return try {
+            val prompt =
+                buildString {
+                    append("Gustos del oyente: ").append(taste).append('\n')
+                    append("Canción con la que arranca la sesión: ").append(seed).append('\n')
+                    if (avoid.isNotEmpty()) {
+                        append("NO repetir estas canciones: ").append(avoid.joinToString(" | ")).append('\n')
+                    }
+                    append("Dame exactamente ").append(count).append(" canciones.")
+                }
+            val raw = service.suggestSongs(prompt) ?: return Result.failure(IllegalStateException("Empty suggestions"))
+            val parsed = parseSuggestions(raw)
+            if (parsed.isEmpty()) Result.failure(IllegalStateException("Unreadable suggestions")) else Result.success(parsed)
+        } catch (e: CancellationException) {
+            throw e
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
     private companion object {
         /** Bad request, bad key, no access, unknown model: retrying cannot help, Settings can. */
         val REJECTED_STATUS = setOf(400, 401, 403, 404)
     }
+}
+
+/**
+ * Lee la respuesta del modelo con tolerancia: un arreglo JSON de cadenas (con o sin cercas ```),
+ * o, si el modelo ignoró el formato, una canción por línea.
+ */
+internal fun parseSuggestions(raw: String): List<String> {
+    val cleaned = raw.replace("```json", "").replace("```", "").trim()
+    val fromJson =
+        runCatching {
+            val start = cleaned.indexOf('[')
+            val end = cleaned.lastIndexOf(']')
+            if (start < 0 || end <= start) {
+                emptyList()
+            } else {
+                kotlinx.serialization.json.Json
+                    .parseToJsonElement(cleaned.substring(start, end + 1))
+                    .let { it as kotlinx.serialization.json.JsonArray }
+                    .mapNotNull { (it as? kotlinx.serialization.json.JsonPrimitive)?.content }
+            }
+        }.getOrDefault(emptyList())
+    val lines =
+        fromJson.ifEmpty {
+            cleaned
+                .lines()
+                .map { it.trim().trimStart('-', '*', '•').replace(Regex("^\\d+[.)]\\s*"), "").trim().trim('"', ',') }
+        }
+    return lines
+        .map { it.trim() }
+        .filter { it.contains(" - ") && it.length in 5..160 }
+        .distinct()
 }

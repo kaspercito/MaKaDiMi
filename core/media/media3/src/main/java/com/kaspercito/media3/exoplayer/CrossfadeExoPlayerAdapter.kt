@@ -3026,6 +3026,10 @@ internal class CrossfadeExoPlayerAdapter(
         positionUpdateJob =
             coroutineScope.launch {
                 while (isActive && currentPlayer != null) {
+                    // Ritmo adaptativo: antes esto corría SIEMPRE a 50 ms (20 veces/seg), incluso en
+                    // segundo plano mientras el usuario juega, y mantenía la CPU despertando sin parar.
+                    // Solo hace falta precisión fina cuando hay (o está por haber) un crossfade.
+                    var nextDelayMs = if (currentPlayer?.isPlaying == true) 100L else 500L
                     try {
                         currentPlayer?.let { player ->
                             if (internalState == InternalState.PLAYING ||
@@ -3077,6 +3081,8 @@ internal class CrossfadeExoPlayerAdapter(
                                             crossfadeDurationMs
                                         }
                                     val triggerThreshold = resolvedDurationMs.toLong() + preparationBufferMs
+                                    // Cerca del punto de disparo, vuelve al ritmo fino de 50 ms.
+                                    if (timeRemaining in 1..(triggerThreshold + 1500L)) nextDelayMs = 50L
                                     if (timeRemaining in 1..triggerThreshold) {
                                         if (hasNextMediaItem()) {
                                             val nextIndex = getNextMediaItemIndex()
@@ -3090,7 +3096,8 @@ internal class CrossfadeExoPlayerAdapter(
                         // Ignore query errors - don't log to avoid spam
                     }
 
-                    delay(50) // Update every 50ms
+                    if (isCrossfading) nextDelayMs = 50L
+                    delay(nextDelayMs)
                 }
             }
     }
