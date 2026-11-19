@@ -189,12 +189,23 @@ internal class AndroidDjAnnouncer(
     }
 
     private suspend fun prepareFor(previous: String?) {
-        val next =
-            try {
-                if (player.hasNextMediaItem()) player.getMediaItemAt(player.currentMediaItemIndex + 1) else null
-            } catch (_: Exception) {
-                null
-            } ?: return
+        // La cola del DJ se va llenando poco a poco: si aún no hay "siguiente", se reintenta unos
+        // segundos en vez de rendirse (antes el DJ se quedaba mudo justo en esos casos).
+        var next: GenericMediaItem? = null
+        for (attempt in 0 until 4) {
+            next =
+                try {
+                    if (player.hasNextMediaItem()) player.getMediaItemAt(player.currentMediaItemIndex + 1) else null
+                } catch (_: Exception) {
+                    null
+                }
+            if (next != null) break
+            delay(3_000)
+        }
+        if (next == null) {
+            Logger.w(TAG, "No hay siguiente canción en la cola; este turno el DJ no comenta")
+            return
+        }
         val nextDescription = describe(next) ?: return
         val languageCode = runCatching { dataStoreManager.language.first().take(2) }.getOrDefault("es").ifBlank { "es" }
         val languageName = Locale.forLanguageTag(languageCode).getDisplayLanguage(Locale.ENGLISH)

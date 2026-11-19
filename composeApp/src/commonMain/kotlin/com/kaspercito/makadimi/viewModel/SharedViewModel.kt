@@ -100,6 +100,8 @@ import kotlinx.coroutines.flow.lastOrNull
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import com.kaspercito.data.dj.DjQueueBuilder
+import com.kaspercito.domain.dj.DjSession
 import kotlinx.coroutines.currentCoroutineContext
 import kotlinx.coroutines.ensureActive
 import kotlinx.coroutines.launch
@@ -137,6 +139,12 @@ private const val LYRICS_PROVIDER_TIMEOUT_MS = 15_000L
 /** Tipo de carga de la sesión del DJ: pone la canción inicial sin pedir la radio relacionada. */
 private const val DJ_SESSION = "DJ_SESSION"
 
+/** Cuando quedan estas canciones o menos por sonar, el DJ pide más a la IA. */
+private const val DJ_REFILL_THRESHOLD = 6
+
+/** Cuántas canciones se piden en cada relleno. */
+private const val DJ_REFILL_COUNT = 20
+
 @OptIn(ExperimentalCoroutinesApi::class)
 class SharedViewModel(
     private val dataStoreManager: DataStoreManager,
@@ -155,6 +163,20 @@ class SharedViewModel(
     var showedUpdateDialog: Boolean = false
 
     private val appIdentity: AppIdentity by inject()
+
+    private val djQueueBuilder: DjQueueBuilder by inject()
+
+    // Relleno automático de la cola del DJ: vigila cuántas canciones quedan y pide más a la IA.
+    private var djRefillJob: Job? = null
+
+    @Volatile
+    private var djRefilling = false
+
+    // IDs ya encolados en la sesión actual del DJ (para no repetir nunca una canción).
+    private val djQueuedIds = HashSet<String>()
+
+    // Canciones tuyas sin encolar todavía: red de seguridad si la IA o la red fallan.
+    private val djOwnPool = ArrayDeque<Track>()
 
     private val _isCheckingUpdate = MutableStateFlow(false)
     val isCheckingUpdate: StateFlow<Boolean> = _isCheckingUpdate
@@ -994,6 +1016,12 @@ class SharedViewModel(
             if (firstBatch.isNotEmpty()) mediaPlayerHandler.loadMoreCatalog(ArrayList(firstBatch), false)
             val pending = ArrayList<Track>()
             val added = HashSet<String>().apply { add(seed.videoId); firstBatch.forEach { add(it.videoId) } }
+            // Estado del relleno automático: arranca de cero con cada sesión nueva.
+            djQueuedIds.clear()
+            djQueuedIds.addAll(added)
+            djOwnPool.clear()
+            djOwnPool.addAll(ownQueue)
+            startDjRefillWatcher()
             suggestions.collect { track ->
                 if (!added.add(track.videoId)) return@collect
                 pending.add(track)
@@ -1011,6 +1039,80 @@ class SharedViewModel(
                 if (rest.isNotEmpty()) mediaPlayerHandler.loadMoreCatalog(ArrayList(rest), false)
             }
         }
+    }
+
+    /**
+     * Mantiene la cola del DJ siempre llena: cada vez que empieza una canción, si quedan pocas por
+     * sonar y el DJ sigue encendido, pide más canciones del mismo estilo a la IA. Así la música
+     * nunca se detiene cuando se acaba el primer lote.
+     */
+    private fun startDjRefillWatcher() {
+        djRefillJob?.cancel()
+        djRefillJob =
+            viewModelScope.launch {
+                mediaPlayerHandler.nowPlaying
+                    .filterNotNull()
+                    .distinctUntilChangedBy { it.mediaId }
+                    .collect {
+                        if (dataStoreManager.aiDj.first() != DataStoreManager.TRUE) return@collect
+                        refillDjQueueIfNeeded()
+                    }
+            }
+    }
+
+    private suspend fun refillDjQueueIfNeeded() {
+        if (djRefilling) return
+        val tracks = mediaPlayerHandler.queueData.value?.data?.listTracks.orEmpty()
+        val remaining = tracks.size - mediaPlayerHandler.currentOrderIndex() - 1
+        if (remaining > DJ_REFILL_THRESHOLD) return
+        djRefilling = true
+        try {
+            val taste = DjSession.suggestionTaste ?: DjSession.tasteProfile ?: return
+            val current = mediaPlayerHandler.currentOrderIndex().coerceIn(0, (tracks.size - 1).coerceAtLeast(0))
+            val seedTrack = tracks.getOrNull(current) ?: tracks.lastOrNull() ?: return
+            // Lo último que sonó guía el "ambiente" de las nuevas, sin salirse de tus gustos.
+            val recent = tracks.take(current + 1).takeLast(5).map { it.displayLabel() }
+            val inQueueIds = tracks.map { it.videoId }.toSet() + djQueuedIds
+            val avoidTitles = tracks.takeLast(60).map { it.displayLabel() }
+            var addedAny = false
+            val batch = ArrayList<Track>()
+            djQueueBuilder
+                .suggestions(
+                    taste = taste + " Últimas canciones sonando: " + recent.joinToString("; ") + ".",
+                    seed = seedTrack.displayLabel(),
+                    avoidTitles = avoidTitles,
+                    avoidIds = inQueueIds,
+                    count = DJ_REFILL_COUNT,
+                ).collect { track ->
+                    if (!djQueuedIds.add(track.videoId)) return@collect
+                    batch.add(track)
+                    if (batch.size >= 3) {
+                        mediaPlayerHandler.loadMoreCatalog(ArrayList(batch), false)
+                        batch.clear()
+                        addedAny = true
+                    }
+                }
+            if (batch.isNotEmpty()) {
+                mediaPlayerHandler.loadMoreCatalog(ArrayList(batch), false)
+                addedAny = true
+            }
+            // La IA no dio nada (sin red, sin cuota o error): se rellena con canciones tuyas para no parar.
+            if (!addedAny) {
+                val fallback = ArrayList<Track>()
+                while (fallback.size < 5) {
+                    val next = djOwnPool.removeFirstOrNull() ?: break
+                    if (next.videoId !in inQueueIds && djQueuedIds.add(next.videoId)) fallback.add(next)
+                }
+                if (fallback.isNotEmpty()) mediaPlayerHandler.loadMoreCatalog(fallback, false)
+            }
+        } finally {
+            djRefilling = false
+        }
+    }
+
+    private fun Track.displayLabel(): String {
+        val artist = artists?.firstOrNull { it.name.isNotBlank() }?.name
+        return if (artist != null) "$artist - $title" else title
     }
 
     fun onUIEvent(uiEvent: UIEvent) =

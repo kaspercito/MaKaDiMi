@@ -12,6 +12,14 @@ object DjSession {
     @Volatile
     var tasteProfile: String? = null
 
+    /**
+     * Gustos en el formato que espera el modelo que sugiere canciones (artistas más escuchados y
+     * muestra de favoritas). Se guarda para poder pedir MÁS canciones del mismo estilo cuando la
+     * cola del DJ se va vaciando, sin tener que volver a consultar la base de datos.
+     */
+    @Volatile
+    var suggestionTaste: String? = null
+
     @Volatile
     private var processHandled = false
 

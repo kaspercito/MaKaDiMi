@@ -394,6 +394,7 @@ fun DjSheet(
                             message = null
                             // Tus gustos: el DJ los usa para que sus comentarios suenen a ti.
                             DjSession.tasteProfile = buildTasteProfile(liked, played)
+                            DjSession.suggestionTaste = buildSuggestionTaste(liked, played)
                             // Tus canciones (favoritas y más escuchadas) ancladas a la cola.
                             val own = (liked + played).distinctBy { it.videoId }
                             val suggestions =
