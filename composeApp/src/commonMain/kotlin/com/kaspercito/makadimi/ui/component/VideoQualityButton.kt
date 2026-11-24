@@ -33,6 +33,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import makadimi.composeapp.generated.resources.Res
+import makadimi.composeapp.generated.resources.data_saver
 import makadimi.composeapp.generated.resources.quick_video_quality
 import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
@@ -66,6 +67,8 @@ fun VideoQualityButton(
     handler: MediaPlayerHandler = koinInject<MediaPlayerHandler>(),
 ) {
     val saved by dataStoreManager.videoQuality.collectAsState(VIDEO_QUALITY.items[1].toString())
+    val dataSaver by dataStoreManager.dataSaver.collectAsState(DataStoreManager.FALSE)
+    val limited = dataSaver == DataStoreManager.TRUE
     var expanded by remember { mutableStateOf(false) }
 
     // Si el botón desaparece con el menú abierto, los controles vuelven a poder esconderse.
@@ -93,7 +96,7 @@ fun VideoQualityButton(
             },
         ) {
             Text(
-                text = stringResource(Res.string.quick_video_quality),
+                text = stringResource(if (limited) Res.string.data_saver else Res.string.quick_video_quality),
                 style = MaterialTheme.typography.labelMedium,
                 color = MaterialTheme.colorScheme.primary,
                 fontWeight = FontWeight.Bold,
@@ -101,8 +104,9 @@ fun VideoQualityButton(
             )
             VIDEO_QUALITY.items.forEach { option ->
                 val label = option.toString()
-                val selected = label == saved
+                val selected = label == (if (limited) "360p" else saved)
                 DropdownMenuItem(
+                    enabled = !limited || label == "360p",
                     text = {
                         Text(
                             text = label,

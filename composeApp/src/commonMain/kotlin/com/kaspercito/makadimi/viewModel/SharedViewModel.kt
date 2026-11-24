@@ -167,6 +167,7 @@ class SharedViewModel(
     private val djQueueBuilder: DjQueueBuilder by inject()
 
     // Relleno automático de la cola del DJ: vigila cuántas canciones quedan y pide más a la IA.
+    private var djSessionJob: Job? = null
     private var djRefillJob: Job? = null
 
     @Volatile
@@ -1004,40 +1005,36 @@ class SharedViewModel(
         own: List<Track>,
         suggestions: Flow<Track>,
     ) {
-        viewModelScope.launch {
+        djSessionJob?.cancel()
+        djRefillJob?.cancel()
+        djSessionJob = viewModelScope.launch {
             // DJ_SESSION no hace nada en el `when` de loadMediaItemFromTrack: así no se pide la radio.
             loadMediaItemFromTrack(seed, DJ_SESSION)
             // Espera a que la canción inicial esté puesta antes de añadir el resto.
             withTimeoutOrNull(10_000) { mediaPlayerHandler.nowPlaying.first { it?.mediaId == seed.videoId } }
             val ownQueue = ArrayDeque(own.filter { it.videoId != seed.videoId }.distinctBy { it.videoId })
-            // Primero un par tuyas para que siempre haya "siguiente" aunque la IA tarde.
-            val firstBatch = ArrayList<Track>()
-            repeat(2) { ownQueue.removeFirstOrNull()?.let(firstBatch::add) }
-            if (firstBatch.isNotEmpty()) mediaPlayerHandler.loadMoreCatalog(ArrayList(firstBatch), false)
-            val pending = ArrayList<Track>()
-            val added = HashSet<String>().apply { add(seed.videoId); firstBatch.forEach { add(it.videoId) } }
-            // Estado del relleno automático: arranca de cero con cada sesión nueva.
             djQueuedIds.clear()
-            djQueuedIds.addAll(added)
+            djQueuedIds.add(seed.videoId)
             djOwnPool.clear()
             djOwnPool.addAll(ownQueue)
-            startDjRefillWatcher()
+            val pending = ArrayList<Track>()
+            var found = false
             suggestions.collect { track ->
-                if (!added.add(track.videoId)) return@collect
-                pending.add(track)
-                // De 3 en 3, con una canción tuya en medio: ancla la sesión a tu estilo.
-                if (pending.size >= 3) {
-                    ownQueue.removeFirstOrNull()?.takeIf { added.add(it.videoId) }?.let { pending.add(1, it) }
-                    mediaPlayerHandler.loadMoreCatalog(ArrayList(pending), false)
-                    pending.clear()
+                if (djQueuedIds.add(track.videoId)) {
+                    pending.add(track)
+                    if (!found || pending.size >= 3) {
+                        mediaPlayerHandler.loadMoreCatalog(ArrayList(pending), false)
+                        pending.clear()
+                        found = true
+                    }
                 }
             }
-            if (pending.isNotEmpty()) mediaPlayerHandler.loadMoreCatalog(ArrayList(pending), false)
-            // Si la IA no dio nada (sin red o sin cuota), la cola sigue siendo tuya, no de la radio.
-            if (added.size <= 3) {
-                val rest = ownQueue.filter { added.add(it.videoId) }.take(30)
-                if (rest.isNotEmpty()) mediaPlayerHandler.loadMoreCatalog(ArrayList(rest), false)
+            if (pending.isNotEmpty()) mediaPlayerHandler.loadMoreCatalog(pending, false)
+            if (!found) {
+                val fallback = ownQueue.take(10).filter { djQueuedIds.add(it.videoId) }
+                if (fallback.isNotEmpty()) mediaPlayerHandler.loadMoreCatalog(ArrayList(fallback), false)
             }
+            startDjRefillWatcher()
         }
     }
 
@@ -1081,7 +1078,7 @@ class SharedViewModel(
                     taste = taste + " Últimas canciones sonando: " + recent.joinToString("; ") + ".",
                     seed = seedTrack.displayLabel(),
                     avoidTitles = avoidTitles,
-                    avoidIds = inQueueIds,
+                    avoidIds = inQueueIds + djOwnPool.map { it.videoId } + songRepository.getRecentSong(100, 0).map { it.videoId },
                     count = DJ_REFILL_COUNT,
                 ).collect { track ->
                     if (!djQueuedIds.add(track.videoId)) return@collect

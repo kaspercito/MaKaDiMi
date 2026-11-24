@@ -12,6 +12,7 @@ import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.MergingMediaSource
 import androidx.media3.exoplayer.upstream.LoadErrorHandlingPolicy
+import com.kaspercito.common.VIDEO_QUALITY
 import com.kaspercito.common.MERGING_DATA_TYPE
 import com.kaspercito.common.OfflineMode
 import com.kaspercito.domain.data.player.LiveStreamRegistry
@@ -84,12 +85,23 @@ internal class MergingMediaSourceFactory(
         Logger.w("Merging Media Source", mediaItem.mediaMetadata.description.toString())
         val getVideo = runBlocking(Dispatchers.IO) { dataStoreManager.watchVideoInsteadOfPlayingAudio.first() } == DataStoreManager.Values.TRUE
         Logger.w("Merging Media Source", getVideo.toString())
-        if (mediaItem.mediaMetadata.description == MERGING_DATA_TYPE.VIDEO && getVideo && !isVideoUnreachable(mediaItem.mediaId) && !VideoFallback.isMarked(mediaItem.mediaId)) {
+        if (mediaItem.mediaMetadata.description == MERGING_DATA_TYPE.VIDEO && getVideo && !VideoFallback.isMarked(mediaItem.mediaId)) {
+            val baseKey = "${MERGING_DATA_TYPE.VIDEO}${mediaItem.mediaId}"
+            val quality = runBlocking(Dispatchers.IO) {
+                if (dataStoreManager.dataSaver.first() == DataStoreManager.TRUE) "360p" else dataStoreManager.videoQuality.first()
+            }
+            val preferredKey = "$baseKey:$quality"
+            val key = if (OfflineMode.enabled || !isOnline()) {
+                (listOf(preferredKey, baseKey) + VIDEO_QUALITY.items.map { "$baseKey:$it" })
+                    .firstOrNull { isFullyCached(it) } ?: return defaultMediaSourceFactory.createMediaSource(mediaItem)
+            } else {
+                preferredKey
+            }
             val videoItem =
                 mediaItem
                     .buildUpon()
                     .setMediaId("${MERGING_DATA_TYPE.VIDEO}${mediaItem.mediaId}")
-                    .setCustomCacheKey("${MERGING_DATA_TYPE.VIDEO}${mediaItem.mediaId}")
+                    .setCustomCacheKey(key)
                     .build()
             return MergingMediaSource(
                 defaultMediaSourceFactory.createMediaSource(videoItem),
@@ -101,13 +113,6 @@ internal class MergingMediaSourceFactory(
 
 //        val default = defaultMediaSourceFactory.createMediaSource(mediaItem.buildUpon().setMediaId("AUDIO-${mediaItem.mediaId}").build())
     }
-
-    // A track downloaded while video playback was off holds its audio only. Offline, its video
-    // half can be neither read nor fetched, and one failing half fails the whole merged source.
-    private fun isVideoUnreachable(mediaId: String): Boolean =
-        isFullyCached(mediaId) &&
-            !isFullyCached("${MERGING_DATA_TYPE.VIDEO}$mediaId") &&
-            (OfflineMode.enabled || !isOnline())
 
     private fun isFullyCached(key: String): Boolean =
         downloadCache.isFullyCached(key, 0L) || playerCache.isFullyCached(key, 0L)

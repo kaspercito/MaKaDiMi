@@ -4,7 +4,8 @@ import android.content.Intent
 import android.content.Intent.FLAG_ACTIVITY_NEW_TASK
 import android.os.Build
 import android.provider.Settings
-import androidx.appcompat.app.AppCompatActivity
+import android.content.Context
+import kotlin.coroutines.cancellation.CancellationException
 import androidx.core.content.FileProvider
 import androidx.core.net.toUri
 import com.kaspercito.makadimi.utils.BrandLinks
@@ -27,29 +28,25 @@ actual suspend fun downloadAndInstallUpdate(
     // Seguridad: solo se instalan APKs que vengan de los Releases de TU repositorio.
     if (!url.startsWith("${BrandLinks.REPO_URL}/releases/download/")) return UpdateInstallResult.Failed
 
-    val activity: AppCompatActivity = getKoin().get()
-
-    // Android pide un permiso especial para instalar APKs desde una app (una sola vez).
-    if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !activity.packageManager.canRequestPackageInstalls()) {
-        val settings =
-            Intent(
-                Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,
-                "package:${activity.packageName}".toUri(),
-            ).addFlags(FLAG_ACTIVITY_NEW_TASK)
-        activity.startActivity(settings)
-        return UpdateInstallResult.NeedsPermission
-    }
-
     return try {
-        val apk = withContext(Dispatchers.IO) { downloadApk(activity.cacheDir, url, fileName, onProgress) }
-        val uri = FileProvider.getUriForFile(activity, "${activity.packageName}.FileProvider", apk)
+        val context = getKoin().get<Context>().applicationContext
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && !context.packageManager.canRequestPackageInstalls()) {
+            context.startActivity(Intent(Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES, "package:${context.packageName}".toUri()).addFlags(FLAG_ACTIVITY_NEW_TASK))
+            return UpdateInstallResult.NeedsPermission
+        }
+
+        val apk = withContext(Dispatchers.IO) { downloadApk(context.cacheDir, url, fileName, onProgress) }
+        val uri = FileProvider.getUriForFile(context, "${context.packageName}.FileProvider", apk)
         val install =
             Intent(Intent.ACTION_VIEW)
                 .setDataAndType(uri, APK_MIME)
                 .addFlags(FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_GRANT_READ_URI_PERMISSION)
-        withContext(Dispatchers.Main) { activity.startActivity(install) }
+        withContext(Dispatchers.Main) { context.startActivity(install) }
         UpdateInstallResult.InstallerOpened
-    } catch (_: Throwable) {
+    } catch (cancelled: CancellationException) {
+        throw cancelled
+    } catch (_: Exception) {
         UpdateInstallResult.Failed
     }
 }

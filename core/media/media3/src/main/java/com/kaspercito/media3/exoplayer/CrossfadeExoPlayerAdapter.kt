@@ -1179,6 +1179,17 @@ internal class CrossfadeExoPlayerAdapter(
         }
     }
 
+    override fun reloadCurrentSource(): Boolean {
+        val id = currentMediaItem?.mediaId ?: return true
+        coroutineScope.launch {
+            if (currentMediaItem?.mediaId != id) return@launch
+            clearPrecacheExceptCurrentInternal()
+            precachedPlayers.remove(id)?.let { cleanupPlayerInternal(it.player) }
+            loadAndPlayTrackInternal(localCurrentMediaItemIndex, currentPosition.coerceAtLeast(0L), internalPlayWhenReady)
+        }
+        return true
+    }
+
     override fun replaceMediaItem(
         index: Int,
         mediaItem: GenericMediaItem,

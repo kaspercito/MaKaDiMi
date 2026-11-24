@@ -91,6 +91,7 @@ internal class StreamRepositoryImpl(
         isDownloading: Boolean,
         isVideo: Boolean,
         muxed: Boolean,
+        requestedVideoQuality: String?,
     ): Flow<String?> =
         flow {
             if (OfflineMode.enabled) {
@@ -112,7 +113,7 @@ internal class StreamRepositoryImpl(
                     QUALITY.itagOf(dataStoreManager.quality.first())
                 }
             val videoItag =
-                if (dataSaver && !muxed) {
+                if (dataSaver && !muxed && requestedVideoQuality == null) {
                     ITAG.VIDEO_360P
                 } else if (!muxed) {
                     VIDEO_QUALITY.itags.getOrNull(
@@ -120,7 +121,7 @@ internal class StreamRepositoryImpl(
                             if (isDownloading) {
                                 dataStoreManager.videoDownloadQuality.first()
                             } else {
-                                dataStoreManager.videoQuality.first()
+                                requestedVideoQuality ?: dataStoreManager.videoQuality.first()
                             },
                         ),
                     )
@@ -168,11 +169,13 @@ internal class StreamRepositoryImpl(
                         response.streamingData?.adaptiveFormats?.filter { it.url.isNullOrEmpty().not() }
                             ?: emptyList(),
                     )
+                    val targetHeight = VIDEO_QUALITY.items.getOrNull(VIDEO_QUALITY.itags.indexOf(videoItag))
+                        ?.toString()?.removeSuffix("p")?.toIntOrNull() ?: 360
+                    val videos = formatList.filter { (it.height ?: 0) > 0 }
                     val videoFormat =
                         formatList.find { it.itag == videoItag }
-                            ?: formatList.find { it.itag == ITAG.VIDEO_720P }
-                            ?: formatList.find { it.itag == ITAG.VIDEO_360P }
-                            ?: formatList.find { !it.isAudio && it.url.isNullOrEmpty().not() }
+                            ?: videos.filter { it.height!! <= targetHeight }.maxByOrNull { it.height!! }
+                            ?: videos.minByOrNull { it.height!! }
                     val audioTwinItag = ITAG.highQualityTwinOf(itag)
                     val audioFormat =
                         formatList.find { it.itag == itag } ?: if (dataSaver) {
@@ -242,7 +245,7 @@ internal class StreamRepositoryImpl(
                     }
                     insertNewFormat(
                         NewFormatEntity(
-                            videoId = if (VIDEO_QUALITY.itags.contains(format?.itag)) "${MERGING_DATA_TYPE.VIDEO}$videoId" else videoId,
+                            videoId = if (isVideo && !muxed) "${MERGING_DATA_TYPE.VIDEO}$videoId" else videoId,
                             itag = format?.itag ?: itag,
                             mimeType =
                                 Regex("""([^;]+);\s*codecs=["']([^"']+)["']""")

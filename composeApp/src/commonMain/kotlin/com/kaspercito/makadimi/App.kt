@@ -51,12 +51,7 @@ import androidx.compose.ui.graphics.luminance
 import androidx.compose.ui.input.pointer.PointerEventPass
 import androidx.compose.ui.input.pointer.PointerEventType
 import androidx.compose.ui.input.pointer.pointerInput
-import androidx.compose.ui.text.SpanStyle
-import androidx.compose.ui.text.TextLinkStyles
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.compose.ui.window.DialogProperties
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavDestination.Companion.hasRoute
@@ -108,20 +103,16 @@ import com.kaspercito.makadimi.ui.theme.ForceDarkContent
 import com.kaspercito.makadimi.ui.theme.desktopPanelDark
 import com.kaspercito.makadimi.ui.theme.desktopWindowDark
 import com.kaspercito.makadimi.ui.theme.desktopWindowLight
-import com.kaspercito.makadimi.ui.theme.fontFamily
 import com.kaspercito.makadimi.ui.theme.parseThemeColorHex
 import com.kaspercito.makadimi.ui.theme.typo
 import com.kaspercito.makadimi.utils.VersionManager
 import com.kaspercito.makadimi.utils.isAppLinkAvailable
 import com.kaspercito.makadimi.utils.libraryTabOf
 import com.kaspercito.makadimi.viewModel.SharedViewModel
-import com.mikepenz.markdown.m3.Markdown
-import com.mikepenz.markdown.m3.markdownTypography
 import dev.chrisbanes.haze.hazeSource
 import dev.chrisbanes.haze.rememberHazeState
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.format
@@ -969,16 +960,7 @@ fun App(
                                 } ?: stringResource(Res.string.unknown)
 
                             val updateMessage =
-                                runBlocking {
-                                    getString(
-                                        Res.string.update_message,
-                                        response.tagName,
-                                        formatted,
-                                        // values-iw/values-in still carry an old %3$s; Compose Resources indexes
-                                        // args without a bounds check, so omitting it crashes the dialog
-                                        "",
-                                    )
-                                }
+                                stringResource(Res.string.update_message, response.tagName, formatted, "")
                             Column(
                                 Modifier
                                     .heightIn(
@@ -1011,27 +993,6 @@ fun App(
                                     modifier =
                                         Modifier.padding(
                                             vertical = 8.dp,
-                                        ),
-                                )
-                                Markdown(
-                                    response.body,
-                                    typography =
-                                        markdownTypography(
-                                            h1 = typo().labelLarge,
-                                            h2 = typo().labelMedium,
-                                            h3 = typo().labelSmall,
-                                            text = typo().bodySmall,
-                                            bullet = typo().bodySmall,
-                                            paragraph = typo().bodySmall,
-                                            textLink =
-                                                TextLinkStyles(
-                                                    SpanStyle(
-                                                        fontSize = 11.sp,
-                                                        fontWeight = FontWeight.Normal,
-                                                        fontFamily = fontFamily(),
-                                                        textDecoration = TextDecoration.Underline,
-                                                    ),
-                                                ),
                                         ),
                                 )
                             }

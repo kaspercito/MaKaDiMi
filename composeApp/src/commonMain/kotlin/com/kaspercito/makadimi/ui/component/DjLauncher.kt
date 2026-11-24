@@ -401,12 +401,13 @@ fun DjSheet(
                             DjSession.suggestionTaste = buildSuggestionTaste(liked, played)
                             // Tus canciones (favoritas y más escuchadas) ancladas a la cola.
                             val own = (liked + played).distinctBy { it.videoId }
+                            val recentlyPlayed = songRepository.getRecentSong(100, 0)
                             val suggestions =
                                 djQueueBuilder.suggestions(
                                     taste = buildSuggestionTaste(liked, played),
                                     seed = seed.displayName(),
                                     avoidTitles = own.shuffled().take(40).map { it.displayName() },
-                                    avoidIds = own.map { it.videoId }.toSet(),
+                                    avoidIds = (own + recentlyPlayed).map { it.videoId }.toSet(),
                                 )
                             // Si ya estaba encendido, se apaga un instante para que vuelva a "encenderse" y saludar.
                             if (active) {

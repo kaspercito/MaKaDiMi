@@ -44,6 +44,8 @@ interface MediaPlayerInterface {
 
     fun prepare()
 
+    fun reloadCurrentSource(): Boolean = false
+
     // Media item management
     fun setMediaItem(mediaItem: GenericMediaItem)
 

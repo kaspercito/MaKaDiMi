@@ -41,6 +41,7 @@ import com.kaspercito.common.Config.DOWNLOAD_CACHE
 import com.kaspercito.common.Config.MAIN_PLAYER
 import com.kaspercito.common.Config.PLAYER_CACHE
 import com.kaspercito.common.Config.SERVICE_SCOPE
+import com.kaspercito.common.VIDEO_QUALITY
 import com.kaspercito.common.MERGING_DATA_TYPE
 import com.kaspercito.common.OfflineMode
 import com.kaspercito.domain.data.player.LiveStreamRegistry
@@ -245,7 +246,9 @@ private fun provideResolvingDataSourceFactory(
 ): DataSource.Factory {
     return ResolvingDataSource.Factory(cacheDataSourceFactory) { dataSpec ->
         val mediaId = dataSpec.key ?: throw IOException("Missing playback cache key")
-        val videoId = mediaId.removePrefix(MERGING_DATA_TYPE.VIDEO)
+        val isVideo = mediaId.startsWith(MERGING_DATA_TYPE.VIDEO)
+        val videoId = if (isVideo) mediaId.removePrefix(MERGING_DATA_TYPE.VIDEO).substringBefore(':') else mediaId
+        val quality = if (isVideo) mediaId.substringAfter(':', "") else ""
         // A live broadcast reached a progressive source that was built before it was known to be
         // live; failing it is what gets the track rebuilt as HLS — see LiveStreamDetectedException.
         val isCached = downloadCache.isFullyCached(mediaId, 0L) || playerCache.isFullyCached(mediaId, 0L)
@@ -263,10 +266,11 @@ private fun provideResolvingDataSourceFactory(
         var dataSpecReturn = dataSpec
         var resolved = false
         runBlocking(Dispatchers.IO) {
-            if (mediaId.startsWith(MERGING_DATA_TYPE.VIDEO)) {
-                streamRepository.getNewFormat(videoId).lastOrNull()?.let {
+            if (isVideo) {
+                val expectedItag = VIDEO_QUALITY.itags.getOrNull(VIDEO_QUALITY.items.indexOf(quality))
+                streamRepository.getNewFormat("${MERGING_DATA_TYPE.VIDEO}$videoId").lastOrNull()?.let {
                     val videoUrl = it.videoUrl
-                    if (videoUrl != null && it.expiredTime > now()) {
+                    if (videoUrl != null && it.itag == expectedItag && it.expiredTime > now()) {
                         Logger.d("Stream", "Video from format")
                         val is403Url = streamRepository.is403Url(videoUrl).firstOrNull() != false
                         Logger.d("Stream", "is 403 $is403Url")
@@ -283,6 +287,7 @@ private fun provideResolvingDataSourceFactory(
                         videoId,
                         isDownloading = false,
                         isVideo = true,
+                        requestedVideoQuality = quality.takeIf { it.isNotEmpty() },
                     ).lastOrNull()
                     ?.let {
                         Logger.d("Stream", "Video")

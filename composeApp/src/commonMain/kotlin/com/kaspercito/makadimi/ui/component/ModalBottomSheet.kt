@@ -1915,6 +1915,9 @@ fun ActionButton(
         modifier =
             Modifier
                 .fillMaxWidth()
+                .padding(horizontal = 16.dp, vertical = 3.dp)
+                .clip(RoundedCornerShape(18.dp))
+                .background(c.content.copy(alpha = 0.065f))
                 .wrapContentHeight(Alignment.CenterVertically)
                 .then(
                     if (enable) Modifier.clickable { onClick.invoke() } else Modifier.greyScale(),
@@ -1922,7 +1925,7 @@ fun ActionButton(
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.padding(horizontal = 20.dp),
+            modifier = Modifier.padding(horizontal = 12.dp, vertical = 3.dp),
         ) {
             Box(
                 modifier =
@@ -1931,16 +1934,13 @@ fun ActionButton(
                         .size(42.dp)
                         .background(
                             MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                            RoundedCornerShape(topStart = 14.dp, topEnd = 4.dp, bottomEnd = 14.dp, bottomStart = 4.dp),
-                        ).neonBorder(
-                            RoundedCornerShape(topStart = 14.dp, topEnd = 4.dp, bottomEnd = 14.dp, bottomStart = 4.dp),
-                            alpha = 0.45f,
+                            RoundedCornerShape(50),
                         ),
                 contentAlignment = Alignment.Center,
             ) {
                 Image(
                     imageVector = icon,
-                    contentDescription = if (text != null) stringResource(text) else textString ?: "",
+                    contentDescription = null,
                     modifier = Modifier.size(22.dp),
                     colorFilter =
                         if (enable) {
@@ -1952,7 +1952,7 @@ fun ActionButton(
             }
             Text(
                 text = if (text != null) stringResource(text) else textString ?: "",
-                style = typo().labelMedium.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Medium),
+                style = MaterialTheme.typography.titleSmall.copy(fontWeight = androidx.compose.ui.text.font.FontWeight.Medium),
                 color = if (enable) textColor ?: c.content else c.disabled,
                 modifier =
                     Modifier

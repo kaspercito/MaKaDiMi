@@ -1,12 +1,12 @@
 package com.kaspercito.makadimi.ui.component
 
-import com.kaspercito.makadimi.ui.theme.monoFontFamily
+import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.ArrowForwardIos
 import com.kaspercito.makadimi.ui.theme.neonBorder
 import com.kaspercito.makadimi.ui.theme.glassPanel
 import com.kaspercito.makadimi.ui.theme.LeafShapeLarge
 import androidx.compose.material3.SwitchDefaults
 import com.kaspercito.makadimi.ui.theme.neonBrush
-import androidx.compose.ui.unit.sp
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
@@ -34,8 +34,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.drawscope.clipRect
 import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.ui.text.intl.Locale
-import androidx.compose.ui.text.toUpperCase
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import com.kaspercito.makadimi.Platform
@@ -161,6 +159,14 @@ fun SettingItem(
                     it.invoke()
                 }
             }
+            if (switch == null && onClick != null && otherView == null) {
+                androidx.compose.material3.Icon(
+                    SimpIcons.ArrowForwardIos,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(start = 8.dp).size(16.dp),
+                )
+            }
             if (switch != null) {
                 Spacer(Modifier.width(10.dp))
                 Switch(
@@ -210,15 +216,9 @@ fun SettingGroup(
             )
             Spacer(Modifier.width(10.dp))
             Text(
-                text = title.toUpperCase(Locale.current),
-                style =
-                    typo().labelMedium.copy(
-                        fontWeight = FontWeight.Normal,
-                        fontFamily = monoFontFamily(),
-                        fontSize = 12.sp,
-                        letterSpacing = 2.sp,
-                    ),
-                color = MaterialTheme.colorScheme.primary,
+                text = title,
+                style = MaterialTheme.typography.titleMedium.copy(fontWeight = FontWeight.Bold),
+                color = MaterialTheme.colorScheme.onSurface,
             )
             Spacer(Modifier.width(12.dp))
             Box(

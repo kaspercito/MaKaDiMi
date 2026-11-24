@@ -61,6 +61,8 @@ import com.kaspercito.makadimi.ui.theme.typo
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import makadimi.composeapp.generated.resources.Res
+import makadimi.composeapp.generated.resources.audio
+import makadimi.composeapp.generated.resources.videos
 import makadimi.composeapp.generated.resources.data_saver
 import makadimi.composeapp.generated.resources.data_saver_description
 import makadimi.composeapp.generated.resources.normalize_volume
@@ -96,6 +98,7 @@ fun QuickPlaybackSheet(
     val dataSaver by dataStoreManager.dataSaver.collectAsState(DataStoreManager.FALSE)
     val normalizeVolume by dataStoreManager.normalizeVolume.collectAsState(DataStoreManager.FALSE)
 
+    var videoTab by androidx.compose.runtime.saveable.rememberSaveable { mutableStateOf(false) }
     var dirty by remember { mutableStateOf(false) }
     var reloading by remember { mutableStateOf(false) }
     val videoOn = watchVideo == DataStoreManager.TRUE
@@ -146,49 +149,62 @@ fun QuickPlaybackSheet(
                 )
             }
 
-            // --- Modo vídeo ---
-            QuickCard {
-                QuickSwitchRow(
-                    icon = if (videoOn) SimpIcons.Movie else SimpIcons.MovieOff,
-                    title = stringResource(Res.string.quick_video_mode),
-                    subtitle = stringResource(Res.string.quick_video_mode_desc),
-                    checked = videoOn,
-                    onChange = {
-                        dirty = true
-                        scope.launch { dataStoreManager.setWatchVideoInsteadOfPlayingAudio(it) }
-                    },
-                )
-                if (videoOn) {
-                    QuickLabel(stringResource(Res.string.quick_video_quality))
+            Row(
+                Modifier.fillMaxWidth().padding(horizontal = 20.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                listOf(Res.string.audio, Res.string.videos).forEachIndexed { index, label ->
+                    androidx.compose.material3.FilterChip(
+                        selected = videoTab == (index == 1),
+                        onClick = { videoTab = index == 1 },
+                        label = { Text(stringResource(label)) },
+                    )
+                }
+            }
+            if (videoTab) {
+                // --- Modo vídeo ---
+                QuickCard {
+                    QuickSwitchRow(
+                        icon = if (videoOn) SimpIcons.Movie else SimpIcons.MovieOff,
+                        title = stringResource(Res.string.quick_video_mode),
+                        subtitle = stringResource(Res.string.quick_video_mode_desc),
+                        checked = videoOn,
+                        onChange = {
+                            dirty = true
+                            scope.launch { dataStoreManager.setWatchVideoInsteadOfPlayingAudio(it) }
+                        },
+                    )
+                    if (videoOn) {
+                        val limited = dataSaver == DataStoreManager.TRUE
+                        QuickLabel(stringResource(if (limited) Res.string.data_saver else Res.string.quick_video_quality))
+                        QuickChips(
+                            options = if (limited) listOf("360p") else VIDEO_QUALITY.items.map { it.toString() },
+                            selected = if (limited) "360p" else videoQuality,
+                            onSelect = {
+                                if (!limited && it != videoQuality) {
+                                    dirty = true
+                                    scope.launch { dataStoreManager.setVideoQuality(it) }
+                                }
+                            },
+                        )
+                    }
+                }
+            } else {
+                // --- Calidad de audio ---
+                QuickCard {
+                    QuickLabel(stringResource(Res.string.quick_audio_quality), icon = SimpIcons.Headphones)
+                    val normalized = QUALITY.normalize(audioQuality)
                     QuickChips(
-                        options = VIDEO_QUALITY.items.map { it.toString() },
-                        selected = videoQuality,
+                        options = QUALITY.items.map { it.toString() },
+                        selected = normalized,
+                        display = { it.substringBefore(" - ").substringBefore(" (") },
                         onSelect = {
                             dirty = true
-                            scope.launch { dataStoreManager.setVideoQuality(it) }
+                            scope.launch { dataStoreManager.setQuality(it) }
                         },
                     )
                 }
             }
-
-            Spacer(Modifier.height(12.dp))
-
-            // --- Calidad de audio ---
-            QuickCard {
-                QuickLabel(stringResource(Res.string.quick_audio_quality), icon = SimpIcons.Headphones)
-                val normalized = QUALITY.normalize(audioQuality)
-                QuickChips(
-                    options = QUALITY.items.map { it.toString() },
-                    selected = normalized,
-                    display = { it.substringBefore(" - ").substringBefore(" (") },
-                    onSelect = {
-                        dirty = true
-                        scope.launch { dataStoreManager.setQuality(it) }
-                    },
-                )
-            }
-
-
             Spacer(Modifier.height(12.dp))
             QuickCard {
                 QuickSwitchRow(
@@ -260,6 +276,7 @@ fun QuickPlaybackSheet(
 /** Recarga la pista en curso (se vuelve a resolver el stream con los ajustes nuevos) sin perder el punto. */
 internal suspend fun reloadCurrentTrack(handler: MediaPlayerHandler) {
     val player = handler.player
+    if (player.reloadCurrentSource()) return
     val index = player.currentMediaItemIndex
     val item = player.getMediaItemAt(index) ?: return
     val position = player.currentPosition
@@ -272,7 +289,7 @@ internal suspend fun reloadCurrentTrack(handler: MediaPlayerHandler) {
             waited += 250
             if (player.isPlaying && waited >= 750) break
         }
-        player.seekTo(position)
+        if (player.currentMediaItem?.mediaId == item.mediaId) player.seekTo(position)
     }
 }
 
