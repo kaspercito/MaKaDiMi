@@ -214,20 +214,11 @@ class LibraryDynamicPlaylistViewModel(
     fun playSong(
         videoId: String,
         type: LibraryDynamicPlaylistType,
+        visibleSongs: List<SongEntity>? = null,
     ) {
-        val (targetList, playTrack) =
-            when (type) {
-                LibraryDynamicPlaylistType.Favorite -> listFavoriteSong.value to listFavoriteSong.value.find { it.videoId == videoId }
-                LibraryDynamicPlaylistType.Downloaded -> listDownloadedSong.value to listDownloadedSong.value.find { it.videoId == videoId }
-                LibraryDynamicPlaylistType.Followed -> return
-                LibraryDynamicPlaylistType.MostPlayed -> listMostPlayedSong.value to listMostPlayedSong.value.find { it.videoId == videoId }
-                is LibraryDynamicPlaylistType.MonthlyRecap ->
-                    listMonthlyRecapSong.value to listMonthlyRecapSong.value.find { it.videoId == videoId }
-                is LibraryDynamicPlaylistType.ArtistLiked ->
-                    listArtistLikedSong.value to listArtistLikedSong.value.find { it.videoId == videoId }
-                else -> return
-            }
-        if (playTrack == null) return
+        val targetList = visibleSongs ?: getSongList(type)
+        val index = targetList.indexOfFirst { it.videoId == videoId }
+        val playTrack = targetList.getOrNull(index) ?: return
         setQueueData(
             QueueData.Data(
                 listTracks = targetList.toArrayListTrack(),
@@ -241,7 +232,7 @@ class LibraryDynamicPlaylistViewModel(
         loadMediaItem(
             playTrack.toTrack(),
             Config.PLAYLIST_CLICK,
-            targetList.indexOf(playTrack).coerceAtLeast(0),
+            index,
         )
     }
 
@@ -255,8 +246,8 @@ class LibraryDynamicPlaylistViewModel(
             else -> emptyList()
         }
 
-    fun playAll(type: LibraryDynamicPlaylistType) {
-        val targetList = getSongList(type)
+    fun playAll(type: LibraryDynamicPlaylistType, visibleSongs: List<SongEntity>? = null) {
+        val targetList = visibleSongs ?: getSongList(type)
         val firstTrack = targetList.firstOrNull() ?: return
         setQueueData(
             QueueData.Data(
@@ -275,8 +266,8 @@ class LibraryDynamicPlaylistViewModel(
         )
     }
 
-    fun shuffle(type: LibraryDynamicPlaylistType) {
-        val targetList = getSongList(type)
+    fun shuffle(type: LibraryDynamicPlaylistType, visibleSongs: List<SongEntity>? = null) {
+        val targetList = visibleSongs ?: getSongList(type)
         if (targetList.isEmpty()) return
         val shuffledList = targetList.shuffled()
         val firstTrack = shuffledList.first()

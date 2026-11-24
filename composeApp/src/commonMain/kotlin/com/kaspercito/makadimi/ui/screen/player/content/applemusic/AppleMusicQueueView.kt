@@ -35,7 +35,6 @@ import androidx.compose.material3.SwitchDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -50,6 +49,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalDensity
+import androidx.compose.ui.semantics.CustomAccessibilityAction
+import androidx.compose.ui.semantics.customActions
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
@@ -78,7 +80,10 @@ import org.koin.compose.koinInject
 import makadimi.composeapp.generated.resources.Res
 import makadimi.composeapp.generated.resources.continue_playing
 import makadimi.composeapp.generated.resources.endless_queue
+import makadimi.composeapp.generated.resources.move_down
+import makadimi.composeapp.generated.resources.move_up
 import makadimi.composeapp.generated.resources.now_playing
+import makadimi.composeapp.generated.resources.upcoming_queue_empty
 
 /**
  * The QUEUE body: compact header, [Info][PlaylistAdd][Shuffle][Repeat] pills, a "Continue
@@ -106,6 +111,8 @@ internal fun AppleMusicQueueView(
 ) {
     val localDensity = LocalDensity.current
     val coroutineScope = rememberCoroutineScope()
+    val moveUp = stringResource(Res.string.move_up)
+    val moveDown = stringResource(Res.string.move_down)
 
     // Upcoming tracks live in the SAME index space as musicServiceHandler.swap(from, to) and
     // removeMediaItem(index): artworkQueue == queueData.data.listTracks, and both operations
@@ -192,19 +199,16 @@ internal fun AppleMusicQueueView(
         }
 
         // Endless/radio queues page in as you scroll — same trigger QueueBottomSheet uses.
-        val loadMoreState by remember {
-            derivedStateOf { musicServiceHandler.queueData.value?.queueState ?: QueueData.StateSource.STATE_CREATED }
-        }
-        val shouldLoadMore by remember {
-            derivedStateOf {
+        LaunchedEffect(lazyListState) {
+            snapshotFlow {
                 val layoutInfo = lazyListState.layoutInfo
-                val lastVisibleItem = layoutInfo.visibleItemsInfo.lastOrNull() ?: return@derivedStateOf true
-                lastVisibleItem.index >= layoutInfo.totalItemsCount - 3 && layoutInfo.totalItemsCount > 0
+                val lastVisibleIndex = layoutInfo.visibleItemsInfo.lastOrNull()?.index ?: -1
+                layoutInfo.totalItemsCount.takeIf { lastVisibleIndex >= 0 && lastVisibleIndex >= it - 3 }
+            }.collect { count ->
+                if (count != null && musicServiceHandler.queueData.value?.queueState == QueueData.StateSource.STATE_INITIALIZED) {
+                    musicServiceHandler.loadMore()
+                }
             }
-        }
-        LaunchedEffect(Unit) {
-            snapshotFlow { shouldLoadMore }
-                .collect { if (it && loadMoreState == QueueData.StateSource.STATE_INITIALIZED) musicServiceHandler.loadMore() }
         }
         var overscrollJob by remember { mutableStateOf<Job?>(null) }
 
@@ -214,6 +218,13 @@ internal fun AppleMusicQueueView(
                     .weight(1f)
                     .appleMusicVerticalFadeEdges(topFade = QUEUE_TOP_FADE, bottomFade = QUEUE_BOTTOM_FADE),
         ) {
+            if (upcoming.isEmpty()) {
+                Text(
+                    text = stringResource(Res.string.upcoming_queue_empty),
+                    modifier = Modifier.align(Alignment.Center),
+                    style = typography.queueSectionSubtitle,
+                )
+            }
             LazyColumn(
                 state = lazyListState,
                 // Space at BOTH ends equal to the fade at that end, so each fade lands on blank
@@ -278,7 +289,22 @@ internal fun AppleMusicQueueView(
                         SongFullWidthItems(
                             track = track,
                             isPlaying = false,
-                            modifier = Modifier.fillMaxWidth(),
+                            modifier = Modifier.fillMaxWidth().semantics {
+                                customActions = buildList {
+                                    if (localIndex > 0) {
+                                        add(CustomAccessibilityAction(moveUp) {
+                                            actions.onMoveQueueItem(queueIndex, queueIndex - 1)
+                                            true
+                                        })
+                                    }
+                                    if (localIndex < upcoming.lastIndex) {
+                                        add(CustomAccessibilityAction(moveDown) {
+                                            actions.onMoveQueueItem(queueIndex, queueIndex + 1)
+                                            true
+                                        })
+                                    }
+                                }
+                            },
                             onClickListener = { videoId ->
                                 if (videoId == track.videoId) actions.onSeekToQueueIndex(queueIndex)
                             },

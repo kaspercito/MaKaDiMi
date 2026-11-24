@@ -42,7 +42,6 @@ import com.kaspercito.domain.mediaservice.handler.MediaPlayerHandler
 import com.kaspercito.domain.mediaservice.handler.ToastType
 import com.kaspercito.logger.Logger
 import com.kaspercito.media3.di.setServiceActivitySession
-import com.kaspercito.makadimi.di.viewModelModule
 import com.kaspercito.makadimi.service.rss.RssFeedNotifyWork
 import com.kaspercito.makadimi.service.test.notification.NotifyWork
 import com.kaspercito.makadimi.utils.ComposeResUtils
@@ -51,9 +50,6 @@ import com.kaspercito.makadimi.viewModel.SharedViewModel
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.inject
-import org.koin.core.context.loadKoinModules
-import org.koin.core.context.unloadKoinModules
-import org.koin.dsl.module
 import org.makadimi.crashlytics.pushPlayerError
 import pub.devrel.easypermissions.EasyPermissions
 import java.util.Locale
@@ -65,24 +61,30 @@ class MainActivity : AppCompatActivity() {
     val mediaPlayerHandler by inject<MediaPlayerHandler>()
     val dataStoreManager: DataStoreManager by inject()
 
-    private var mBound = false
-    private var shouldUnbind = false
     private var bindActive = false
+    private val playbackToast: (ToastType) -> Unit = { type ->
+        lifecycleScope.launch {
+            val message =
+                when (type) {
+                    is ToastType.ExplicitContent -> ComposeResUtils.getResString(ComposeResUtils.StringType.EXPLICIT_CONTENT_BLOCKED)
+                    is ToastType.PlayerError -> ComposeResUtils.getResString(ComposeResUtils.StringType.TIME_OUT_ERROR, type.error)
+                    is ToastType.SponsorBlockSkip -> ComposeResUtils.getResString(ComposeResUtils.StringType.SPONSOR_BLOCK_SKIP, type.category)
+                }
+            viewModel.makeToast(message)
+        }
+    }
     private val serviceConnection =
         object : ServiceConnection {
             override fun onServiceConnected(
                 name: ComponentName?,
                 service: IBinder?,
             ) {
-//                mediaPlayerHandler.setActivitySession(this@MainActivity, MainActivity::class.java, service)
                 setServiceActivitySession(this@MainActivity, MainActivity::class.java, service)
                 Logger.w("MainActivity", "onServiceConnected: ")
-                mBound = true
             }
 
             override fun onServiceDisconnected(name: ComponentName?) {
                 Logger.w("MainActivity", "onServiceDisconnected: ")
-                mBound = false
             }
         }
 
@@ -93,11 +95,11 @@ class MainActivity : AppCompatActivity() {
 
     override fun onStop() {
         super.onStop()
+        if (mediaPlayerHandler.showToast === playbackToast) {
+            mediaPlayerHandler.showToast = {}
+        }
         if (bindActive) {
-            // Flag propio: shouldUnbind se conserva tal cual porque onDestroy lo lee después de onStop.
-            // Sin reiniciar bindActive, un segundo desenlace lanzaría IllegalArgumentException.
             bindActive = false
-            mBound = false
             try {
                 unbindService(serviceConnection)
             } catch (e: IllegalArgumentException) {
@@ -141,14 +143,6 @@ class MainActivity : AppCompatActivity() {
     @ExperimentalFoundationApi
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        loadKoinModules(
-            module {
-                single<AppCompatActivity> { this@MainActivity }
-            },
-        )
-        // Recreate view model to fix the issue of view model not getting data from the service
-        unloadKoinModules(viewModelModule)
-        loadKoinModules(viewModelModule)
         VersionManager.initialize()
         // Antes de arrancar el servicio, la comprobación de versión o la portada: así ya está decidido el
         // modo offline y el idioma/región del teléfono (sin esperar a un segundo arranque).
@@ -156,11 +150,7 @@ class MainActivity : AppCompatActivity() {
         applyLanguageAndRegion()
         checkForUpdate()
         askIgnoreBatteryOptimizationsOnce()
-        if (viewModel.recreateActivity.value || viewModel.isServiceRunning) {
-            viewModel.activityRecreateDone()
-        } else {
-            startMusicService()
-        }
+        viewModel.activityRecreateDone()
         Logger.d("MainActivity", "onCreate: ")
         val data = (intent?.data ?: intent?.getStringExtra(Intent.EXTRA_TEXT)?.toUri())?.toKmpUriOrNull()
         if (data != null) {
@@ -232,52 +222,19 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    override fun onDestroy() {
-        val shouldStopMusicService = viewModel.shouldStopMusicService()
-        Logger.w("MainActivity", "onDestroy: Should stop service $shouldStopMusicService")
-
-        // Always unbind service if it was bound to prevent MusicBinder leak
-        if (shouldStopMusicService && shouldUnbind && isFinishing) {
-            viewModel.isServiceRunning = false
-        }
-        unloadKoinModules(viewModelModule)
-        super.onDestroy()
-        Logger.d("MainActivity", "onDestroy: ")
-    }
-
     override fun onRestart() {
         super.onRestart()
         viewModel.activityRecreate()
     }
 
     private fun startMusicService() {
-//        mediaPlayerHandler.startMediaService(this, serviceConnection)
-        com.kaspercito.media3.di
+        viewModel.isServiceRunning = com.kaspercito.media3.di
             .startService(this@MainActivity, serviceConnection)
+        bindActive = true
         mediaPlayerHandler.pushPlayerError = { it ->
             pushPlayerError(it)
         }
-        mediaPlayerHandler.showToast = { type ->
-            viewModel.makeToast(
-                when (type) {
-                    is ToastType.ExplicitContent -> {
-                        runBlocking { ComposeResUtils.getResString(ComposeResUtils.StringType.EXPLICIT_CONTENT_BLOCKED) }
-                    }
-
-                    is ToastType.PlayerError -> {
-                        runBlocking { ComposeResUtils.getResString(ComposeResUtils.StringType.TIME_OUT_ERROR, type.error) }
-                    }
-
-                    is ToastType.SponsorBlockSkip -> {
-                        runBlocking { ComposeResUtils.getResString(ComposeResUtils.StringType.SPONSOR_BLOCK_SKIP, type.category) }
-                    }
-                },
-            )
-        }
-        viewModel.isServiceRunning = true
-        shouldUnbind = true
-        bindActive = true
-        Logger.d("Service", "Service started")
+        mediaPlayerHandler.showToast = playbackToast
     }
 
     private fun checkForUpdate() {

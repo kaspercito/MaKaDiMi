@@ -142,6 +142,7 @@ internal class MediaServiceHandlerImpl(
     // leer DataStore con runBlocking ahí bloquea la reproducción. Se mantiene al día con un collector.
     @Volatile
     private var endlessQueueEnabled: Boolean = false
+    private var killServiceOnExitEnabled: Boolean = false
     private val context: Context = getKoin().get()
 
     /**
@@ -271,11 +272,9 @@ internal class MediaServiceHandlerImpl(
     // List of Specific variables
 
     private var loudnessEnhancer: LoudnessEnhancer? = null
-    private var secondLoudnessEnhancer: LoudnessEnhancer? = null
 
     private var skipSilent = false
 
-    private var normalizeVolume = false
 
     /** Written by the equalizer-type collector; read on the player's thread by [shouldOpenOrCloseEqualizerIntent]. */
     @Volatile
@@ -421,6 +420,9 @@ internal class MediaServiceHandlerImpl(
         backgroundScope.launch {
             dataStoreManager.endlessQueue.collectLatest { endlessQueueEnabled = it == TRUE }
         }
+        coroutineScope.launch {
+            dataStoreManager.killServiceOnExit.collect { killServiceOnExitEnabled = it == TRUE }
+        }
         // Collected rather than read once like the settings around it: the equalizer is adjusted
         // while music is playing, and a curve that only takes effect after a restart is useless
         // for judging what you just changed.
@@ -499,8 +501,6 @@ internal class MediaServiceHandlerImpl(
                 .distinctUntilChanged()
                 .collect { effects -> player.setAudioEffects(effects) }
         }
-        normalizeVolume =
-            runBlocking { dataStoreManager.normalizeVolume.first() == TRUE }
         _nowPlaying.value = player.currentMediaItem
         if (runBlocking { dataStoreManager.saveStateOfPlayback.first() } == TRUE) {
             Logger.d(TAG, "SaveStateOfPlayback TRUE")
@@ -745,6 +745,9 @@ internal class MediaServiceHandlerImpl(
         }
         _format.value = null
         _skipSegments.value = null
+        songEntityJob?.cancel()
+        getSkipSegmentsJob?.cancel()
+        getFormatJob?.cancel()
         getDataOfNowPlayingTrackStateJob?.cancel()
         getDataOfNowPlayingTrackStateJob =
             coroutineScope.launch {
@@ -795,7 +798,7 @@ internal class MediaServiceHandlerImpl(
                         _controlState.update { it.copy(isLiked = false) }
                         var thumbUrl =
                             track?.thumbnails?.lastOrNull()?.url
-                                ?: "http://i.ytimg.com/vi/${track?.videoId}/maxresdefault.jpg"
+                                ?: "http://i.ytimg.com/vi/$videoId/maxresdefault.jpg"
                         Logger.d(TAG, "getDataOfNowPlayingState before: $thumbUrl")
                         thumbUrl = Regex("=w\\d+-h\\d+").replace(thumbUrl, "=w544-h544")
                         val songEntity =
@@ -820,7 +823,6 @@ internal class MediaServiceHandlerImpl(
                         coroutineScope.launch { lastfmScrobbler.onTrackStarted(songEntity) }
                     }
                 }
-                songEntityJob?.cancel()
                 songEntityJob =
                     coroutineScope.launch {
                         songRepository.getSongAsFlow(videoId).cancellable().filterNotNull().collectLatest { songEntity ->
@@ -857,21 +859,21 @@ internal class MediaServiceHandlerImpl(
     }
 
     private fun getSkipSegments(videoId: String) {
-        _skipSegments.value = null
-        coroutineScope.launch {
-            streamRepository.getSkipSegments(videoId).collect { response ->
-                when (response) {
-                    is Resource.Success -> {
-                        _skipSegments.value = response.data
-                    }
+        getSkipSegmentsJob =
+            coroutineScope.launch {
+                streamRepository.getSkipSegments(videoId).collect { response ->
+                    when (response) {
+                        is Resource.Success -> {
+                            _skipSegments.value = response.data
+                        }
 
-                    is Resource.Error -> {
-                        Logger.e(TAG, "getSkipSegments: ${response.message}")
-                        _skipSegments.value = null
+                        is Resource.Error -> {
+                            Logger.e(TAG, "getSkipSegments: ${response.message}")
+                            _skipSegments.value = null
+                        }
                     }
                 }
             }
-        }
     }
 
     private fun getFormat(mediaId: String?) {
@@ -2498,87 +2500,45 @@ internal class MediaServiceHandlerImpl(
     }
 
     override fun mayBeNormalizeVolume() {
-        runBlocking {
-            normalizeVolume = dataStoreManager.normalizeVolume.first() == TRUE
-        }
-        if (!normalizeVolume) {
-            loudnessEnhancer?.enabled = false
-            loudnessEnhancer?.release()
-            loudnessEnhancer = null
-            volumeNormalizationJob?.cancel()
-            player.volume = 1f
-            return
-        }
+        volumeNormalizationJob?.cancel()
+        volumeNormalizationJob =
+            coroutineScope.launch {
+                releaseLoudnessEnhancer()
+                if (dataStoreManager.normalizeVolume.first() != TRUE || _castState.value.isRemote) return@launch
+                val audioSessionId = player.audioSessionId
+                if (audioSessionId == PlayerConstants.AUDIO_SESSION_ID_UNSET) return@launch
+                val videoId = player.currentMediaItem?.mediaId?.removePrefix(MERGING_DATA_TYPE.VIDEO) ?: return@launch
+                val enhancer =
+                    try {
+                        LoudnessEnhancer(audioSessionId)
+                    } catch (e: RuntimeException) {
+                        Logger.w(TAG, "Could not create loudness enhancer: ${e.message}")
+                        return@launch
+                    }
+                loudnessEnhancer = enhancer
 
-        // Always recreate LoudnessEnhancer because CrossfadeExoPlayerAdapter creates new
-        // ExoPlayer instances per track, each with a different audio session ID.
-        // The old LoudnessEnhancer becomes attached to a released session and has no effect.
-        // Skip entirely while casting: a Cast session has no local audio session, and
-        // constructing a LoudnessEnhancer with session id 0 (AUDIO_SESSION_ID_UNSET) throws.
-        if (!_castState.value.isRemote && player.audioSessionId != PlayerConstants.AUDIO_SESSION_ID_UNSET) {
-            try {
-                loudnessEnhancer?.release()
-            } catch (_: Exception) {
-            }
-            try {
-                loudnessEnhancer = LoudnessEnhancer(player.audioSessionId)
-            } catch (e: Exception) {
-                Logger.e(TAG, "mayBeNormalizeVolume: ${e.message}")
-                e.printStackTrace()
-            }
-        }
-
-        player.currentMediaItem?.mediaId?.let { songId ->
-            val videoId =
-                if (songId.contains("Video")) {
-                    songId.removePrefix("Video")
-                } else {
-                    songId
-                }
-            volumeNormalizationJob?.cancel()
-            volumeNormalizationJob =
-                coroutineScope.launch(Dispatchers.Main) {
-                    fun Float?.toMb() = ((this ?: 0f) * 100).toInt()
-                    streamRepository
-                        .getFormatFlow(videoId)
-                        .cancellable()
-                        .distinctUntilChanged()
-                        .collectLatest { format ->
-                            if (format != null) {
-                                val loudnessMb =
-                                    format.loudnessDb.toMb().let {
-                                        if (it !in -2000..2000) {
-                                            0
-                                        } else {
-                                            it
-                                        }
-                                    }
-                                Logger.d(TAG, "Loudness: ${format.loudnessDb} db, $loudnessMb")
-                                try {
-                                    loudnessEnhancer?.setTargetGain(0f.toMb() - loudnessMb)
-                                    loudnessEnhancer?.enabled = true
-                                    Logger.w(
-                                        TAG,
-                                        "mayBeNormalizeVolume: ${loudnessEnhancer?.targetGain}",
-                                    )
-                                } catch (e: Exception) {
-                                    Logger.e(TAG, "mayBeNormalizeVolume: ${e.message}")
-                                    e.printStackTrace()
-                                }
-                                try {
-                                    secondLoudnessEnhancer?.setTargetGain(0f.toMb() - loudnessMb)
-                                    secondLoudnessEnhancer?.enabled = true
-                                    Logger.w(
-                                        TAG,
-                                        "mayBeNormalizeVolume: ${secondLoudnessEnhancer?.targetGain}",
-                                    )
-                                } catch (e: Exception) {
-                                    Logger.e(TAG, "mayBeNormalizeVolume: ${e.message}")
-                                    e.printStackTrace()
-                                }
-                            }
+                streamRepository.getFormatFlow(videoId).distinctUntilChanged().collectLatest { format ->
+                    if (format != null && player.audioSessionId == audioSessionId && !_castState.value.isRemote) {
+                        val loudnessMb = ((format.loudnessDb ?: 0f) * 100).toInt()
+                        val targetGain = if (loudnessMb in -2000..2000) -loudnessMb else 0
+                        try {
+                            enhancer.setTargetGain(targetGain)
+                            enhancer.enabled = true
+                        } catch (e: RuntimeException) {
+                            Logger.w(TAG, "Could not normalize playback volume: ${e.message}")
                         }
+                    }
                 }
+            }
+    }
+
+    private fun releaseLoudnessEnhancer() {
+        val enhancer = loudnessEnhancer ?: return
+        loudnessEnhancer = null
+        try {
+            enhancer.release()
+        } catch (e: RuntimeException) {
+            Logger.w(TAG, "Could not release loudness enhancer: ${e.message}")
         }
     }
 
@@ -2738,10 +2698,7 @@ internal class MediaServiceHandlerImpl(
             true
         }
 
-    override fun shouldReleaseOnTaskRemoved() =
-        runBlocking {
-            dataStoreManager.killServiceOnExit.first() == TRUE
-        }
+    override fun shouldReleaseOnTaskRemoved() = killServiceOnExitEnabled
 
     override fun release() {
         Logger.w("ServiceHandler", "Starting release process")
@@ -2757,18 +2714,7 @@ internal class MediaServiceHandlerImpl(
             // Stop and release player
             player.removeListener(this)
 
-            // Release audio effects
-            try {
-                loudnessEnhancer?.enabled = false
-                loudnessEnhancer?.release()
-                loudnessEnhancer = null
-
-                secondLoudnessEnhancer?.enabled = false
-                secondLoudnessEnhancer?.release()
-                secondLoudnessEnhancer = null
-            } catch (e: Exception) {
-                Logger.e("ServiceHandler", "Error releasing audio effects ${e.message}")
-            }
+            releaseLoudnessEnhancer()
 
             // Send close equalizer intent
             sendCloseEqualizerIntent()
@@ -2906,6 +2852,12 @@ internal class MediaServiceHandlerImpl(
             if (mediaItem != null) {
                 getDataOfNowPlayingState(mediaItem)
             } else {
+                getDataOfNowPlayingTrackStateJob?.cancel()
+                songEntityJob?.cancel()
+                getSkipSegmentsJob?.cancel()
+                getFormatJob?.cancel()
+                _format.value = null
+                _skipSegments.value = null
                 _nowPlayingState.update {
                     NowPlayingTrackState
                         .initial()

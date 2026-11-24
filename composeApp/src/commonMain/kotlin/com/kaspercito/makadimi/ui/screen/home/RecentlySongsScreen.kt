@@ -1,19 +1,22 @@
 package com.kaspercito.makadimi.ui.screen.home
 
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -64,8 +67,11 @@ import org.jetbrains.compose.resources.stringResource
 import org.koin.compose.koinInject
 import org.koin.compose.viewmodel.koinViewModel
 import makadimi.composeapp.generated.resources.Res
+import makadimi.composeapp.generated.resources.downloaded
 import makadimi.composeapp.generated.resources.error
 import makadimi.composeapp.generated.resources.recently_added
+import makadimi.composeapp.generated.resources.recent_list_empty
+import makadimi.composeapp.generated.resources.retry
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,6 +89,7 @@ fun RecentlySongsScreen(
     var showSelectionAddToPlaylist by rememberSaveable { mutableStateOf(false) }
 
     val recentlyItems = viewModel.recentlySongs.collectAsLazyPagingItems()
+    val downloadedOnly by viewModel.downloadedOnly.collectAsStateWithLifecycle()
     val playingTrack by sharedViewModel.nowPlayingState.map { it?.songEntity }.collectAsState(initial = null)
     val isPlaying by sharedViewModel.controllerState.map { it.isPlaying }.collectAsState(initial = false)
 
@@ -101,10 +108,22 @@ fun RecentlySongsScreen(
                 )
             }
 
+            item {
+                FilterChip(
+                    selected = downloadedOnly,
+                    onClick = {
+                        selectionState.exit()
+                        viewModel.setDownloadedOnly(!downloadedOnly)
+                    },
+                    label = { Text(stringResource(Res.string.downloaded)) },
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                )
+            }
+
             items(
                 count = recentlyItems.itemCount,
                 key = { index ->
-                    val item = recentlyItems[index]
+                    val item = recentlyItems.peek(index)
                     when (item) {
                         is SongEntity -> "song_${item.videoId}_$index"
                         is AlbumEntity -> "album_${item.browseId}_$index"
@@ -212,12 +231,22 @@ fun RecentlySongsScreen(
 
                     loadState.refresh is LoadState.Error || loadState.append is LoadState.Error -> {
                         item {
-                            val error =
-                                (loadState.refresh as? LoadState.Error)?.error?.message
-                                    ?: (loadState.append as? LoadState.Error)?.error?.message
-                                    ?: stringResource(Res.string.error)
-                            LaunchedEffect(error) {
-                                viewModel.makeToast(error)
+                            Column(
+                                modifier = Modifier.fillMaxWidth().padding(20.dp),
+                                horizontalAlignment = Alignment.CenterHorizontally,
+                            ) {
+                                Text(stringResource(Res.string.error))
+                                TextButton(onClick = { recentlyItems.retry() }) {
+                                    Text(stringResource(Res.string.retry))
+                                }
+                            }
+                        }
+                    }
+
+                    itemCount == 0 -> {
+                        item {
+                            Box(Modifier.fillMaxWidth().padding(24.dp), contentAlignment = Alignment.Center) {
+                                Text(stringResource(Res.string.recent_list_empty), style = MaterialTheme.typography.bodyMedium)
                             }
                         }
                     }

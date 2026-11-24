@@ -218,10 +218,11 @@ interface DatabaseDao {
     suspend fun insertSearchHistory(searchHistory: SearchHistory): Long
 
     // Song
-    @Query("SELECT * FROM song ORDER BY inLibrary DESC LIMIT :limit OFFSET :offset")
+    @Query("SELECT * FROM song WHERE :downloadState IS NULL OR downloadState = :downloadState ORDER BY inLibrary DESC, videoId LIMIT :limit OFFSET :offset")
     suspend fun getRecentSongs(
         limit: Int,
         offset: Int,
+        downloadState: Int?,
     ): List<SongEntity>
 
     @Query("SELECT * FROM song ORDER BY inLibrary DESC LIMIT :limit OFFSET 0")
@@ -406,7 +407,7 @@ interface DatabaseDao {
     @Query("SELECT thumbnails FROM artist WHERE followed = 1 AND thumbnails IS NOT NULL ORDER BY followedAt DESC LIMIT :limit")
     fun getFollowedArtistThumbnails(limit: Int): Flow<List<String?>>
 
-    @Query("UPDATE song SET downloadState = :downloadState, downloadedAt = :downloadedAt WHERE videoId = :videoId")
+    @Query("UPDATE song SET downloadState = :downloadState, downloadedAt = CASE WHEN downloadState = 3 AND :downloadState = 3 THEN COALESCE(downloadedAt, :downloadedAt) ELSE :downloadedAt END WHERE videoId = :videoId")
     suspend fun updateDownloadState(
         downloadState: Int,
         videoId: String,
@@ -838,13 +839,16 @@ interface DatabaseDao {
     @Query(
         "SELECT p.* FROM pair_song_local_playlist p JOIN song s ON s.videoId = p.songId " +
             "WHERE p.playlistId = :playlistId AND " +
-            "(s.title LIKE :query ESCAPE '\\' OR s.artistName LIKE :query ESCAPE '\\') " +
-            "ORDER BY p.position ASC LIMIT :limit",
+            "(:downloadedOnly = 0 OR s.downloadState = 3) AND " +
+            "(s.title LIKE :query ESCAPE '\\' OR s.artistName LIKE :query ESCAPE '\\' OR s.albumName LIKE :query ESCAPE '\\') " +
+            "ORDER BY CASE WHEN :newestFirst THEN p.inPlaylist END DESC, p.position ASC LIMIT :limit",
     )
     suspend fun searchPlaylistPairSong(
         playlistId: Long,
         query: String,
         limit: Int,
+        downloadedOnly: Boolean,
+        newestFirst: Boolean,
     ): List<PairSongLocalPlaylist>
 
     @Query(

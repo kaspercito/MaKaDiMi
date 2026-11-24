@@ -208,6 +208,20 @@ class LocalPlaylistViewModel(
 
     private val _searchQuery: MutableStateFlow<String> = MutableStateFlow("")
     val searchQuery: StateFlow<String> get() = _searchQuery
+    private val _searchDownloadedOnly = MutableStateFlow(false)
+    val searchDownloadedOnly: StateFlow<Boolean> get() = _searchDownloadedOnly
+    private val _searchNewestFirst = MutableStateFlow(false)
+    val searchNewestFirst: StateFlow<Boolean> get() = _searchNewestFirst
+
+    fun setSearchDownloadedOnly(enabled: Boolean) {
+        _searchDownloadedOnly.value = enabled
+    }
+
+    fun setSearchNewestFirst(enabled: Boolean) {
+        _searchNewestFirst.value = enabled
+    }
+
+    private data class TrackSearch(val id: Long, val query: String, val downloadedOnly: Boolean, val newestFirst: Boolean)
 
     fun setSearchQuery(query: String) {
         _searchQuery.value = query
@@ -225,15 +239,15 @@ class LocalPlaylistViewModel(
      */
     @OptIn(FlowPreview::class, ExperimentalCoroutinesApi::class)
     val searchResults: StateFlow<List<Pair<SongEntity, PairSongLocalPlaylist>>> =
-        _searchQuery
-            .debounce(250)
+        combine(_searchQuery.debounce(250), _searchDownloadedOnly, _searchNewestFirst, uiState.map { it.id }) { raw, downloadedOnly, newestFirst, id ->
+            TrackSearch(id, raw.trim(), downloadedOnly, newestFirst)
+        }
             .distinctUntilChanged()
-            .flatMapLatest { raw ->
-                val query = raw.trim()
-                if (query.length < 2) {
+            .flatMapLatest { (id, query, downloadedOnly, newestFirst) ->
+                if ((query.isEmpty() && !downloadedOnly && !newestFirst) || query.length == 1) {
                     flowOf(emptyList())
                 } else {
-                    localPlaylistRepository.searchTracks(uiState.value.id, query)
+                    localPlaylistRepository.searchTracks(id, query, downloadedOnly = downloadedOnly, newestFirst = newestFirst)
                 }
             }.stateIn(viewModelScope, SharingStarted.WhileSubscribed(5_000), emptyList())
     private val lazyTrackPagingItems: MutableStateFlow<LazyPagingItems<Pair<SongEntity, PairSongLocalPlaylist>>?> = MutableStateFlow(null)

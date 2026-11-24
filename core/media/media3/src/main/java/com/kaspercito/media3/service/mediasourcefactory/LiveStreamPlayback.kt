@@ -8,6 +8,9 @@ import androidx.media3.datasource.DataSource
 import androidx.media3.datasource.ResolvingDataSource
 import androidx.media3.exoplayer.upstream.DefaultLoadErrorHandlingPolicy
 import androidx.media3.exoplayer.upstream.LoadErrorHandlingPolicy
+import com.kaspercito.common.OfflineMode
+import com.kaspercito.media3.service.OfflinePlaybackException
+import com.kaspercito.media3.service.isOfflinePlaybackFailure
 import java.io.IOException
 
 /*
@@ -41,7 +44,11 @@ internal fun Throwable.isLiveStreamDetected(): Boolean =
 @UnstableApi
 internal class LiveStreamAwareLoadErrorHandlingPolicy : DefaultLoadErrorHandlingPolicy() {
     override fun getRetryDelayMsFor(loadErrorInfo: LoadErrorHandlingPolicy.LoadErrorInfo): Long =
-        if (loadErrorInfo.exception.isLiveStreamDetected()) C.TIME_UNSET else super.getRetryDelayMsFor(loadErrorInfo)
+        if (loadErrorInfo.exception.isLiveStreamDetected() || loadErrorInfo.exception.isOfflinePlaybackFailure()) {
+            C.TIME_UNSET
+        } else {
+            super.getRetryDelayMsFor(loadErrorInfo)
+        }
 }
 
 /**
@@ -70,6 +77,7 @@ internal fun liveStreamDataSourceFactory(
 ): DataSource.Factory =
     ResolvingDataSource.Factory(httpDataSourceFactory) { dataSpec ->
         val videoId = LiveStreamPlaylistUri.videoIdOf(dataSpec.uri) ?: return@Factory dataSpec
+        if (OfflineMode.enabled) throw OfflinePlaybackException(OfflineMode.BLOCKED_MESSAGE)
         val playlistUrl = resolveLiveHlsUrl(videoId) ?: throw IOException("No live HLS playlist found for $videoId")
         dataSpec.withUri(playlistUrl.toUri())
     }

@@ -1051,4 +1051,12 @@
     <string name="background_glow_color">Color del brillo</string>
     <string name="background_glow_theme">Seguir el tema</string>
     <string name="background_intensity">Intensidad del fondo</string>
+    <string name="recent_list_empty">No hay canciones para mostrar</string>
+    <string name="upcoming_queue_empty">No hay canciones en cola</string>
+    <string name="collection_search_hint">Canción, artista o álbum</string>
+    <string name="collection_no_matches">No hay canciones que coincidan con la búsqueda o los filtros</string>
+    <string name="collection_recent_downloads">Últimos 7 días</string>
+    <string name="collection_search_more">Buscar en más canciones</string>
+    <string name="collection_type_two_chars">Escribe al menos dos caracteres</string>
+    <string name="collection_narrow_results">Mostrando hasta 200 canciones. Afina la búsqueda para encontrar la que quieres.</string>
 </resources>

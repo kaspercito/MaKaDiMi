@@ -106,6 +106,7 @@ interface SongRepository {
     suspend fun getRecentSong(
         limit: Int,
         offset: Int,
+        downloadedOnly: Boolean = false,
     ): List<SongEntity>
 
     suspend fun insertSongInfo(songInfo: SongInfoEntity)

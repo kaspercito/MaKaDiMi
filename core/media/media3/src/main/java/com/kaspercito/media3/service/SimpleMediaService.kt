@@ -2,7 +2,6 @@ package com.kaspercito.media3.service
 
 import android.app.Activity
 import android.app.PendingIntent
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.os.Binder
@@ -10,25 +9,18 @@ import android.os.IBinder
 import androidx.media3.common.Player
 import androidx.media3.common.util.UnstableApi
 import androidx.media3.session.DefaultMediaNotificationProvider
-import androidx.media3.session.MediaController
 import androidx.media3.session.MediaLibraryService
 import androidx.media3.session.MediaSession
-import androidx.media3.session.SessionToken
-import com.google.common.util.concurrent.ListenableFuture
-import com.google.common.util.concurrent.MoreExecutors
 import com.kaspercito.common.MEDIA_NOTIFICATION
-import com.kaspercito.domain.mediaservice.handler.DownloadHandler
 import com.kaspercito.domain.mediaservice.handler.MediaPlayerHandler
 import com.kaspercito.logger.Logger
 import com.kaspercito.media3.R
 import com.kaspercito.media3.extension.toCommandButton
 import com.kaspercito.media3.utils.CoilBitmapLoader
 import com.kaspercito.media3.utils.sizeLimitedForSession
-import kotlinx.coroutines.runBlocking
 import org.koin.core.component.KoinComponent
 import org.koin.core.component.inject
 import org.koin.core.qualifier.named
-import kotlin.system.exitProcess
 
 @UnstableApi
 internal class SimpleMediaService :
@@ -41,14 +33,9 @@ internal class SimpleMediaService :
 
     private var mediaSession: MediaLibrarySession? = null
 
-    // Controller interno conectado a la propia sesión; se guarda para poder liberarlo en onDestroy.
-    private var selfControllerFuture: ListenableFuture<MediaController>? = null
-
     private val simpleMediaSessionCallback: MediaLibrarySession.Callback by inject<MediaLibrarySession.Callback>()
 
     private val simpleMediaServiceHandler: MediaPlayerHandler by inject<MediaPlayerHandler>()
-
-    private val downloadHandler: DownloadHandler by inject<DownloadHandler>()
 
     private val binder = MusicBinder()
 
@@ -92,14 +79,7 @@ internal class SimpleMediaService :
             },
         )
 
-        if (mediaSession == null) {
-            mediaSession =
-                provideMediaLibrarySession(
-                    this,
-                    player,
-                    simpleMediaSessionCallback,
-                )
-        }
+        mediaSession = provideMediaLibrarySession(this, player, simpleMediaSessionCallback).also(::addSession)
 
         simpleMediaServiceHandler.onUpdateNotification = { list ->
             val commandButtonList = list.map { it.toCommandButton(this) }
@@ -107,21 +87,6 @@ internal class SimpleMediaService :
                 commandButtonList,
             )
         }
-
-        val sessionToken = SessionToken(this, ComponentName(this, SimpleMediaService::class.java))
-        val controllerFuture = MediaController.Builder(this, sessionToken).buildAsync()
-        selfControllerFuture = controllerFuture
-        controllerFuture.addListener(
-            {
-                // get() lanza si la conexión falla; no debe tumbar el servicio.
-                try {
-                    controllerFuture.get()
-                } catch (e: Exception) {
-                    Logger.e("Service", "Self MediaController connection failed: ${e.message}")
-                }
-            },
-            MoreExecutors.directExecutor(),
-        )
     }
 
     @UnstableApi
@@ -136,50 +101,24 @@ internal class SimpleMediaService :
 
     override fun onGetSession(controllerInfo: MediaSession.ControllerInfo): MediaLibrarySession? = mediaSession
 
-    @UnstableApi
-    fun release() {
-        Logger.w("Service", "Starting release process")
-        runBlocking {
-            try {
-                // Release MediaSession (don't release player - CrossfadeExoPlayerAdapter manages it)
-                mediaSession?.run {
-                    this.player.pause()
-                    this.player.playWhenReady = false
-                    // Don't call this.player.release() - CrossfadeExoPlayerAdapter manages player lifecycle
-                    this.release()
-                }
-                // Release handler (contains coroutines and jobs, which also releases the adapter)
-                simpleMediaServiceHandler.release()
-                mediaSession = null
-                Logger.w("Service", "Simple Media Service Released")
-            } catch (e: Exception) {
-                Logger.e("Service", "Error during release")
-            }
+    private fun releaseSession() {
+        val session = mediaSession ?: return
+        mediaSession = null
+        try {
+            removeSession(session)
+        } finally {
+            session.release()
         }
     }
 
     @UnstableApi
     override fun onDestroy() {
-        super.onDestroy()
-        Logger.w("Service", "Simple Media Service Destroyed")
-        // El handler ya no debe retener este servicio (la lambda lo captura).
         simpleMediaServiceHandler.onUpdateNotification = {}
-        selfControllerFuture?.let { MediaController.releaseFuture(it) }
-        selfControllerFuture = null
-        if (simpleMediaServiceHandler.shouldReleaseOnTaskRemoved()) {
-            release()
+        try {
+            releaseSession()
+        } finally {
+            super.onDestroy()
         }
-        // Si el servicio se destruye sin release() completo, la sesión seguiría registrada con el
-        // mismo ID y al recrear el servicio Media3 lanzaría "Session ID must be unique".
-        // Solo se libera la sesión: el player lo gestiona el adaptador, no se toca.
-        mediaSession?.let { session ->
-            try {
-                session.release()
-            } catch (e: Exception) {
-                Logger.e("Service", "Error releasing MediaSession: ${e.message}")
-            }
-        }
-        mediaSession = null
     }
 
     override fun onTrimMemory(level: Int) {
@@ -190,30 +129,13 @@ internal class SimpleMediaService :
 
     @UnstableApi
     override fun onTaskRemoved(rootIntent: Intent?) {
-        Logger.w("Service", "Simple Media Service Task Removed")
-        // Como Spotify: si al cerrar la app desde recientes NO está sonando música, se cierra el
-        // servicio y la notificación desaparece. Si está sonando, sigue reproduciendo.
-        val isPlayingNow =
-            try {
-                mediaSession?.player?.playWhenReady == true
-            } catch (e: Exception) {
-                false
-            }
-        // Si hay descargas en curso no se cierra el proceso (se cortarían).
-        val hasActiveDownloads =
-            try {
-                downloadHandler.downloadTask.value.values.any {
-                    it == DownloadHandler.STATE_QUEUED ||
-                        it == DownloadHandler.STATE_DOWNLOADING ||
-                        it == DownloadHandler.STATE_RESTARTING
-                }
-            } catch (e: Exception) {
-                false
-            }
-        if (simpleMediaServiceHandler.shouldReleaseOnTaskRemoved() || (!isPlayingNow && !hasActiveDownloads)) {
-            release()
-            super.onTaskRemoved(rootIntent)
-            exitProcess(0)
+        val canContinuePlayback =
+            isPlaybackOngoing() &&
+                player.playWhenReady &&
+                (player.playbackState == Player.STATE_READY || player.playbackState == Player.STATE_BUFFERING)
+        if (simpleMediaServiceHandler.shouldReleaseOnTaskRemoved() || !canContinuePlayback) {
+            pauseAllPlayersAndStopSelf()
+            releaseSession()
         }
     }
 

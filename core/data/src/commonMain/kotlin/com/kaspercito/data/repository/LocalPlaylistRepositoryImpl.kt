@@ -114,9 +114,11 @@ internal class LocalPlaylistRepositoryImpl(
         id: Long,
         query: String,
         limit: Int,
+        downloadedOnly: Boolean,
+        newestFirst: Boolean,
     ): Flow<List<Pair<SongEntity, PairSongLocalPlaylist>>> =
         flow {
-            val pairs = localDataSource.searchPlaylistPairSong(id, query, limit)
+            val pairs = localDataSource.searchPlaylistPairSong(id, query, limit, downloadedOnly, newestFirst)
             if (pairs.isEmpty()) {
                 emit(emptyList())
                 return@flow

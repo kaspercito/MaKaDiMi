@@ -55,12 +55,13 @@ jobs:
       - name: Compilar APK release
         run: |
           chmod +x gradlew
-          ./gradlew :androidApp:assembleRelease --no-daemon --stacktrace
+          ./gradlew :media3:testDebugUnitTest :androidApp:assembleRelease --no-daemon --stacktrace
 
       - name: Renombrar APK
         run: |
           mkdir -p salida
           for f in androidApp/build/outputs/apk/release/*.apk; do
+            "$ANDROID_HOME/build-tools/36.0.0/apksigner" verify "$f"
             cp "$f" "salida/MaKaDiMi-${GITHUB_REF_NAME}-arm64.apk"
           done
           ls -la salida

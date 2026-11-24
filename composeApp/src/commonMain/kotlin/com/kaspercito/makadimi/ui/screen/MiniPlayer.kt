@@ -418,13 +418,12 @@ fun MiniPlayer(
                                         ImageRequest
                                             .Builder(LocalPlatformContext.current)
                                             .data(songEntity?.thumbnails)
-                                            .crossfade(550)
+                                            .crossfade(200)
                                             .build(),
                                     placeholder = rememberHolderPainter(),
                                     error = rememberHolderPainter(),
                                     contentDescription = null,
-                                    // Crop in the circle: FillWidth would leave bands around a 16:9 video thumbnail.
-                                    contentScale = if (isFlat) ContentScale.Crop else ContentScale.FillWidth,
+                                    contentScale = ContentScale.Crop,
                                     modifier =
                                         Modifier
                                             .size(if (isFlat) 36.dp else 40.dp)

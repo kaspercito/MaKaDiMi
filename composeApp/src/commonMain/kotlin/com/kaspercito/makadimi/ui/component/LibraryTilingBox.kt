@@ -10,13 +10,16 @@ import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -41,6 +44,9 @@ import coil3.request.crossfade
 import com.kaspercito.domain.data.model.library.LibraryCollectionPreview
 import com.kaspercito.domain.data.model.library.LibraryOverview
 import com.kaspercito.makadimi.ui.component.taste.libraryCardColor
+import com.kaspercito.makadimi.ui.icon.History
+import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.navigation.destination.home.RecentlySongsDestination
 import com.kaspercito.makadimi.ui.navigation.destination.library.LibraryDynamicPlaylistDestination
 import com.kaspercito.makadimi.ui.screen.library.LibraryDynamicPlaylistType
 import com.kaspercito.makadimi.ui.theme.typo
@@ -55,6 +61,7 @@ import makadimi.composeapp.generated.resources.library_artist_count
 import makadimi.composeapp.generated.resources.library_favorite_empty_hint
 import makadimi.composeapp.generated.resources.liked_songs_count
 import makadimi.composeapp.generated.resources.most_played
+import makadimi.composeapp.generated.resources.recently_added
 
 /**
  * The four collections at the top of the Your library tab: Favorite as the wide card, then
@@ -77,6 +84,18 @@ fun LibraryTilingBox(
         verticalArrangement = Arrangement.spacedBy(10.dp),
     ) {
         FavoriteCard(overview?.favorite, container) { open(LibraryDynamicPlaylistType.Favorite) }
+        OutlinedButton(
+            onClick = { navController.navigate(RecentlySongsDestination) },
+            modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
+            shape = CardShape,
+        ) {
+            Icon(SimpIcons.History, contentDescription = null, modifier = Modifier.size(20.dp))
+            Text(
+                text = stringResource(Res.string.recently_added),
+                modifier = Modifier.padding(start = 8.dp),
+                style = MaterialTheme.typography.labelLarge,
+            )
+        }
         Row(horizontalArrangement = Arrangement.spacedBy(10.dp)) {
             CollectionCard(
                 title = Res.string.followed,

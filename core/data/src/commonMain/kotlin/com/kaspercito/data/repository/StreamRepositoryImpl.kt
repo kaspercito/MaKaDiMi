@@ -180,10 +180,9 @@ internal class StreamRepositoryImpl(
                             formatList
                                 .filter { it.isAudio && it.url.isNullOrEmpty().not() }
                                 .minByOrNull { it.bitrate }
-                        } else if (audioTwinItag != null) {
-                            formatList.find { it.itag == audioTwinItag }
                         } else {
-                            formatList.find { it.isAudio && it.url.isNullOrEmpty().not() }
+                            formatList.find { it.itag == audioTwinItag }
+                                ?: formatList.find { it.isAudio }
                         }
                     var format =
                         if (isVideo) {
@@ -265,7 +264,7 @@ internal class StreamRepositoryImpl(
                                     ?.audioConfig
                                     ?.loudnessDb
                                     ?.toFloat(),
-                            lengthSeconds = response.videoDetails?.lengthSeconds?.toInt(),
+                            lengthSeconds = durationSecond,
                             playbackTrackingVideostatsPlaybackUrl =
                                 response.playbackTracking?.videostatsPlaybackUrl?.baseUrl?.replace(
                                     "https://s.youtube.com",

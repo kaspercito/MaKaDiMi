@@ -15,7 +15,7 @@ import androidx.media3.exoplayer.offline.DownloadManager
 import androidx.media3.exoplayer.offline.DownloadNotificationHelper
 import androidx.media3.exoplayer.offline.DownloadRequest
 import androidx.media3.exoplayer.offline.DownloadService
-import coil3.ImageLoader
+import coil3.imageLoader
 import coil3.request.CachePolicy
 import coil3.request.ImageRequest
 import com.kaspercito.common.MERGING_DATA_TYPE
@@ -245,7 +245,9 @@ internal class DownloadUtils(
         }
         return when (audio to video) {
             Download.STATE_COMPLETED to Download.STATE_COMPLETED -> DownloadState.STATE_DOWNLOADED
+            Download.STATE_COMPLETED to Download.STATE_FAILED -> DownloadState.STATE_DOWNLOADED
             Download.STATE_FAILED to Download.STATE_FAILED -> DownloadState.STATE_NOT_DOWNLOADED
+            Download.STATE_FAILED to Download.STATE_COMPLETED -> DownloadState.STATE_NOT_DOWNLOADED
             Download.STATE_QUEUED to Download.STATE_QUEUED -> DownloadState.STATE_PREPARING
             Download.STATE_COMPLETED to null -> DownloadState.STATE_DOWNLOADED
             Download.STATE_FAILED to null -> DownloadState.STATE_NOT_DOWNLOADED
@@ -298,9 +300,10 @@ internal class DownloadUtils(
                 ImageRequest
                     .Builder(context)
                     .data(thumbnail)
+                    .size(256)
                     .diskCachePolicy(CachePolicy.ENABLED)
                     .build()
-            val imageResult = ImageLoader(context).execute(request)
+            val imageResult = context.imageLoader.execute(request)
             if (imageResult.image?.height != imageResult.image?.width && imageResult.image != null) {
                 isVideo = true
             }
@@ -412,24 +415,15 @@ internal class DownloadUtils(
 
         // Pair Audio and Video
         val result = mutableMapOf<String, Pair<DownloadHandler.Download?, DownloadHandler.Download?>>()
-        val cursor = downloadManager.downloadIndex.getDownloads()
-        while (cursor.moveToNext()) {
-            val id = cursor.download.request.id
-            val isVideo = id.contains(MERGING_DATA_TYPE.VIDEO)
-            val songId =
-                if (id.contains(MERGING_DATA_TYPE.VIDEO)) {
-                    id.removePrefix(MERGING_DATA_TYPE.VIDEO)
-                } else {
-                    id
-                }
-            result[songId] =
-                if (isVideo) {
-                    result[songId]?.copy(second = DownloadHandler.Download(cursor.download.state))
-                        ?: Pair(null, DownloadHandler.Download(cursor.download.state))
-                } else {
-                    result[songId]?.copy(first = DownloadHandler.Download(cursor.download.state))
-                        ?: Pair(DownloadHandler.Download(cursor.download.state), null)
-                }
+        downloadManager.downloadIndex.getDownloads().use { cursor ->
+            while (cursor.moveToNext()) {
+                val download = cursor.download
+                val id = download.request.id
+                val songId = id.removePrefix(MERGING_DATA_TYPE.VIDEO)
+                val previous = result[songId] ?: (null to null)
+                val state = DownloadHandler.Download(download.state)
+                result[songId] = if (id == songId) previous.copy(first = state) else previous.copy(second = state)
+            }
         }
         _downloads.value = result
         downloadManager.addListener(

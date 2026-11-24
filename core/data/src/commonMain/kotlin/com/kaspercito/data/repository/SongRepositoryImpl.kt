@@ -297,7 +297,12 @@ internal class SongRepositoryImpl(
     override suspend fun getRecentSong(
         limit: Int,
         offset: Int,
-    ) = localDataSource.getRecentSongs(limit, offset)
+        downloadedOnly: Boolean,
+    ) = localDataSource.getRecentSongs(
+        limit,
+        offset,
+        if (downloadedOnly) DownloadState.STATE_DOWNLOADED else null,
+    )
 
     override suspend fun insertSongInfo(songInfo: SongInfoEntity) =
         withContext(Dispatchers.IO) {

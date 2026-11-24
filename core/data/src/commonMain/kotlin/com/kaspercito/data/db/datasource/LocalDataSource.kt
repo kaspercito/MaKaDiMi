@@ -68,7 +68,8 @@ internal class LocalDataSource(
     suspend fun getRecentSongs(
         limit: Int,
         offset: Int,
-    ) = databaseDao.getRecentSongs(limit, offset)
+        downloadState: Int?,
+    ) = databaseDao.getRecentSongs(limit, offset, downloadState)
 
     suspend fun getSongByListVideoId(
         primaryKeyList: List<String>,
@@ -529,10 +530,14 @@ internal class LocalDataSource(
         playlistId: Long,
         query: String,
         limit: Int,
+        downloadedOnly: Boolean,
+        newestFirst: Boolean,
     ) = databaseDao.searchPlaylistPairSong(
         playlistId = playlistId,
         query = "%" + query.escapeForLike() + "%",
         limit = limit,
+        downloadedOnly = downloadedOnly,
+        newestFirst = newestFirst,
     )
 
     suspend fun getPlaylistPairSongByOffset(

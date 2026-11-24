@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -21,6 +22,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.LocalTextStyle
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SearchBarDefaults
+import androidx.compose.material3.FilterChip
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
@@ -35,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.zIndex
@@ -85,6 +88,8 @@ import dev.chrisbanes.haze.rememberHazeState
 import com.kaspercito.makadimi.ui.screen.home.analytics.formatNumericSpan
 import com.kaspercito.makadimi.ui.screen.home.analytics.labelRes
 import kotlinx.datetime.LocalDate
+import kotlinx.datetime.DateTimeUnit
+import kotlinx.datetime.minus
 import kotlinx.datetime.Month
 import org.jetbrains.compose.resources.StringResource
 import org.jetbrains.compose.resources.pluralStringResource
@@ -101,7 +106,9 @@ import makadimi.composeapp.generated.resources.liked_songs
 import makadimi.composeapp.generated.resources.liked_songs_count
 import makadimi.composeapp.generated.resources.lower_plays
 import makadimi.composeapp.generated.resources.most_played
-import makadimi.composeapp.generated.resources.search
+import makadimi.composeapp.generated.resources.collection_search_hint
+import makadimi.composeapp.generated.resources.collection_no_matches
+import makadimi.composeapp.generated.resources.collection_recent_downloads
 import makadimi.composeapp.generated.resources.seconds
 import makadimi.composeapp.generated.resources.wrapped
 import makadimi.composeapp.generated.resources.wrapped_recap_month
@@ -122,10 +129,11 @@ fun LibraryDynamicPlaylistScreen(
     sharedViewModel: SharedViewModel = koinInject(),
 ) {
     val nowPlayingVideoId by viewModel.nowPlayingVideoId.collectAsStateWithLifecycle()
+    val focusManager = LocalFocusManager.current
 
     var chosenSong: SongEntity? by remember { mutableStateOf(null) }
     var showBottomSheet by rememberSaveable { mutableStateOf(false) }
-    var showSearchBar by rememberSaveable { mutableStateOf(false) }
+    var showSearchBar by rememberSaveable(type) { mutableStateOf(type == LibraryDynamicPlaylistType.Downloaded.toStringParams()) }
     var query by rememberSaveable { mutableStateOf("") }
 
     val selectionState = rememberSongSelectionState()
@@ -134,22 +142,13 @@ fun LibraryDynamicPlaylistScreen(
     var showSelectionAddToPlaylist by rememberSaveable { mutableStateOf(false) }
 
     val favorite by viewModel.listFavoriteSong.collectAsStateWithLifecycle()
-    var tempFavorite by remember { mutableStateOf(emptyList<SongEntity>()) }
     val followed by viewModel.listFollowedArtist.collectAsStateWithLifecycle()
-    var tempFollowed by remember { mutableStateOf(emptyList<ArtistEntity>()) }
     val mostPlayed by viewModel.listMostPlayedSong.collectAsStateWithLifecycle()
-    var tempMostPlayed by remember { mutableStateOf(emptyList<SongEntity>()) }
     val downloaded by viewModel.listDownloadedSong.collectAsStateWithLifecycle()
-    var tempDownloaded by remember { mutableStateOf(emptyList<SongEntity>()) }
     val monthlyRecap by viewModel.listMonthlyRecapSong.collectAsStateWithLifecycle()
-    var tempMonthlyRecap by remember { mutableStateOf(emptyList<SongEntity>()) }
     val artistLiked by viewModel.listArtistLikedSong.collectAsStateWithLifecycle()
     val artistLikedName by viewModel.artistLikedName.collectAsStateWithLifecycle()
-    var tempArtistLiked by remember { mutableStateOf(emptyList<SongEntity>()) }
     val analyticsUIState by analyticsViewModel.analyticsUIState.collectAsStateWithLifecycle()
-    var tempTopTracks by remember { mutableStateOf(analyticsUIState.topTracks.data ?: emptyList()) }
-    var tempTopArtists by remember { mutableStateOf(analyticsUIState.topArtists.data ?: emptyList()) }
-    var tempTopAlbums by remember { mutableStateOf(analyticsUIState.topAlbums.data ?: emptyList()) }
     val hazeState =
         rememberHazeState()
 
@@ -171,25 +170,35 @@ fun LibraryDynamicPlaylistScreen(
         parsed.topListRange()?.let { (start, end) -> analyticsViewModel.showRange(start, end) }
     }
 
-    LaunchedEffect(query) {
-        tempFavorite = favorite.filter { it.matches(query) }
-        tempFollowed = followed.filter { it.name.contains(query, ignoreCase = true) }
-        tempMostPlayed = mostPlayed.filter { it.matches(query) }
-        tempDownloaded = downloaded.filter { it.matches(query) }
-        tempMonthlyRecap = monthlyRecap.filter { it.matches(query) }
-        tempArtistLiked = artistLiked.filter { it.matches(query) }
-        tempTopTracks =
-            analyticsUIState.topTracks.data
-                ?.filter { it.second.matches(query) }
-                ?: emptyList()
-        tempTopArtists =
-            analyticsUIState.topArtists.data
-                ?.filter { it.second.name.contains(query, ignoreCase = true) }
-                ?: emptyList()
-        tempTopAlbums =
-            analyticsUIState.topAlbums.data
-                ?.filter { matchesQuery(it.second.title, it.second.artistName, query) }
-                ?: emptyList()
+    val search = query.trim().takeIf { showSearchBar }.orEmpty()
+    val tempFavorite = remember(favorite, search) { if (search.isEmpty()) favorite else favorite.filter { it.matches(search) } }
+    val tempFollowed = remember(followed, search) { if (search.isEmpty()) followed else followed.filter { it.name.contains(search, ignoreCase = true) } }
+    val tempMostPlayed = remember(mostPlayed, search) { if (search.isEmpty()) mostPlayed else mostPlayed.filter { it.matches(search) } }
+    val tempMonthlyRecap = remember(monthlyRecap, search) { if (search.isEmpty()) monthlyRecap else monthlyRecap.filter { it.matches(search) } }
+    val tempArtistLiked = remember(artistLiked, search) { if (search.isEmpty()) artistLiked else artistLiked.filter { it.matches(search) } }
+    val tempTopTracks = remember(analyticsUIState.topTracks.data, search) {
+        analyticsUIState.topTracks.data.orEmpty().let { if (search.isEmpty()) it else it.filter { row -> row.second.matches(search) } }
+    }
+    val tempTopArtists = remember(analyticsUIState.topArtists.data, search) {
+        analyticsUIState.topArtists.data.orEmpty().let { if (search.isEmpty()) it else it.filter { row -> row.second.name.contains(search, ignoreCase = true) } }
+    }
+    val tempTopAlbums = remember(analyticsUIState.topAlbums.data, search) {
+        analyticsUIState.topAlbums.data.orEmpty().let {
+            if (search.isEmpty()) it else it.filter { row -> matchesQuery(row.second.title, row.second.artistName, search) }
+        }
+    }
+    var recentDownloadsOnly by rememberSaveable { mutableStateOf(false) }
+    var favoriteDownloadsOnly by rememberSaveable { mutableStateOf(false) }
+    val today = now().date
+    val visibleDownloads = remember(downloaded, search, recentDownloadsOnly, favoriteDownloadsOnly, today) {
+        if (search.isEmpty() && !recentDownloadsOnly && !favoriteDownloadsOnly) downloaded else {
+            val firstDay = today.minus(6, DateTimeUnit.DAY)
+            downloaded.filter { song ->
+                (search.isEmpty() || song.matches(search)) &&
+                    (!recentDownloadsOnly || song.downloadedAt?.date?.let { it in firstDay..today } == true) &&
+                    (!favoriteDownloadsOnly || song.liked)
+            }
+        }
     }
 
     LazyColumn(
@@ -205,6 +214,30 @@ fun LibraryDynamicPlaylistScreen(
             }
         }
         val type = LibraryDynamicPlaylistType.toType(type)
+        if (type == LibraryDynamicPlaylistType.Downloaded) {
+            item {
+                Row(
+                    modifier = Modifier.padding(horizontal = 16.dp),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                ) {
+                    FilterChip(
+                        selected = recentDownloadsOnly,
+                        onClick = { recentDownloadsOnly = !recentDownloadsOnly },
+                        label = { Text(stringResource(Res.string.collection_recent_downloads)) },
+                    )
+                    FilterChip(
+                        selected = favoriteDownloadsOnly,
+                        onClick = { favoriteDownloadsOnly = !favoriteDownloadsOnly },
+                        label = { Text(stringResource(Res.string.favorite)) },
+                    )
+                }
+            }
+            if (visibleDownloads.isEmpty() && (search.isNotEmpty() || recentDownloadsOnly || favoriteDownloadsOnly)) {
+                item {
+                    Text(stringResource(Res.string.collection_no_matches), Modifier.padding(20.dp))
+                }
+            }
+        }
         if (type == LibraryDynamicPlaylistType.Followed) {
             items(
                 if (query.isNotEmpty() && showSearchBar) {
@@ -369,13 +402,7 @@ fun LibraryDynamicPlaylistScreen(
         } else {
             items(
                 when (type) {
-                    LibraryDynamicPlaylistType.Downloaded -> {
-                        if (query.isNotEmpty() && showSearchBar) {
-                            tempDownloaded
-                        } else {
-                            downloaded
-                        }
-                    }
+                    LibraryDynamicPlaylistType.Downloaded -> visibleDownloads
 
                     LibraryDynamicPlaylistType.Favorite -> {
                         if (query.isNotEmpty() && showSearchBar) {
@@ -413,7 +440,7 @@ fun LibraryDynamicPlaylistScreen(
                         }
                     }
                 },
-                key = { it.hashCode() },
+                key = { it.videoId },
             ) { song ->
                 SongFullWidthItems(
                     songEntity = song,
@@ -424,7 +451,7 @@ fun LibraryDynamicPlaylistScreen(
                         showBottomSheet = true
                     },
                     onClickListener = { videoId ->
-                        viewModel.playSong(videoId, type = type)
+                        viewModel.playSong(videoId, type, visibleDownloads.takeIf { type == LibraryDynamicPlaylistType.Downloaded })
                     },
                     onAddToQueue = {
                         sharedViewModel.addListToQueue(
@@ -587,7 +614,7 @@ fun LibraryDynamicPlaylistScreen(
                                     )
                                 }
                             } else {
-                                viewModel.playAll(type)
+                                viewModel.playAll(type, visibleDownloads.takeIf { type == LibraryDynamicPlaylistType.Downloaded })
                             }
                         }
                         RippleIconButton(
@@ -618,7 +645,7 @@ fun LibraryDynamicPlaylistScreen(
                                     )
                                 }
                             } else {
-                                viewModel.shuffle(type)
+                                viewModel.shuffle(type, visibleDownloads.takeIf { type == LibraryDynamicPlaylistType.Downloaded })
                             }
                         }
                     }
@@ -660,8 +687,7 @@ fun LibraryDynamicPlaylistScreen(
                                     ).map { it.second.videoId }
 
                                 LibraryDynamicPlaylistType.Downloaded ->
-                                    (if (query.isNotEmpty() && showSearchBar) tempDownloaded else downloaded)
-                                        .map { it.videoId }
+                                    visibleDownloads.map { it.videoId }
 
                                 LibraryDynamicPlaylistType.Favorite ->
                                     (if (query.isNotEmpty() && showSearchBar) tempFavorite else favorite)
@@ -700,12 +726,12 @@ fun LibraryDynamicPlaylistScreen(
                         SearchBarDefaults.InputField(
                             query = query,
                             onQueryChange = { query = it },
-                            onSearch = { showSearchBar = false },
+                            onSearch = { focusManager.clearFocus() },
                             expanded = showSearchBar,
                             onExpandedChange = { showSearchBar = it },
                             placeholder = {
                                 Text(
-                                    stringResource(Res.string.search),
+                                    stringResource(Res.string.collection_search_hint),
                                     style = typo().bodySmall,
                                 )
                             },
@@ -991,4 +1017,5 @@ private fun matchesQuery(
     title.contains(query, ignoreCase = true) ||
         artists?.any { it.contains(query, ignoreCase = true) } == true
 
-private fun SongEntity.matches(query: String): Boolean = matchesQuery(title, artistName, query)
+private fun SongEntity.matches(query: String): Boolean =
+    matchesQuery(title, artistName, query) || albumName?.contains(query, ignoreCase = true) == true

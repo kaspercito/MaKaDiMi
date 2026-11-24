@@ -707,6 +707,7 @@ fun SettingScreen(
 
     val settingListState = rememberLazyListState()
     val hubScope = androidx.compose.runtime.rememberCoroutineScope()
+    var hubHeightPx by remember { mutableIntStateOf(0) }
     // The toolbar is part of the list and scrolls away with it; a pinned, frosted copy takes over
     // once the Devices group has gone under it — Playlist's and Artist's way. The group's height
     // (top padding, header, card) is the scroll that carries it fully under the bar.
@@ -767,10 +768,30 @@ fun SettingScreen(
                     val isAndroid = getPlatform() == Platform.Android
                     val hubEntries =
                         buildList {
-                            add(SettingsHubEntry("user_interface", stringResource(Res.string.user_interface), SimpIcons.Tune))
-                            add(SettingsHubEntry("content", stringResource(Res.string.content), SimpIcons.LibraryMusic))
-                            if (isAndroid) add(SettingsHubEntry("audio", stringResource(Res.string.audio), SimpIcons.Headphones))
-                            add(SettingsHubEntry("playback", stringResource(Res.string.playback), SimpIcons.PlayCircle))
+                            add(SettingsHubEntry(
+                                "user_interface",
+                                stringResource(Res.string.user_interface),
+                                SimpIcons.Tune,
+                                listOf(stringResource(Res.string.theme), stringResource(Res.string.theme_color)),
+                            ))
+                            add(SettingsHubEntry(
+                                "content",
+                                stringResource(Res.string.content),
+                                SimpIcons.LibraryMusic,
+                                listOf(stringResource(Res.string.offline_mode_setting_title), stringResource(Res.string.language), stringResource(Res.string.video_quality)),
+                            ))
+                            if (isAndroid) add(SettingsHubEntry(
+                                "audio",
+                                stringResource(Res.string.audio),
+                                SimpIcons.Headphones,
+                                listOf(stringResource(Res.string.normalize_volume), stringResource(Res.string.equalizer_type)),
+                            ))
+                            add(SettingsHubEntry(
+                                "playback",
+                                stringResource(Res.string.playback),
+                                SimpIcons.PlayCircle,
+                                listOf(stringResource(Res.string.data_saver), stringResource(Res.string.equalizer)),
+                            ))
                             add(SettingsHubEntry("listening_history", stringResource(Res.string.listening_history), SimpIcons.History))
                             add(SettingsHubEntry("lyrics", stringResource(Res.string.lyrics), SimpIcons.Lyrics))
                             add(SettingsHubEntry("AI", stringResource(Res.string.ai), SimpIcons.GraphicEq))
@@ -778,17 +799,25 @@ fun SettingScreen(
                             add(SettingsHubEntry("discord", stringResource(Res.string.discord_integration), SimpIcons.Groups))
                             if (viewModel.lastfmAvailable) add(SettingsHubEntry("lastfm", stringResource(Res.string.lastfm_integration), SimpIcons.Insights))
                             add(SettingsHubEntry("sponsor_block", stringResource(Res.string.sponsorBlock), SimpIcons.FastForward))
-                            if (isAndroid) add(SettingsHubEntry("storage", stringResource(Res.string.storage), SimpIcons.Download))
+                            if (isAndroid) add(SettingsHubEntry(
+                                "storage",
+                                stringResource(Res.string.storage),
+                                SimpIcons.Download,
+                                listOf(stringResource(Res.string.clear_downloaded_cache), stringResource(Res.string.clear_player_cache)),
+                            ))
                             add(SettingsHubEntry("backup", stringResource(Res.string.backup), SimpIcons.Sync))
                             add(SettingsHubEntry("about_us", stringResource(Res.string.about_us), SimpIcons.Info))
                             add(SettingsHubEntry("developer_option", stringResource(Res.string.developer_option), SimpIcons.Settings))
                         }
                     SettingsHub(
                         entries = hubEntries,
+                        modifier = Modifier.onSizeChanged { hubHeightPx = it.height },
                         onJump = { key ->
                             // Mismo orden y mismas condiciones que los items de la lista.
                             val index = hubEntries.indexOfFirst { it.key == key }
-                            if (index >= 0) hubScope.launch { settingListState.animateScrollToItem(index) }
+                            if (index >= 0) hubScope.launch {
+                                settingListState.animateScrollToItem(index, scrollOffset = if (index == 0) hubHeightPx else 0)
+                            }
                         },
                     )
                 }

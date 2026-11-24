@@ -61,6 +61,9 @@ import com.kaspercito.makadimi.ui.theme.typo
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import makadimi.composeapp.generated.resources.Res
+import makadimi.composeapp.generated.resources.data_saver
+import makadimi.composeapp.generated.resources.data_saver_description
+import makadimi.composeapp.generated.resources.normalize_volume
 import makadimi.composeapp.generated.resources.quick_apply_now
 import makadimi.composeapp.generated.resources.quick_apply_now_desc
 import makadimi.composeapp.generated.resources.quick_audio_quality
@@ -90,6 +93,8 @@ fun QuickPlaybackSheet(
     val watchVideo by dataStoreManager.watchVideoInsteadOfPlayingAudio.collectAsState(DataStoreManager.FALSE)
     val videoQuality by dataStoreManager.videoQuality.collectAsState("720p")
     val audioQuality by dataStoreManager.quality.collectAsState(QUALITY.items.first().toString())
+    val dataSaver by dataStoreManager.dataSaver.collectAsState(DataStoreManager.FALSE)
+    val normalizeVolume by dataStoreManager.normalizeVolume.collectAsState(DataStoreManager.FALSE)
 
     var dirty by remember { mutableStateOf(false) }
     var reloading by remember { mutableStateOf(false) }
@@ -183,6 +188,32 @@ fun QuickPlaybackSheet(
                 )
             }
 
+
+            Spacer(Modifier.height(12.dp))
+            QuickCard {
+                QuickSwitchRow(
+                    icon = SimpIcons.Headphones,
+                    title = stringResource(Res.string.data_saver),
+                    subtitle = stringResource(Res.string.data_saver_description),
+                    checked = dataSaver == DataStoreManager.TRUE,
+                    onChange = {
+                        dirty = true
+                        scope.launch { dataStoreManager.setDataSaver(it) }
+                    },
+                )
+                QuickSwitchRow(
+                    icon = SimpIcons.Headphones,
+                    title = stringResource(Res.string.normalize_volume),
+                    subtitle = "",
+                    checked = normalizeVolume == DataStoreManager.TRUE,
+                    onChange = {
+                        scope.launch {
+                            dataStoreManager.setNormalizeVolume(it)
+                            handler.mayBeNormalizeVolume()
+                        }
+                    },
+                )
+            }
 
             // --- Aplicar ahora ---
             if (dirty) {
@@ -345,8 +376,10 @@ private fun QuickSwitchRow(
         Spacer(Modifier.width(14.dp))
         Column(Modifier.weight(1f)) {
             Text(title, style = typo().labelMedium.copy(fontWeight = FontWeight.SemiBold), color = c.content)
-            Spacer(Modifier.height(2.dp))
-            Text(subtitle, style = typo().bodySmall, color = c.subtitle)
+            if (subtitle.isNotEmpty()) {
+                Spacer(Modifier.height(2.dp))
+                Text(subtitle, style = typo().bodySmall, color = c.subtitle)
+            }
         }
         Spacer(Modifier.width(10.dp))
         Switch(

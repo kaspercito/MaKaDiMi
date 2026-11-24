@@ -41,7 +41,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.draw.scale
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.text.font.FontWeight
@@ -99,14 +98,16 @@ fun DjOrb(
     // Cuánto espacio extra se reserva alrededor para las ondas: 1.5 es el original (Inicio y hoja);
     // el dock usa menos para no estirar la barra.
     halo: Float = 1.5f,
+    animate: Boolean = true,
     onClick: (() -> Unit)? = null,
 ) {
     // El orbe vive en la barra inferior, visible en TODAS las pantallas: si respirara siempre, la app
     // redibujaría un brillo a 60 fps de forma permanente (y el celular se calienta). Quieto cuando el
     // DJ está apagado; solo se anima mientras está en el aire.
-    val transition = rememberInfiniteTransition(label = "djOrb")
+    val animateOrb = active && animate
+    val transition = if (animateOrb) rememberInfiniteTransition(label = "djOrb") else null
     val idle = remember { mutableStateOf(1f) }
-    val breathe by if (active) {
+    val breathe by if (transition != null) {
         transition.animateFloat(
             initialValue = 1f,
             targetValue = 1.08f,
@@ -116,7 +117,7 @@ fun DjOrb(
     } else {
         idle
     }
-    val wave by if (active) {
+    val wave by if (transition != null) {
         transition.animateFloat(
             initialValue = 0f,
             targetValue = 1f,
@@ -127,14 +128,14 @@ fun DjOrb(
         idle
     }
     Box(modifier = modifier.size(size * halo), contentAlignment = Alignment.Center) {
-        if (active) {
+        if (animateOrb) {
             // Dos ondas desfasadas que se expanden y se desvanecen.
             listOf(0f, 0.5f).forEach { phase ->
-                val p = (wave + phase) % 1f
                 Box(
                     Modifier
                         .size(size)
                         .graphicsLayer {
+                            val p = (wave + phase) % 1f
                             scaleX = 1f + p * 0.5f
                             scaleY = 1f + p * 0.5f
                             alpha = (1f - p) * 0.45f
@@ -145,7 +146,10 @@ fun DjOrb(
         Box(
             Modifier
                 .size(size)
-                .scale(breathe)
+                .graphicsLayer {
+                    scaleX = breathe
+                    scaleY = breathe
+                }
                 .neonGlow(MaterialTheme.colorScheme.primary.copy(alpha = if (active) 0.7f else 0.4f), size / 3)
                 .clip(CircleShape)
                 .background(auroraBrush())

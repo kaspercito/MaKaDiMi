@@ -7,7 +7,6 @@ import com.kaspercito.makadimi.ui.theme.monoFontFamily
 import androidx.compose.ui.unit.sp
 import com.kaspercito.makadimi.ui.theme.neonBorder
 import androidx.compose.animation.animateColorAsState
-import androidx.compose.animation.animateContentSize
 import com.kaspercito.makadimi.ui.theme.neonBrush
 import androidx.compose.animation.core.VisibilityThreshold
 import androidx.compose.animation.core.animateDpAsState
@@ -21,6 +20,7 @@ import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -41,7 +41,9 @@ import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.layout
 import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Constraints
 import androidx.compose.ui.unit.Density
 import androidx.compose.ui.unit.Dp
@@ -144,11 +146,6 @@ fun AppBottomNavigationBar(
     )
 }
 
-/**
- * Menú inferior MaKaDiMi: un dock a todo el ancho con el borde superior en degradado neón.
- * Todas las pestañas (Buscar incluida) viven en la misma barra; la activa se expande en una
- * píldora con degradado que muestra icono + nombre, y las demás quedan como iconos limpios.
- */
 @Composable
 private fun NeonDock(
     tabs: List<BottomNavScreen>,
@@ -168,7 +165,7 @@ private fun NeonDock(
         Modifier
             .fillMaxWidth()
             .windowInsetsPadding(NavigationBarDefaults.windowInsets)
-            .padding(horizontal = 14.dp, vertical = 10.dp),
+            .padding(horizontal = 8.dp, vertical = 8.dp),
     ) {
         Row(
             modifier =
@@ -178,7 +175,7 @@ private fun NeonDock(
                     .neonGlow(cs.primary.copy(alpha = 0.16f), 18.dp)
                     .clip(dockShape)
                     .glassPanel(dockShape, tint = cs.surfaceContainerHigh, alpha = 0.82f, borderAlpha = 0.9f)
-                    .padding(horizontal = 8.dp, vertical = 8.dp),
+                    .padding(horizontal = 4.dp, vertical = 6.dp),
             horizontalArrangement = Arrangement.SpaceEvenly,
             verticalAlignment = Alignment.CenterVertically,
         ) {
@@ -195,52 +192,45 @@ private fun NeonDock(
                     animationSpec = androidx.compose.animation.core.spring(dampingRatio = 0.55f, stiffness = 500f),
                     label = "dockTabPress",
                 )
-                Row(
+                Column(
                     modifier =
                         Modifier
-                            .animateContentSize(
-                                androidx.compose.animation.core.spring(
-                                    dampingRatio = 0.7f,
-                                    stiffness = androidx.compose.animation.core.Spring.StiffnessMediumLow,
-                                ),
-                            ).graphicsLayer {
+                            .weight(1f)
+                            .graphicsLayer {
                                 scaleX = pressScale
                                 scaleY = pressScale
-                            }.height(48.dp)
-                            .then(if (selected) Modifier.neonGlow(cs.primary.copy(alpha = 0.45f), 10.dp) else Modifier)
+                            }.heightIn(min = 52.dp)
                             .clip(tabShape)
                             .then(if (selected) Modifier.background(brush) else Modifier)
-                            .clickable(interactionSource = interaction, indication = null) {
-                                // Vibración ligera al cambiar de pestaña, como una tecla de verdad.
-                                if (!selected) haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
-                                onTabSelected(screen)
-                            }.padding(horizontal = if (selected) 20.dp else 15.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
+                            .selectable(
+                                selected = selected,
+                                interactionSource = interaction,
+                                indication = null,
+                                role = Role.Tab,
+                                onClick = {
+                                    if (!selected) haptics.performHapticFeedback(androidx.compose.ui.hapticfeedback.HapticFeedbackType.TextHandleMove)
+                                    onTabSelected(screen)
+                                },
+                            ).padding(horizontal = 2.dp, vertical = 4.dp),
+                    horizontalAlignment = Alignment.CenterHorizontally,
+                    verticalArrangement = Arrangement.Center,
                 ) {
                     CompositionLocalProvider(LocalContentColor provides contentColor) {
                         screen.icon()
                     }
-                    if (selected) {
-                        Text(
-                            stringResource(screen.title).uppercase(),
-                            style =
-                                typo().labelSmall.copy(
-                                    fontFamily = monoFontFamily(),
-                                    fontWeight = FontWeight.Bold,
-                                    fontSize = 11.sp,
-                                    letterSpacing = 1.2.sp,
-                                ),
-                            color = contentColor,
-                            maxLines = 1,
-                        )
-                    }
+                    Text(
+                        stringResource(screen.title),
+                        style = MaterialTheme.typography.labelSmall,
+                        color = contentColor,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
                 }
             }
             // El DJ vive en el centro del dock: tabs a la izquierda, orbe, tabs a la derecha.
             val half = (tabs.size + 1) / 2
             tabs.take(half).forEach { renderTab(it) }
-            DjOrb(active = djActive, size = 44.dp, halo = 1.2f, onClick = { showDj = true })
+            DjOrb(active = djActive, size = 44.dp, halo = 1.2f, animate = false, onClick = { showDj = true })
             tabs.drop(half).forEach { renderTab(it) }
         }
     }

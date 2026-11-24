@@ -41,6 +41,8 @@ import com.kaspercito.media3.audio.EchoAudioProcessor
 import com.kaspercito.media3.audio.EqualizerAudioProcessor
 import com.kaspercito.media3.audio.EqualizerCurve
 import com.kaspercito.media3.audio.SleepFadeAudioProcessor
+import com.kaspercito.media3.service.isOfflinePlaybackFailure
+import com.kaspercito.media3.service.playbackRetryDelay
 import com.kaspercito.media3.service.mediasourcefactory.isLiveStreamDetected
 import com.kaspercito.media3.exoplayer.CrossfadeExoPlayerAdapter.Companion.SPEED_PITCH_STEP
 import com.kaspercito.media3.service.mediasourcefactory.MergingMediaSourceFactory
@@ -617,10 +619,10 @@ internal class CrossfadeExoPlayerAdapter(
                     DefaultLoadControl
                         .Builder()
                         .setBufferDurationsMs(
-                            DefaultLoadControl.DEFAULT_MIN_BUFFER_MS * 4,
-                            DefaultLoadControl.DEFAULT_MAX_BUFFER_MS * 4,
+                            DefaultLoadControl.DEFAULT_MIN_BUFFER_MS,
+                            DefaultLoadControl.DEFAULT_MAX_BUFFER_MS,
                             0,
-                            0,
+                            1_000,
                         ).build(),
                 ).setWakeMode(C.WAKE_MODE_NETWORK)
                 .setHandleAudioBecomingNoisy(true)
@@ -662,6 +664,15 @@ internal class CrossfadeExoPlayerAdapter(
                         transitionToState(InternalState.PLAYING)
                         internalPlayWhenReady = true
                     } ?: Logger.w(TAG, "Play called but currentPlayer is null")
+                }
+
+                InternalState.ERROR -> {
+                    if (localCurrentMediaItemIndex in playlist.indices) {
+                        retryCount = 0
+                        retryVideoId = null
+                        internalPlayWhenReady = true
+                        loadAndPlayTrackInternal(localCurrentMediaItemIndex, cachedPosition, shouldPlay = true)
+                    }
                 }
 
                 InternalState.PREPARING -> {
@@ -737,6 +748,7 @@ internal class CrossfadeExoPlayerAdapter(
     }
 
     override fun stop() {
+        internalPlayWhenReady = false
         castRemotePlayer?.let { remote ->
             remote.stop()
             return
@@ -1546,6 +1558,12 @@ internal class CrossfadeExoPlayerAdapter(
                 message = error.message,
             )
         Logger.e(TAG, "Playback error: ${error.message}")
+        internalPlayWhenReady = false
+        stopPositionUpdates()
+        if (cachedIsLoading) {
+            cachedIsLoading = false
+            listeners.forEach { it.onIsLoadingChanged(false) }
+        }
         listeners.forEach { it.onPlayerError(genericError) }
         transitionToState(InternalState.ERROR)
     }
@@ -1708,6 +1726,9 @@ internal class CrossfadeExoPlayerAdapter(
                     // 3. Set new player as current
                     currentPlayer = player
                     currentPlayerFilter = playerFilter
+                    cachedPosition = startPositionMs.coerceAtLeast(0L)
+                    cachedDuration = player.duration.coerceAtLeast(0L)
+                    cachedBufferedPosition = player.bufferedPosition.coerceAtLeast(0L)
 
                     // 4. Setup our listener on new player
                     setupPlayerListenerInternal(player)
@@ -1744,7 +1765,6 @@ internal class CrossfadeExoPlayerAdapter(
                     // Seek if needed
                     if (startPositionMs > 0) {
                         player.seekTo(startPositionMs)
-                        cachedPosition = startPositionMs
                     }
 
                     // Auto-play if requested
@@ -1882,10 +1902,19 @@ internal class CrossfadeExoPlayerAdapter(
                             error.errorCode == PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND
 
                     val currentVideoId = playlist.getOrNull(localCurrentMediaItemIndex)?.mediaId
+                    val failedMediaId = player.currentMediaItem?.mediaId
+                    val videoKey = currentVideoId?.let { "${com.kaspercito.common.MERGING_DATA_TYPE.VIDEO}$it" }
+                    if (failedMediaId != currentVideoId && failedMediaId != videoKey) return
+                    val failedLoad = currentLoadJob
+                    fun isCurrentFailure(): Boolean =
+                        player === currentPlayer &&
+                            failedLoad === currentLoadJob &&
+                            playlist.getOrNull(localCurrentMediaItemIndex)?.mediaId == currentVideoId &&
+                            !isCastActive &&
+                            internalState != InternalState.IDLE
                     // When it was the VIDEO half that could not be fetched, the retry below plays the
                     // track as audio only instead of failing the whole merged source again.
-                    if (currentVideoId != null && isNetworkError) {
-                        val videoKey = "${com.kaspercito.common.MERGING_DATA_TYPE.VIDEO}$currentVideoId"
+                    if (currentVideoId != null && videoKey != null && isNetworkError) {
                         val videoHalfFailed =
                             generateSequence<Throwable>(error) { it.cause }
                                 .take(6)
@@ -1901,8 +1930,9 @@ internal class CrossfadeExoPlayerAdapter(
                     if (error.isLiveStreamDetected() && currentVideoId != null) {
                         Logger.w(TAG, "$currentVideoId is a live stream; loading it again as HLS")
                         coroutineScope.launch {
+                            if (!isCurrentFailure()) return@launch
                             precachedPlayers.remove(currentVideoId)?.player?.release()
-                            loadAndPlayTrackInternal(localCurrentMediaItemIndex, 0L, shouldPlay = true)
+                            loadAndPlayTrackInternal(localCurrentMediaItemIndex, 0L, shouldPlay = internalPlayWhenReady)
                         }
                         return
                     }
@@ -1916,38 +1946,52 @@ internal class CrossfadeExoPlayerAdapter(
                         )
                     }
                     // With offline mode on every request is refused by design, so a retry can only fail again.
-                    if (isRetryableSourceError && currentVideoId != null && !com.kaspercito.common.OfflineMode.enabled) {
+                    if (isRetryableSourceError && currentVideoId != null) {
                         // Reset retry count if this is a different track
                         if (retryVideoId != currentVideoId) {
                             retryVideoId = currentVideoId
                             retryCount = 0
                         }
-                        if (retryCount < maxRetryCount) {
+                        val retryDelay = playbackRetryDelay(
+                            offline = com.kaspercito.common.OfflineMode.enabled || error.isOfflinePlaybackFailure(),
+                            retryable = isRetryableSourceError,
+                            networkFailure = isNetworkError,
+                            failedAttempts = retryCount,
+                            maxRetries = maxRetryCount,
+                        )
+                        if (retryDelay != null) {
                             retryCount++
                             Logger.w(TAG, "Retryable source error (attempt $retryCount/$maxRetryCount) for $currentVideoId: ${error.errorCodeName}")
                             // Snapshot the current position so the retry resumes where playback
                             // failed instead of restarting the track from the beginning.
                             val resumePositionMs = cachedPosition.coerceAtLeast(0L)
-                            val attemptNumber = retryCount
                             coroutineScope.launch {
                                 try {
-                                    if (isNetworkError) delay(1_000L * attemptNumber)
+                                    if (retryDelay > 0L) delay(retryDelay)
+                                    if (!isCurrentFailure()) return@launch
+                                    if (com.kaspercito.common.OfflineMode.enabled) {
+                                        propagatePlayerError(error)
+                                        return@launch
+                                    }
                                     // Invalidate cached format so ResolvingDataSource fetches a fresh URL
                                     streamRepository.invalidateFormat(currentVideoId)
-                                    streamRepository.invalidateFormat("${com.kaspercito.common.MERGING_DATA_TYPE.VIDEO}$currentVideoId")
+                                    videoKey?.let { streamRepository.invalidateFormat(it) }
+                                    if (!isCurrentFailure()) return@launch
                                     // Evict from precache (it may hold a stale player)
                                     precachedPlayers.remove(currentVideoId)?.player?.release()
                                     // Reload the track at the saved position
-                                    loadAndPlayTrackInternal(localCurrentMediaItemIndex, resumePositionMs, shouldPlay = true)
+                                    loadAndPlayTrackInternal(localCurrentMediaItemIndex, resumePositionMs, shouldPlay = internalPlayWhenReady)
                                 } catch (e: Exception) {
                                     if (e is CancellationException) throw e
                                     Logger.e(TAG, "Retry failed: ${e.message}", e)
-                                    propagatePlayerError(error)
+                                    if (isCurrentFailure()) propagatePlayerError(error)
                                 }
                             }
                             return
                         }
-                        Logger.e(TAG, "Max retries ($maxRetryCount) exhausted for $currentVideoId")
+                        if (retryCount >= maxRetryCount) {
+                            Logger.e(TAG, "Max retries ($maxRetryCount) exhausted for $currentVideoId")
+                        }
                     }
 
                     propagatePlayerError(error)
@@ -3029,7 +3073,7 @@ internal class CrossfadeExoPlayerAdapter(
                     // Ritmo adaptativo: antes esto corría SIEMPRE a 50 ms (20 veces/seg), incluso en
                     // segundo plano mientras el usuario juega, y mantenía la CPU despertando sin parar.
                     // Solo hace falta precisión fina cuando hay (o está por haber) un crossfade.
-                    var nextDelayMs = if (currentPlayer?.isPlaying == true) 100L else 500L
+                    var nextDelayMs = if (currentPlayer?.isPlaying == true) 100L else 1_000L
                     try {
                         currentPlayer?.let { player ->
                             if (internalState == InternalState.PLAYING ||

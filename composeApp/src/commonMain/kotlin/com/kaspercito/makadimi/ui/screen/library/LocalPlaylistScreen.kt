@@ -64,6 +64,8 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
+import androidx.compose.material3.FilterChip
+import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
@@ -209,7 +211,11 @@ import makadimi.composeapp.generated.resources.unsync_playlist_warning
 import makadimi.composeapp.generated.resources.warning
 import makadimi.composeapp.generated.resources.yes
 import makadimi.composeapp.generated.resources.your_playlist
-import makadimi.composeapp.generated.resources.search
+import makadimi.composeapp.generated.resources.newer_first
+import makadimi.composeapp.generated.resources.collection_search_hint
+import makadimi.composeapp.generated.resources.collection_no_matches
+import makadimi.composeapp.generated.resources.collection_type_two_chars
+import makadimi.composeapp.generated.resources.collection_narrow_results
 
 private const val TAG = "LocalPlaylistScreen"
 
@@ -440,6 +446,9 @@ fun LocalPlaylistScreen(
     var showSearchBar by rememberSaveable { mutableStateOf(false) }
     val searchQuery by viewModel.searchQuery.collectAsStateWithLifecycle()
     val searchResults by viewModel.searchResults.collectAsStateWithLifecycle()
+    val searchDownloadedOnly by viewModel.searchDownloadedOnly.collectAsStateWithLifecycle()
+    val searchNewestFirst by viewModel.searchNewestFirst.collectAsStateWithLifecycle()
+    val searchFocusManager = LocalFocusManager.current
 //    Box {
     LazyColumn(
         modifier =
@@ -1335,59 +1344,26 @@ fun LocalPlaylistScreen(
             }
         }
         items(count = trackPagingItems.itemCount, key = { index ->
-            val item = trackPagingItems[index]
+            val item = trackPagingItems.peek(index)
             (item?.first?.videoId ?: "") + "item_$index" + item?.second?.inPlaylist + item?.second?.position
         }) { index ->
             val item = trackPagingItems[index]?.first
             if (item != null) {
                 val content = @Composable { mod: Modifier ->
-                    if (playingTrack?.videoId == item.videoId && isPlaying) {
-                        SongFullWidthItems(
-                            forceDark = true,
-                            isPlaying = true,
-                            shouldShowDragHandle = changingOrder,
-                            songEntity = item,
-                            onMoreClickListener = { onItemMoreClick(it) },
-                            onClickListener = {
-                                Logger.w("PlaylistScreen", "index: $index")
-                                onPlaylistItemClick(it)
-                            },
-                            onAddToQueue = {
-                                sharedViewModel.addListToQueue(
-                                    arrayListOf(item.toTrack()),
-                                )
-                            },
-                            selectionMode = selectionState.isActive,
-                            isSelected = selectionState.isSelected(item.videoId),
-                            // No long press while reordering: that gesture already belongs to drag.
-                            onLongClick = if (changingOrder) null else ({ selectionState.start(it) }),
-                            onSelectToggle = { selectionState.toggle(it) },
-                            modifier = mod,
-                        )
-                    } else {
-                        SongFullWidthItems(
-                            forceDark = true,
-                            isPlaying = false,
-                            shouldShowDragHandle = changingOrder,
-                            songEntity = item,
-                            onMoreClickListener = { onItemMoreClick(it) },
-                            onClickListener = {
-                                Logger.w("PlaylistScreen", "index: $index")
-                                onPlaylistItemClick(it)
-                            },
-                            onAddToQueue = {
-                                sharedViewModel.addListToQueue(
-                                    arrayListOf(item.toTrack()),
-                                )
-                            },
-                            selectionMode = selectionState.isActive,
-                            isSelected = selectionState.isSelected(item.videoId),
-                            // No long press while reordering: that gesture already belongs to drag.
-                            onLongClick = if (changingOrder) null else ({ selectionState.start(it) }),
-                            onSelectToggle = { selectionState.toggle(it) },
-                            modifier = mod,
-                        )
-                    }
+                    SongFullWidthItems(
+                        forceDark = true,
+                        isPlaying = playingTrack?.videoId == item.videoId && isPlaying,
+                        shouldShowDragHandle = changingOrder,
+                        songEntity = item,
+                        onMoreClickListener = { onItemMoreClick(it) },
+                        onClickListener = { onPlaylistItemClick(it) },
+                        onAddToQueue = { sharedViewModel.addListToQueue(arrayListOf(item.toTrack())) },
+                        selectionMode = selectionState.isActive,
+                        isSelected = selectionState.isSelected(item.videoId),
+                        onLongClick = if (changingOrder) null else ({ selectionState.start(it) }),
+                        onSelectToggle = { selectionState.toggle(it) },
+                        modifier = mod,
+                    )
                 }
                 if (changingOrder) {
                     DraggableItem(
@@ -1632,7 +1608,7 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                     RippleIconButton(
                         imageVector = SimpIcons.ArrowBackIosNew,
                     ) {
-                        navController.navigateUp()
+                        showSearchBar = false
                     }
                     SearchBar(
                         modifier =
@@ -1649,12 +1625,12 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                                 SearchBarDefaults.InputField(
                                     query = searchQuery,
                                     onQueryChange = { viewModel.setSearchQuery(it) },
-                                    onSearch = {},
+                                    onSearch = { searchFocusManager.clearFocus() },
                                     expanded = showSearchBar,
                                     onExpandedChange = { showSearchBar = it },
                                     placeholder = {
                                         Text(
-                                            stringResource(Res.string.search),
+                                            stringResource(Res.string.collection_search_hint),
                                             style = typo().bodyMedium,
                                         )
                                     },
@@ -1668,15 +1644,41 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                     }
                     IconButton(
                         onClick = {
-                            showSearchBar = false
-                            viewModel.setSearchQuery("")
+                            if (searchQuery.isNotEmpty()) viewModel.setSearchQuery("") else showSearchBar = false
                         },
                     ) {
                         Icon(SimpIcons.Close, null, tint = Color.White)
                     }
                 }
             }
+            Row(
+                modifier = Modifier.padding(horizontal = 16.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+            ) {
+                FilterChip(
+                    selected = searchDownloadedOnly,
+                    onClick = { viewModel.setSearchDownloadedOnly(!searchDownloadedOnly) },
+                    label = { Text(stringResource(Res.string.downloaded)) },
+                )
+                FilterChip(
+                    selected = searchNewestFirst,
+                    onClick = { viewModel.setSearchNewestFirst(!searchNewestFirst) },
+                    label = { Text(stringResource(Res.string.newer_first)) },
+                )
+            }
             LazyColumn(modifier = Modifier.weight(1f)) {
+                val queryLength = searchQuery.trim().length
+                val searchHint = when {
+                    queryLength == 1 -> Res.string.collection_type_two_chars
+                    searchResults.isEmpty() && (queryLength >= 2 || searchDownloadedOnly || searchNewestFirst) -> Res.string.collection_no_matches
+                    searchResults.size >= 200 -> Res.string.collection_narrow_results
+                    else -> null
+                }
+                if (searchHint != null) {
+                    item {
+                        Text(stringResource(searchHint), Modifier.padding(20.dp), color = Color.White)
+                    }
+                }
                 items(
                     searchResults,
                     key = { (song, pair) -> song.videoId + "_" + pair.position },

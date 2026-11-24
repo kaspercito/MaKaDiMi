@@ -107,6 +107,8 @@ interface LocalPlaylistRepository {
         id: Long,
         query: String,
         limit: Int = 200,
+        downloadedOnly: Boolean = false,
+        newestFirst: Boolean = false,
     ): Flow<List<Pair<SongEntity, PairSongLocalPlaylist>>>
 
     fun getTracksPaging(

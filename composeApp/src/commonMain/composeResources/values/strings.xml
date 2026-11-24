@@ -1091,4 +1091,12 @@ Built with ❤️ on top of the open source project SimpMusic by Tuan Minh Nguye
     <string name="background_glow_color">Glow color</string>
     <string name="background_glow_theme">Follow the theme</string>
     <string name="background_intensity">Background intensity</string>
+    <string name="recent_list_empty">No songs to show</string>
+    <string name="upcoming_queue_empty">No upcoming songs</string>
+    <string name="collection_search_hint">Song, artist or album</string>
+    <string name="collection_no_matches">No songs match your search or filters</string>
+    <string name="collection_recent_downloads">Last 7 days</string>
+    <string name="collection_search_more">Search more songs</string>
+    <string name="collection_type_two_chars">Enter at least two characters</string>
+    <string name="collection_narrow_results">Showing up to 200 songs. Narrow your search to find more specific results.</string>
 </resources>

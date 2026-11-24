@@ -113,6 +113,7 @@ import com.kaspercito.makadimi.ui.icon.SimpIcons
 import com.kaspercito.makadimi.ui.screen.player.content.applemusic.AudioOutputSheetHost
 import com.kaspercito.makadimi.ui.screen.player.content.expressive.ExpressiveTransportRow
 import com.kaspercito.makadimi.ui.screen.player.content.expressive.WavySeekBar
+import com.kaspercito.makadimi.ui.theme.LocalIsDarkTheme
 import com.kaspercito.makadimi.ui.theme.seed
 import com.kaspercito.makadimi.ui.theme.typo
 import com.kaspercito.makadimi.viewModel.UIEvent
@@ -165,7 +166,7 @@ internal fun NowPlayingExpressiveTheme(
     state: NowPlayingContentState,
     content: @Composable () -> Unit,
 ) {
-    // === 1. Color system: full dark scheme derived from the artwork ===
+    // === 1. Color system: tonal scheme derived from the artwork ===
     // Seeded the way Material You seeds from a wallpaper: quantize the artwork and score the colours
     // by population and chroma. Not from the shell's palette colour: that is the cover's DARK
     // swatch, chosen for Classic's gradient, and on a light cover it is often a near-grey line whose
@@ -192,7 +193,7 @@ internal fun NowPlayingExpressiveTheme(
     val derivedScheme =
         rememberDynamicColorScheme(
             seedColor = animatedSeedColor,
-            isDark = true,
+            isDark = LocalIsDarkTheme.current || state.screenData.fullscreenCanvas() != null,
             isAmoled = false,
             style = PaletteStyle.Vibrant,
         )
@@ -370,12 +371,12 @@ private fun NowPlayingM3ExpressiveLayout(
                         Text(
                             text = stringResource(Res.string.now_playing_upper),
                             style = typo().bodyMedium,
-                            color = Color.White,
+                            color = colorScheme.onSurfaceVariant,
                         )
                         Text(
                             text = state.screenData.playlistName,
                             style = typo().labelMedium,
-                            color = Color.White,
+                            color = colorScheme.onSurface,
                             textAlign = TextAlign.Center,
                             maxLines = 1,
                             modifier =
@@ -485,7 +486,7 @@ private fun NowPlayingM3ExpressiveLayout(
                                 LyricText(
                                     text = lineText,
                                     style = typo().labelSmall,
-                                    color = Color.White,
+                                    color = colorScheme.onSurface,
                                     maxLines = 1,
                                     modifier =
                                         Modifier
@@ -613,7 +614,7 @@ private fun NowPlayingM3ExpressiveLayout(
                                                                 ).focusable(),
                                                         text = lineText,
                                                         style = typo().bodyMedium,
-                                                        color = Color.White,
+                                                        color = colorScheme.onSurface,
                                                         maxLines = 1,
                                                     )
                                                     val translatedLineText =
@@ -718,7 +719,7 @@ internal fun ExpressiveTrackInfoRow(
             Text(
                 text = state.screenData.nowPlayingTitle,
                 style = typo().titleMedium,
-                color = Color.White,
+                color = colorScheme.onSurface,
                 maxLines = 1,
                 modifier =
                     Modifier
@@ -745,7 +746,7 @@ internal fun ExpressiveTrackInfoRow(
                 Text(
                     text = state.screenData.artistName,
                     style = typo().bodyMedium,
-                    color = state.secondaryTextColor(),
+                    color = state.secondaryTextColor().let { if (it == Color.Unspecified) colorScheme.onSurfaceVariant else it },
                     maxLines = 1,
                     modifier =
                         Modifier

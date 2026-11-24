@@ -3,7 +3,6 @@ package com.kaspercito.media3.service
 import com.kaspercito.common.OfflineMode
 import okhttp3.Interceptor
 import okhttp3.Response
-import java.io.IOException
 
 /**
  * Bloquea las peticiones de red del reproductor y de las descargas mientras el modo offline está activo.
@@ -11,7 +10,7 @@ import java.io.IOException
  */
 class OfflineBlockInterceptor : Interceptor {
     override fun intercept(chain: Interceptor.Chain): Response {
-        if (OfflineMode.enabled) throw IOException(OfflineMode.BLOCKED_MESSAGE)
+        if (OfflineMode.enabled) throw OfflinePlaybackException(OfflineMode.BLOCKED_MESSAGE)
         return chain.proceed(chain.request())
     }
 }

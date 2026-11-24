@@ -27,6 +27,8 @@ class CoilBitmapLoader(
     private val context: Context,
     private val coroutineScope: CoroutineScope,
 ) : BitmapLoader {
+    private val artworkLimitPx by lazy { platformArtworkLimitPx(context) }
+
     override fun supportsMimeType(mimeType: String): Boolean = true
 
     override fun decodeBitmap(data: ByteArray): ListenableFuture<Bitmap> =
@@ -43,6 +45,7 @@ class CoilBitmapLoader(
                         ImageRequest
                             .Builder(context)
                             .data(uri)
+                            .size(artworkLimitPx)
                             .allowHardware(false)
                             .build(),
                     )

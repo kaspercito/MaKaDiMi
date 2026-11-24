@@ -41,7 +41,6 @@ import org.koin.core.logger.Level
 import org.makadimi.crashlytics.configCrashlytics
 import org.makadimi.lastfm.configLastfm
 import java.io.File
-import java.lang.reflect.Field
 
 class MakadimiApplication :
     Application(),
@@ -102,10 +101,13 @@ class MakadimiApplication :
             .apply()
 
         @SuppressLint("DiscouragedPrivateApi")
-        val field: Field = CursorWindow::class.java.getDeclaredField("sCursorWindowSize")
-        field.isAccessible = true
-        val expectSize = 100 * 1024 * 1024
-        field.set(null, expectSize)
+        val cursorWindowConfig = runCatching {
+            CursorWindow::class.java.getDeclaredField("sCursorWindowSize").apply {
+                isAccessible = true
+                setInt(null, 100 * 1024 * 1024)
+            }
+        }
+        cursorWindowConfig.onFailure { Logger.w("Application", "CursorWindow configuration unavailable: ${it.message}") }
 
         AppContext.apply {
             set(applicationContext)
@@ -144,13 +146,13 @@ class MakadimiApplication :
                         .Builder()
                         .maxSizePercent(context, 0.15)
                         .build()
-                }.diskCache(
+                }.diskCache {
                     DiskCache
                         .Builder()
                         .directory(FileSystem.SYSTEM_TEMPORARY_DIRECTORY / "image_cache")
                         .maxSizeBytes(512L * 1024 * 1024)
-                        .build(),
-                ).crossfade(true)
+                        .build()
+                }.crossfade(true)
                 .build()
         return imageLoader
     }

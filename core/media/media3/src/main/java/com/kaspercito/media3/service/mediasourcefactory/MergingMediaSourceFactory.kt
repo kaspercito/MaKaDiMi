@@ -13,6 +13,7 @@ import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.MergingMediaSource
 import androidx.media3.exoplayer.upstream.LoadErrorHandlingPolicy
 import com.kaspercito.common.MERGING_DATA_TYPE
+import com.kaspercito.common.OfflineMode
 import com.kaspercito.domain.data.player.LiveStreamRegistry
 import com.kaspercito.domain.manager.DataStoreManager
 import com.kaspercito.logger.Logger
@@ -51,6 +52,7 @@ internal class MergingMediaSourceFactory(
     private val dataStoreManager: DataStoreManager,
     private val context: Context,
     private val downloadCache: Cache,
+    private val playerCache: Cache,
 ) : MediaSource.Factory {
     override fun setDrmSessionManagerProvider(drmSessionManagerProvider: DrmSessionManagerProvider): MediaSource.Factory {
         defaultMediaSourceFactory.setDrmSessionManagerProvider(drmSessionManagerProvider)
@@ -103,9 +105,12 @@ internal class MergingMediaSourceFactory(
     // A track downloaded while video playback was off holds its audio only. Offline, its video
     // half can be neither read nor fetched, and one failing half fails the whole merged source.
     private fun isVideoUnreachable(mediaId: String): Boolean =
-        downloadCache.isFullyCached(mediaId, 0L) &&
-            !downloadCache.isFullyCached("${MERGING_DATA_TYPE.VIDEO}$mediaId", 0L) &&
-            !isOnline()
+        isFullyCached(mediaId) &&
+            !isFullyCached("${MERGING_DATA_TYPE.VIDEO}$mediaId") &&
+            (OfflineMode.enabled || !isOnline())
+
+    private fun isFullyCached(key: String): Boolean =
+        downloadCache.isFullyCached(key, 0L) || playerCache.isFullyCached(key, 0L)
 
     private fun isOnline(): Boolean {
         val connectivityManager = context.getSystemService(ConnectivityManager::class.java) ?: return true

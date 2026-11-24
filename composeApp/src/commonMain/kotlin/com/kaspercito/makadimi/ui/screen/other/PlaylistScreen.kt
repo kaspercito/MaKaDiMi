@@ -161,7 +161,11 @@ import makadimi.composeapp.generated.resources.error
 import makadimi.composeapp.generated.resources.no_description
 import makadimi.composeapp.generated.resources.playlist
 import makadimi.composeapp.generated.resources.radio
-import makadimi.composeapp.generated.resources.search
+import makadimi.composeapp.generated.resources.retry
+import makadimi.composeapp.generated.resources.collection_search_hint
+import makadimi.composeapp.generated.resources.collection_no_matches
+import makadimi.composeapp.generated.resources.collection_search_more
+import androidx.compose.ui.platform.LocalFocusManager
 import makadimi.composeapp.generated.resources.unlimited
 
 @OptIn(ExperimentalCoroutinesApi::class, ExperimentalMaterial3Api::class)
@@ -199,6 +203,8 @@ fun PlaylistScreen(
     }
     var shouldHideTopBar by rememberSaveable { mutableStateOf(false) }
     var query by rememberSaveable { mutableStateOf("") }
+    val focusManager = LocalFocusManager.current
+    val searching = showSearchBar && query.isNotBlank()
 
     val selectionState = rememberSongSelectionState()
     val selectionViewModel: SongSelectionViewModel = koinViewModel()
@@ -210,17 +216,14 @@ fun PlaylistScreen(
             if (query.isEmpty() || !showSearchBar) {
                 tracks
             } else {
+                val term = query.trim()
                 tracks.filter {
-                    it.title.contains(query, ignoreCase = true) ||
-                        it.artists?.joinToString(", ")?.contains(query, ignoreCase = true) == true
+                    it.title.contains(term, ignoreCase = true) ||
+                        it.artists?.any { artist -> artist.name.contains(term, ignoreCase = true) } == true ||
+                        it.album?.name?.contains(term, ignoreCase = true) == true
                 }
             }
         }
-    }
-
-    LaunchedEffect(uiState) {
-        Logger.d(tag, "uiState hash: ${uiState.hashCode()}")
-        Logger.d(tag, "uiState data: ${uiState.data}")
     }
 
     LaunchedEffect(showSearchBar) {
@@ -242,11 +245,11 @@ fun PlaylistScreen(
             }
         }
 
-    LaunchedEffect(key1 = shouldStartPaginate.value) {
+    LaunchedEffect(shouldStartPaginate.value, showSearchBar, continuation, tracksListState) {
         Logger.d(tag, "shouldStartPaginate: ${shouldStartPaginate.value}")
         Logger.d(tag, "tracksListState: $tracksListState")
         Logger.d(tag, "Continuation: $continuation")
-        if (shouldStartPaginate.value && tracksListState == ListState.IDLE) {
+        if (!showSearchBar && shouldStartPaginate.value && tracksListState == ListState.IDLE) {
             viewModel.getContinuationTrack(
                 id,
                 continuation,
@@ -1059,49 +1062,19 @@ fun PlaylistScreen(
                         val item = filteredTrack.getOrNull(index)
                         if (item != null) {
                             Column(modifier = Modifier.animateItem()) {
-                                if (playingTrack?.videoId == item.videoId && isPlaying) {
-                                    SongFullWidthItems(
-                                        forceDark = true,
-                                        isPlaying = true,
-                                        track = item,
-                                        onMoreClickListener = { onItemMoreClick(it) },
-                                        onClickListener = {
-                                            Logger.w("PlaylistScreen", "index: $index")
-                                            onPlaylistItemClick(it)
-                                        },
-                                        onAddToQueue = {
-                                            sharedViewModel.addListToQueue(
-                                                arrayListOf(item),
-                                            )
-                                        },
-                                        selectionMode = selectionState.isActive,
-                                        isSelected = selectionState.isSelected(item.videoId),
-                                        onLongClick = { selectionState.start(it) },
-                                        onSelectToggle = { selectionState.toggle(it) },
-                                        modifier = Modifier,
-                                    )
-                                } else {
-                                    SongFullWidthItems(
-                                        forceDark = true,
-                                        isPlaying = false,
-                                        track = item,
-                                        onMoreClickListener = { onItemMoreClick(it) },
-                                        onClickListener = {
-                                            Logger.w("PlaylistScreen", "index: $index")
-                                            onPlaylistItemClick(it)
-                                        },
-                                        onAddToQueue = {
-                                            sharedViewModel.addListToQueue(
-                                                arrayListOf(item),
-                                            )
-                                        },
-                                        selectionMode = selectionState.isActive,
-                                        isSelected = selectionState.isSelected(item.videoId),
-                                        onLongClick = { selectionState.start(it) },
-                                        onSelectToggle = { selectionState.toggle(it) },
-                                        modifier = Modifier,
-                                    )
-                                }
+                                SongFullWidthItems(
+                                    forceDark = true,
+                                    isPlaying = playingTrack?.videoId == item.videoId && isPlaying,
+                                    track = item,
+                                    onMoreClickListener = onItemMoreClick,
+                                    onClickListener = onPlaylistItemClick,
+                                    onAddToQueue = { sharedViewModel.addListToQueue(arrayListOf(item)) },
+                                    selectionMode = selectionState.isActive,
+                                    isSelected = selectionState.isSelected(item.videoId),
+                                    onLongClick = { selectionState.start(it) },
+                                    onSelectToggle = { selectionState.toggle(it) },
+                                    modifier = Modifier,
+                                )
                                 if (index < filteredTrack.size - 1) {
                                     HorizontalDivider(
                                         modifier = Modifier.padding(start = 72.dp, end = 16.dp),
@@ -1109,6 +1082,26 @@ fun PlaylistScreen(
                                         color = Color.White.copy(alpha = 0.12f),
                                     )
                                 }
+                            }
+                        }
+                    }
+                    if (searching && tracksListState != ListState.LOADING && tracksListState != ListState.PAGINATING) {
+                        if (!continuation.isNullOrBlank()) {
+                            item {
+                                TextButton(
+                                    onClick = { viewModel.getContinuationTrack(id, continuation) },
+                                    modifier = Modifier.fillMaxWidth(),
+                                ) {
+                                    Text(
+                                        stringResource(
+                                            if (tracksListState == ListState.ERROR) Res.string.retry else Res.string.collection_search_more,
+                                        ),
+                                    )
+                                }
+                            }
+                        } else if (filteredTrack.isEmpty() && tracksListState != ListState.ERROR) {
+                            item {
+                                Text(stringResource(Res.string.collection_no_matches), Modifier.padding(20.dp), color = Color.White)
                             }
                         }
                     }
@@ -1205,12 +1198,12 @@ fun PlaylistScreen(
                                         SearchBarDefaults.InputField(
                                             query = query,
                                             onQueryChange = { query = it },
-                                            onSearch = { showSearchBar = false },
+                                            onSearch = { focusManager.clearFocus() },
                                             expanded = showSearchBar,
                                             onExpandedChange = { showSearchBar = it },
                                             placeholder = {
                                                 Text(
-                                                    stringResource(Res.string.search),
+                                                    stringResource(Res.string.collection_search_hint),
                                                     style = typo().bodyMedium,
                                                 )
                                             },

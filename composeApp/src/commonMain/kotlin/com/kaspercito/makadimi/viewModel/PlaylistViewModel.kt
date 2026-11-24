@@ -39,6 +39,8 @@ import kotlinx.coroutines.flow.SharingStarted.Companion.WhileSubscribed
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.firstOrNull
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.flow.onEmpty
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.singleOrNull
 import kotlinx.coroutines.flow.stateIn
@@ -273,6 +275,7 @@ class PlaylistViewModel(
         continuation: String?,
     ) {
         viewModelScope.launch {
+            if (_tracksListState.value == ListState.PAGINATING) return@launch
             if (continuation.isNullOrEmpty()) {
                 _tracksListState.value = ListState.PAGINATION_EXHAUST
                 return@launch
@@ -283,8 +286,13 @@ class PlaylistViewModel(
                         playlistId,
                         continuation,
                         fromPlaylist = true,
-                    ).collectLatest { res ->
-                        res.first?.forEach { track ->
+                    ).onEmpty { emit(null to null) }.collectLatest { res ->
+                        val page = res.first
+                        if (page == null) {
+                            _tracksListState.value = ListState.ERROR
+                            return@collectLatest
+                        }
+                        page.forEach { track ->
                             songRepository
                                 .insertSong(
                                     track
@@ -299,10 +307,10 @@ class PlaylistViewModel(
                         }
                         _tracks.update {
                             val newList = it.toMutableList()
-                            newList.addAll(res.first ?: emptyList())
+                            newList.addAll(page)
                             newList
                         }
-                        if (res.second.isNullOrEmpty()) {
+                        if (res.second.isNullOrEmpty() || res.second == continuation) {
                             _continuation.value = null
                             _tracksListState.value = ListState.PAGINATION_EXHAUST
                         } else {
@@ -586,32 +594,22 @@ class PlaylistViewModel(
 
     fun getFullTracks(callback: (List<Track>) -> Unit) {
         viewModelScope.launch {
-            if (tracksListState.value == ListState.PAGINATION_EXHAUST) {
-                _playlistEntity.value
-                    ?.copy(
-                        tracks = tracks.value.toListVideoId(),
-                        trackCount = tracks.value.size,
-                    )?.let {
-                        playlistRepository.insertAndReplacePlaylist(it)
-                    }
-                callback(tracks.value)
-            } else {
+            if (tracksListState.value != ListState.PAGINATION_EXHAUST) {
                 val id = uiState.value.data?.id ?: return@launch
-                tracksListState.collectLatest { state ->
-                    if (state == ListState.PAGINATION_EXHAUST) {
-                        _playlistEntity.value
-                            ?.copy(
-                                tracks = tracks.value.toListVideoId(),
-                                trackCount = tracks.value.size,
-                            )?.let {
-                                playlistRepository.insertAndReplacePlaylist(it)
-                            }
-                        callback(tracks.value)
-                    } else if (state != ListState.PAGINATING) {
+                getContinuationTrack(id, continuation.value)
+                val result = tracksListState.first { state ->
+                    if (state == ListState.IDLE) {
                         getContinuationTrack(id, continuation.value)
                     }
+                    state == ListState.PAGINATION_EXHAUST || state == ListState.ERROR
                 }
+                if (result == ListState.ERROR) return@launch
             }
+            val fullTracks = tracks.value
+            _playlistEntity.value
+                ?.copy(tracks = fullTracks.toListVideoId(), trackCount = fullTracks.size)
+                ?.let { playlistRepository.insertAndReplacePlaylist(it) }
+            callback(fullTracks)
         }
     }
 
