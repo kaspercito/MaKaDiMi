@@ -18,7 +18,6 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.border
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.material3.*
@@ -524,22 +523,11 @@ fun AppNavigationRail(
     ) {
         Spacer(Modifier.height(16.dp))
         Box(Modifier.padding(horizontal = 16.dp)) {
-            Box(
-                Modifier
-                    .size(48.dp)
-                    .clip(RoundedCornerShape(topStart = 18.dp, topEnd = 6.dp, bottomEnd = 18.dp, bottomStart = 6.dp))
-                    .background(auroraBrush()),
-                contentAlignment = Alignment.Center,
-            ) {
-                Image(
-                    painter = painterResource(Res.drawable.mono),
-                    contentDescription = null,
-                    modifier =
-                        Modifier
-                            .height(32.dp)
-                            .clip(CircleShape),
-                )
-            }
+            Image(
+                painter = painterResource(Res.drawable.app_icon),
+                contentDescription = null,
+                modifier = Modifier.size(48.dp).clip(RoundedCornerShape(14.dp)),
+            )
         }
         Spacer(Modifier.weight(1f))
         bottomNavScreens.forEach { screen ->

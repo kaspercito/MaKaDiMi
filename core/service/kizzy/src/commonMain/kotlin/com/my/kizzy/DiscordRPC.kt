@@ -56,10 +56,8 @@ class DiscordRPC(
     companion object {
         private const val APPLICATION_ID = "1530805316894331113"
         private const val APP_NAME: String = "MaKaDiMi"
-        // Icono pequeño de la tarjeta: la "M" de MaKaDiMi, servida desde este mismo repositorio. Antes apuntaba a
-        // un archivo alojado por el autor original (el icono de SimpMusic). Discord descarga la imagen por URL,
-        // así que el repositorio tiene que ser público y el archivo estar en la rama main.
+        // Use a versioned URL so Discord's image proxy gets a new cache key when the artwork changes.
         private const val APP_ICON: String =
-            "https://raw.githubusercontent.com/kaspercito/MaKaDiMi/main/composeApp/src/commonMain/composeResources/drawable/app_icon.png"
+            "https://raw.githubusercontent.com/kaspercito/MaKaDiMi/112995e54930555e3dad509e914fb1d515f5c916/composeApp/src/commonMain/composeResources/drawable/app_icon.png"
     }
 }
