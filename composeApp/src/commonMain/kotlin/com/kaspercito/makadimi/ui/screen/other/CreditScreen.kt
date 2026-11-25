@@ -82,7 +82,7 @@ fun CreditScreen(
 
         // App icon
         Image(
-            painter = painterResource(Res.drawable.app_icon),
+            painter = painterResource(Res.drawable.makadimi_mark),
             contentDescription = "App Icon",
             modifier =
                 Modifier

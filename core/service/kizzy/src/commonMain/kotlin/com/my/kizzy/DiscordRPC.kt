@@ -28,16 +28,18 @@ class DiscordRPC(
         // Reemplaza al antiguo botón "Visit MaKaDiMi", que ya no se muestra.
         val songUrl = "https://music.youtube.com/watch?v=${song.videoId}"
         val artists = song.artistName?.filter { it.isNotBlank() }?.joinToString(", ")
+        val cover = song.thumbnails?.takeIf { it.isNotBlank() }?.let { RpcImage.ExternalImage(it) }
+        val brand = RpcImage.ExternalImage(APP_ICON)
 
         val delivered = setActivity(
             name = APP_NAME,
             details = song.title,
             detailsUrl = songUrl,
             state = artists,
-            largeImage = song.thumbnails?.let { RpcImage.ExternalImage(it) },
-            smallImage = RpcImage.ExternalImage(APP_ICON),
+            largeImage = cover ?: brand,
+            smallImage = brand.takeIf { cover != null },
             // Al pasar el cursor sobre la carátula se ve el álbum (o el título si no hay álbum).
-            largeText = song.albumName?.takeIf { it.isNotBlank() } ?: song.title,
+            largeText = if (cover == null) APP_NAME else song.albumName?.takeIf { it.isNotBlank() } ?: song.title,
             smallText = "Escuchando en $APP_NAME",
             // Sin botones: la tarjeta queda limpia, solo carátula, título, artista y la barra de tiempo.
             buttons = null,
@@ -58,6 +60,6 @@ class DiscordRPC(
         private const val APP_NAME: String = "MaKaDiMi"
         // Use a versioned URL so Discord's image proxy gets a new cache key when the artwork changes.
         private const val APP_ICON: String =
-            "https://raw.githubusercontent.com/kaspercito/MaKaDiMi/112995e54930555e3dad509e914fb1d515f5c916/composeApp/src/commonMain/composeResources/drawable/app_icon.png"
+            "https://raw.githubusercontent.com/kaspercito/MaKaDiMi/v1.2.10/asset/makadimi-rpc-1.2.10.png"
     }
 }
