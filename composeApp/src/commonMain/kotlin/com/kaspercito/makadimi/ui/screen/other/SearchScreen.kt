@@ -130,7 +130,7 @@ import com.kaspercito.makadimi.ui.icon.ArrowOutward
 import com.kaspercito.makadimi.ui.icon.Close
 import com.kaspercito.makadimi.ui.icon.History
 import com.kaspercito.makadimi.ui.icon.Search
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.navigation.destination.home.MoodDestination
 import com.kaspercito.makadimi.ui.navigation.destination.list.AlbumDestination
 import com.kaspercito.makadimi.ui.navigation.destination.list.ArtistDestination
@@ -488,7 +488,7 @@ fun SearchScreen(
                                     },
                                 ) {
                                     Icon(
-                                        imageVector = SimpIcons.ArrowOutward,
+                                        imageVector = MaKaDiMiIcons.ArrowOutward,
                                         contentDescription = "Search suggestion",
                                         modifier = Modifier.size(24.dp),
                                     )
@@ -562,7 +562,7 @@ fun SearchScreen(
                                     verticalAlignment = Alignment.CenterVertically,
                                 ) {
                                     Icon(
-                                        imageVector = SimpIcons.History,
+                                        imageVector = MaKaDiMiIcons.History,
                                         contentDescription = "Search history",
                                         modifier = Modifier.size(24.dp),
                                     )
@@ -579,7 +579,7 @@ fun SearchScreen(
                                         },
                                     ) {
                                         Icon(
-                                            imageVector = SimpIcons.ArrowOutward,
+                                            imageVector = MaKaDiMiIcons.ArrowOutward,
                                             contentDescription = "Search suggestion",
                                             modifier = Modifier.size(24.dp),
                                         )
@@ -1097,13 +1097,13 @@ fun SearchScreen(
                                         enabled = isSearchPanelVisible,
                                     ) {
                                         Icon(
-                                            imageVector = SimpIcons.ArrowBackIosNew,
+                                            imageVector = MaKaDiMiIcons.ArrowBackIosNew,
                                             contentDescription = "Back",
                                         )
                                     }
                                 } else {
                                     Icon(
-                                        imageVector = SimpIcons.Search,
+                                        imageVector = MaKaDiMiIcons.Search,
                                         contentDescription = "Search",
                                     )
                                 }
@@ -1121,7 +1121,7 @@ fun SearchScreen(
                                 },
                             ) {
                                 Icon(
-                                    imageVector = SimpIcons.Close,
+                                    imageVector = MaKaDiMiIcons.Close,
                                     contentDescription = "Clear search",
                                 )
                             }

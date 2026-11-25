@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.VolumeOff: ImageVector
+val MaKaDiMiIcons.VolumeOff: ImageVector
   get() {
     if (_VolumeOff != null) {
       return _VolumeOff!!

@@ -23,8 +23,8 @@ class LoginSyncTest {
     @Test
     fun anyOtherQrIsIgnored() {
         assertNull(LoginSyncInvite.parse("https://simpmusic.org"))
-        assertNull(LoginSyncInvite.parse("simpmusic://login-sync?h=192.168.1.5&p=51234&k=short"))
-        assertNull(LoginSyncInvite.parse("simpmusic://login-sync?h=&p=51234&k=${Base64.UrlSafe.encode(ByteArray(32))}"))
+        assertNull(LoginSyncInvite.parse("makadimi://login-sync?h=192.168.1.5&p=51234&k=short"))
+        assertNull(LoginSyncInvite.parse("makadimi://login-sync?h=&p=51234&k=${Base64.UrlSafe.encode(ByteArray(32))}"))
     }
 
     @Test

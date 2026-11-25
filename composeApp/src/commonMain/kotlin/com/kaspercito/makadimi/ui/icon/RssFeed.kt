@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.RssFeed: ImageVector
+val MaKaDiMiIcons.RssFeed: ImageVector
   get() {
     if (_RssFeed != null) {
       return _RssFeed!!

@@ -16,7 +16,7 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.icon.ThumbDown
 import com.kaspercito.makadimi.ui.icon.ThumbUp
 import com.kaspercito.makadimi.ui.theme.typo
@@ -129,7 +129,7 @@ private fun VoteRow(
 
                 is VoteState.Success -> {
                     Icon(
-                        imageVector = if (voteState.state.upvote) SimpIcons.ThumbUp else SimpIcons.ThumbDown,
+                        imageVector = if (voteState.state.upvote) MaKaDiMiIcons.ThumbUp else MaKaDiMiIcons.ThumbDown,
                         contentDescription = null,
                         tint = Color.Cyan,
                         modifier = Modifier.size(24.dp),
@@ -153,7 +153,7 @@ private fun VoteRow(
                             modifier = Modifier.size(36.dp),
                         ) {
                             Icon(
-                                imageVector = SimpIcons.ThumbUp,
+                                imageVector = MaKaDiMiIcons.ThumbUp,
                                 contentDescription = stringResource(Res.string.upvote),
                                 modifier = Modifier.size(20.dp),
                             )
@@ -163,7 +163,7 @@ private fun VoteRow(
                             modifier = Modifier.size(36.dp),
                         ) {
                             Icon(
-                                imageVector = SimpIcons.ThumbDown,
+                                imageVector = MaKaDiMiIcons.ThumbDown,
                                 contentDescription = stringResource(Res.string.downvote),
                                 modifier = Modifier.size(20.dp),
                             )

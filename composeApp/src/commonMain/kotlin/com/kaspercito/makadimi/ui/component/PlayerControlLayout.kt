@@ -30,7 +30,7 @@ import com.kaspercito.makadimi.ui.icon.PlayCircle
 import com.kaspercito.makadimi.ui.icon.Repeat
 import com.kaspercito.makadimi.ui.icon.RepeatOne
 import com.kaspercito.makadimi.ui.icon.Shuffle
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.icon.SkipNext
 import com.kaspercito.makadimi.ui.icon.SkipPrevious
 import com.kaspercito.makadimi.ui.theme.seed
@@ -87,14 +87,14 @@ fun PlayerControlLayout(
                 Crossfade(targetState = controllerState.isShuffle, label = "Shuffle Button") { isShuffle ->
                     if (!isShuffle) {
                         Icon(
-                            imageVector = SimpIcons.Shuffle,
+                            imageVector = MaKaDiMiIcons.Shuffle,
                             tint = contentColor,
                             contentDescription = "",
                             modifier = Modifier.size(smallIcon.first),
                         )
                     } else {
                         Icon(
-                            imageVector = SimpIcons.Shuffle,
+                            imageVector = MaKaDiMiIcons.Shuffle,
                             tint = activeColor,
                             contentDescription = "",
                             modifier = Modifier.size(smallIcon.first),
@@ -121,7 +121,7 @@ fun PlayerControlLayout(
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                    imageVector = SimpIcons.SkipPrevious,
+                    imageVector = MaKaDiMiIcons.SkipPrevious,
                     tint = if (controllerState.isPreviousAvailable) contentColor else contentColor.copy(alpha = 0.4f),
                     contentDescription = "",
                     modifier = Modifier.size(mediumIcon.first),
@@ -150,14 +150,14 @@ fun PlayerControlLayout(
                 Crossfade(targetState = controllerState.isPlaying) { isPlaying ->
                     if (!isPlaying) {
                         Icon(
-                            imageVector = SimpIcons.PlayArrow,
+                            imageVector = MaKaDiMiIcons.PlayArrow,
                             tint = if (plainPlayPause) contentColor else MaterialTheme.colorScheme.onPrimary,
                             contentDescription = "",
                             modifier = Modifier.size(if (plainPlayPause) bigIcon.first else bigIcon.first * 0.6f),
                         )
                     } else {
                         Icon(
-                            imageVector = SimpIcons.Pause,
+                            imageVector = MaKaDiMiIcons.Pause,
                             tint = if (plainPlayPause) contentColor else MaterialTheme.colorScheme.onPrimary,
                             contentDescription = "",
                             modifier = Modifier.size(if (plainPlayPause) bigIcon.first else bigIcon.first * 0.6f),
@@ -184,7 +184,7 @@ fun PlayerControlLayout(
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                    imageVector = SimpIcons.SkipNext,
+                    imageVector = MaKaDiMiIcons.SkipNext,
                     tint = if (controllerState.isNextAvailable) contentColor else contentColor.copy(alpha = 0.4f),
                     contentDescription = "",
                     modifier = Modifier.size(mediumIcon.first),
@@ -209,7 +209,7 @@ fun PlayerControlLayout(
                     when (rs) {
                         is RepeatState.None -> {
                             Icon(
-                                imageVector = SimpIcons.Repeat,
+                                imageVector = MaKaDiMiIcons.Repeat,
                                 tint = contentColor,
                                 contentDescription = "",
                                 modifier = Modifier.size(smallIcon.first),
@@ -218,7 +218,7 @@ fun PlayerControlLayout(
 
                         RepeatState.All -> {
                             Icon(
-                                imageVector = SimpIcons.Repeat,
+                                imageVector = MaKaDiMiIcons.Repeat,
                                 tint = activeColor,
                                 contentDescription = "",
                                 modifier = Modifier.size(smallIcon.first),
@@ -227,7 +227,7 @@ fun PlayerControlLayout(
 
                         RepeatState.One -> {
                             Icon(
-                                imageVector = SimpIcons.RepeatOne,
+                                imageVector = MaKaDiMiIcons.RepeatOne,
                                 tint = activeColor,
                                 contentDescription = "",
                                 modifier = Modifier.size(smallIcon.first),

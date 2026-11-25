@@ -47,7 +47,7 @@ import com.kaspercito.makadimi.expect.openUrl
 import com.kaspercito.makadimi.extension.ultraThinBarStyle
 import com.kaspercito.makadimi.ui.component.RippleIconButton
 import com.kaspercito.makadimi.ui.icon.ArrowBackIosNew
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.theme.typo
 import com.kaspercito.makadimi.utils.VersionManager
 import com.mikepenz.markdown.m3.Markdown
@@ -226,7 +226,7 @@ fun CreditScreen(
         navigationIcon = {
             Box(Modifier.padding(horizontal = 5.dp)) {
                 RippleIconButton(
-                    SimpIcons.ArrowBackIosNew,
+                    MaKaDiMiIcons.ArrowBackIosNew,
                     Modifier
                         .size(32.dp),
                     true,

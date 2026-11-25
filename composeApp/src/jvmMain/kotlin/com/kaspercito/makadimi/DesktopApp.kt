@@ -160,7 +160,7 @@ fun runDesktopApp(args: Array<String> = emptyArray()) {
     // Note: macOS does NOT pass URI as args — it uses Apple Events via setOpenURIHandler
     //
     // Matched by shape rather than against a fixed list of schemes. The list used to be
-    // simpmusic:// + http:// + https://, which silently dropped the Last.fm callback
+    // makadimi:// + http:// + https://, which silently dropped the Last.fm callback
     // (wordbyword://lastfm-auth?token=…): the OS launched us with the token, this filter
     // discarded it, and the app merely came to the foreground while the login sat there
     // waiting forever. Any scheme we register with the OS must survive this line.
@@ -233,7 +233,7 @@ fun runDesktopApp(args: Array<String> = emptyArray()) {
         )
     }
 
-    // Register simpmusic:// protocol handler on Windows (HKCU, no admin needed)
+    // Register makadimi:// protocol handler on Windows (HKCU, no admin needed)
     WindowsProtocolRegistrar.register()
 
     val desktopNotificationManager = getKoin().get<DesktopNotificationManager>()

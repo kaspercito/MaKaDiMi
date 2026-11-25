@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.Share: ImageVector
+val MaKaDiMiIcons.Share: ImageVector
   get() {
     if (_Share != null) {
       return _Share!!

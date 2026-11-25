@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.Sort: ImageVector
+val MaKaDiMiIcons.Sort: ImageVector
   get() {
     if (_Sort != null) {
       return _Sort!!

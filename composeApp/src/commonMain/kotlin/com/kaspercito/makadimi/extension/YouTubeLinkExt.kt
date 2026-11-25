@@ -2,10 +2,10 @@ package com.kaspercito.makadimi.extension
 
 import com.eygraber.uri.Uri
 
-private const val APP_SCHEME = "simpmusic"
+private const val APP_SCHEME = "makadimi"
 
 /**
- * Turn a pasted YouTube link into the `simpmusic://` deep link that already drives the app.
+ * Turn a pasted YouTube link into the `makadimi://` deep link that already drives the app.
  *
  * Deliberately a *translation* rather than a second link handler: `App.kt` already knows what to do
  * with `watch` / `playlist` / `channel` — including that a `OLAK5uy_` list is an album and that a

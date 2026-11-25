@@ -535,7 +535,7 @@ fun AppNavigationRail(
         Spacer(Modifier.height(16.dp))
         Box(Modifier.padding(horizontal = 16.dp)) {
             Image(
-                painter = painterResource(Res.drawable.app_icon),
+                painter = painterResource(Res.drawable.makadimi_mark),
                 contentDescription = null,
                 modifier = Modifier.size(48.dp).clip(RoundedCornerShape(14.dp)),
             )

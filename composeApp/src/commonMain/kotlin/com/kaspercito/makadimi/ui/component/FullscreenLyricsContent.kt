@@ -107,7 +107,7 @@ import com.kaspercito.makadimi.ui.icon.PictureInPictureAlt
 import com.kaspercito.makadimi.ui.icon.QueueMusic
 import com.kaspercito.makadimi.ui.icon.Share
 import com.kaspercito.makadimi.ui.icon.AvTimer
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.icon.VolumeOff
 import com.kaspercito.makadimi.ui.icon.VolumeUp
 import com.kaspercito.makadimi.ui.navigation.destination.list.ArtistDestination
@@ -443,7 +443,7 @@ fun FullscreenLyricsContent(
                                 onClick = { showShareLyricsSheet = true },
                             ) {
                                 Icon(
-                                    imageVector = SimpIcons.Share,
+                                    imageVector = MaKaDiMiIcons.Share,
                                     contentDescription = stringResource(Res.string.share_lyrics),
                                     tint = Color.White,
                                 )
@@ -455,7 +455,7 @@ fun FullscreenLyricsContent(
                             onClick = { showNowPlayingSheet = true },
                         ) {
                             Icon(
-                                imageVector = SimpIcons.MoreVert,
+                                imageVector = MaKaDiMiIcons.MoreVert,
                                 contentDescription = "",
                                 tint = Color.White,
                             )
@@ -701,7 +701,7 @@ fun FullscreenLyricsContent(
                                                 showControlButtons = true
                                             },
                                         ) {
-                                            Icon(imageVector = SimpIcons.Info, tint = Color.White, contentDescription = "")
+                                            Icon(imageVector = MaKaDiMiIcons.Info, tint = Color.White, contentDescription = "")
                                         }
                                         Row(
                                             Modifier.align(Alignment.CenterEnd),
@@ -721,7 +721,7 @@ fun FullscreenLyricsContent(
                                                 },
                                             ) {
                                                 Icon(
-                                                    imageVector = SimpIcons.QueueMusic,
+                                                    imageVector = MaKaDiMiIcons.QueueMusic,
                                                     tint = Color.White,
                                                     contentDescription = "",
                                                 )
@@ -1012,11 +1012,11 @@ private fun FullscreenLyricsDesktopChrome(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             IconButton(onClick = onDismiss) {
-                Icon(imageVector = SimpIcons.Close, contentDescription = "", tint = Color.White)
+                Icon(imageVector = MaKaDiMiIcons.Close, contentDescription = "", tint = Color.White)
             }
             IconButton(onClick = { toggleMiniPlayer() }) {
                 Icon(
-                    imageVector = SimpIcons.PictureInPictureAlt,
+                    imageVector = MaKaDiMiIcons.PictureInPictureAlt,
                     contentDescription = "Mini Player",
                     tint = Color.White,
                 )
@@ -1048,9 +1048,9 @@ private fun FullscreenLyricsDesktopChrome(
                 Icon(
                     imageVector =
                         if (controllerState.volume > 0f) {
-                            SimpIcons.VolumeUp
+                            MaKaDiMiIcons.VolumeUp
                         } else {
-                            SimpIcons.VolumeOff
+                            MaKaDiMiIcons.VolumeOff
                         },
                     tint = Color.White,
                     contentDescription = if (controllerState.volume > 0f) "Mute" else "Unmute",
@@ -1156,7 +1156,7 @@ private fun FullscreenLyricsList(
             ) { onClick ->
                 LiquidGlassIconButton(
                     backdrop = backdrop,
-                    imageVector = SimpIcons.AvTimer,
+                    imageVector = MaKaDiMiIcons.AvTimer,
                     // A round button's rim, as on the Apple Music player's Desktop dismiss button.
                     highlight = Highlight(width = 1.dp),
                     onClick = onClick,

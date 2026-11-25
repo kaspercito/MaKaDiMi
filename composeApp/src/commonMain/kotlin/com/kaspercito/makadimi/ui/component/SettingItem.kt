@@ -1,6 +1,6 @@
 package com.kaspercito.makadimi.ui.component
 
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.icon.ArrowForwardIos
 import com.kaspercito.makadimi.ui.theme.neonBorder
 import com.kaspercito.makadimi.ui.theme.glassPanel
@@ -161,7 +161,7 @@ fun SettingItem(
             }
             if (switch == null && onClick != null && otherView == null) {
                 androidx.compose.material3.Icon(
-                    SimpIcons.ArrowForwardIos,
+                    MaKaDiMiIcons.ArrowForwardIos,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(start = 8.dp).size(16.dp),

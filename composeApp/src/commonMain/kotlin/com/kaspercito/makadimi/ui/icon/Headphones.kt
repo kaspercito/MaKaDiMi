@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.Headphones: ImageVector
+val MaKaDiMiIcons.Headphones: ImageVector
   get() {
     if (_Headphones != null) {
       return _Headphones!!

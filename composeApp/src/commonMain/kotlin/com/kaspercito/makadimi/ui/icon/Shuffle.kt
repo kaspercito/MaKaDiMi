@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.Shuffle: ImageVector
+val MaKaDiMiIcons.Shuffle: ImageVector
   get() {
     if (_Shuffle != null) {
       return _Shuffle!!

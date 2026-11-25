@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.SkipNext: ImageVector
+val MaKaDiMiIcons.SkipNext: ImageVector
   get() {
     if (_SkipNext != null) {
       return _SkipNext!!

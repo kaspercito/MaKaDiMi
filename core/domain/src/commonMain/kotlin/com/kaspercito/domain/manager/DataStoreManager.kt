@@ -61,6 +61,9 @@ interface DataStoreManager {
 
     suspend fun setTasteProfile(json: String?)
 
+    val playlistFolders: Flow<Map<Long, String>>
+    suspend fun setPlaylistFolder(playlistId: Long, folder: String)
+
     fun getString(key: String): Flow<String?>
 
     suspend fun putString(
@@ -659,7 +662,7 @@ interface DataStoreManager {
     }
 
     companion object Values {
-        const val MAKADIMI = "simpmusic"
+        const val MAKADIMI = "makadimi"
         const val YOUTUBE = "youtube"
         const val LRCLIB = "lrclib"
         const val BETTER_LYRICS = "better_lyrics"

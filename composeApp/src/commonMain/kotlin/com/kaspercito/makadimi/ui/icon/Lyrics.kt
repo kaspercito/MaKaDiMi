@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.Lyrics: ImageVector
+val MaKaDiMiIcons.Lyrics: ImageVector
   get() {
     if (_Lyrics != null) {
       return _Lyrics!!

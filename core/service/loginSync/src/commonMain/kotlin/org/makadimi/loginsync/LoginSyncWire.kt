@@ -64,7 +64,7 @@ class LoginSyncTransportException(
     }
 }
 
-/** What the QR carries: `simpmusic://login-sync?h=<ip>&p=<port>&k=<base64url key>`. */
+/** What the QR carries: `makadimi://login-sync?h=<ip>&p=<port>&k=<base64url key>`. */
 class LoginSyncInvite(
     val hosts: List<String>,
     val port: Int,
@@ -73,11 +73,11 @@ class LoginSyncInvite(
     fun toUri(): String = "$PREFIX?h=${hosts.joinToString(",")}&p=$port&k=${Base64.UrlSafe.encode(key)}"
 
     companion object {
-        private const val PREFIX = "simpmusic://login-sync"
+        private const val PREFIX = "makadimi://login-sync"
 
         /** Null for anything that is not a well-formed invite, so any other QR is simply ignored. */
         fun parse(text: String): LoginSyncInvite? {
-            if (!text.startsWith("$PREFIX?")) return null
+            if (!text.startsWith("$PREFIX?") && !text.startsWith("simpmusic://login-sync?")) return null
             // Split on the FIRST '=' only: the base64 key ends in padding.
             val params =
                 text

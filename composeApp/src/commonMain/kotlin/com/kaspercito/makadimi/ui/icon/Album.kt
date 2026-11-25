@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.Album: ImageVector
+val MaKaDiMiIcons.Album: ImageVector
   get() {
     if (_Album != null) {
       return _Album!!

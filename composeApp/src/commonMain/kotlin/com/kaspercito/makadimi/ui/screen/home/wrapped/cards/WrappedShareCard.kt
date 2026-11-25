@@ -38,7 +38,7 @@ import androidx.compose.ui.unit.min
 import androidx.compose.ui.unit.sp
 import com.kaspercito.makadimi.ui.icon.Download
 import com.kaspercito.makadimi.ui.icon.Share
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.screen.home.wrapped.WrappedTokens
 import com.kaspercito.makadimi.ui.screen.home.wrapped.formatCount
 import com.kaspercito.makadimi.ui.screen.home.wrapped.wholeMinutes
@@ -336,7 +336,7 @@ private fun PosterLabel(
  * the ink the panel writes in (`onSurface`) and the logo prints back through it in the panel's own
  * ground (`surface`), which is what keeps the mark readable whatever the artwork seeded.
  *
- * `Res.drawable.mono` is the app's logo, not an icon: `SimpIcons` is the Material Symbols set and
+ * `Res.drawable.mono` is the app's logo, not an icon: `MaKaDiMiIcons` is the Material Symbols set and
  * has no wordmark in it, and CLAUDE.md keeps the two logos as drawables on purpose. This is the
  * only `painterResource` left in the file.
  */
@@ -417,14 +417,14 @@ private fun ShareActions(
             shape = CircleShape,
             contentPadding = ACTION_CONTENT_PADDING,
         ) {
-            ActionContent(SimpIcons.Download, stringResource(Res.string.wrapped_save))
+            ActionContent(MaKaDiMiIcons.Download, stringResource(Res.string.wrapped_save))
         }
         FilledTonalButton(
             onClick = onShare,
             shape = CircleShape,
             contentPadding = ACTION_CONTENT_PADDING,
         ) {
-            ActionContent(SimpIcons.Share, stringResource(Res.string.wrapped_share))
+            ActionContent(MaKaDiMiIcons.Share, stringResource(Res.string.wrapped_share))
         }
     }
 }

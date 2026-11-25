@@ -73,7 +73,7 @@ import com.kaspercito.makadimi.extension.rgbFactor
 import com.kaspercito.makadimi.extension.smoothScrimBrush
 import com.kaspercito.makadimi.extension.toSquareThumbnailUrl
 import com.kaspercito.makadimi.ui.icon.ArrowBackIosNew
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.distinctUntilChanged
 import org.jetbrains.compose.resources.painterResource
@@ -214,7 +214,7 @@ fun CollapsingToolbarParallaxEffect(
                                 ),
                         ),
                 ) {
-                    Icon(SimpIcons.ArrowBackIosNew, "Back")
+                    Icon(MaKaDiMiIcons.ArrowBackIosNew, "Back")
                 }
             }
         }
@@ -361,7 +361,7 @@ private fun Toolbar(
                             .size(24.dp),
                 ) {
                     Icon(
-                        imageVector = SimpIcons.ArrowBackIosNew,
+                        imageVector = MaKaDiMiIcons.ArrowBackIosNew,
                         contentDescription = null,
                         tint = Color.White,
                     )

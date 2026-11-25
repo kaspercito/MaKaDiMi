@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.RestartAlt: ImageVector
+val MaKaDiMiIcons.RestartAlt: ImageVector
   get() {
     if (_RestartAlt != null) {
       return _RestartAlt!!

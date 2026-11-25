@@ -37,7 +37,7 @@ import androidx.compose.ui.window.WindowState
 import com.kaspercito.makadimi.extension.DesktopWindowChrome
 import com.kaspercito.makadimi.ui.icon.Close
 import com.kaspercito.makadimi.ui.icon.Remove
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.icon.UnfoldLess
 import com.kaspercito.makadimi.ui.icon.UnfoldMore
 import com.kaspercito.makadimi.ui.theme.typo
@@ -217,13 +217,13 @@ private fun WindowControlButton(
             Box(modifier = Modifier.padding(1.dp)) {
                 when (icon) {
                     WindowControlIcon.Minimize -> {
-                        Icon(SimpIcons.Remove, tint = Color.DarkGray, contentDescription = "Minimize")
+                        Icon(MaKaDiMiIcons.Remove, tint = Color.DarkGray, contentDescription = "Minimize")
                     }
 
                     WindowControlIcon.Maximize -> {
                         Icon(
                             modifier = Modifier.rotate(45f),
-                            imageVector = SimpIcons.UnfoldMore,
+                            imageVector = MaKaDiMiIcons.UnfoldMore,
                             tint = Color.DarkGray,
                             contentDescription = "Minimize",
                         )
@@ -232,7 +232,7 @@ private fun WindowControlButton(
                     WindowControlIcon.Restore -> {
                         Icon(
                             modifier = Modifier.rotate(45f),
-                            imageVector = SimpIcons.UnfoldLess,
+                            imageVector = MaKaDiMiIcons.UnfoldLess,
                             tint = Color.DarkGray,
                             contentDescription = "Minimize",
                         )
@@ -240,7 +240,7 @@ private fun WindowControlButton(
 
                     WindowControlIcon.Close -> {
                         Icon(
-                            imageVector = SimpIcons.Close,
+                            imageVector = MaKaDiMiIcons.Close,
                             tint = Color.DarkGray,
                             contentDescription = "Close",
                         )

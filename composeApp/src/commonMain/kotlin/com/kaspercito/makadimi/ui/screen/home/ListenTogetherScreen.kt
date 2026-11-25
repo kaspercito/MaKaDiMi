@@ -96,7 +96,7 @@ import com.kaspercito.makadimi.ui.icon.ContentCopy
 import com.kaspercito.makadimi.ui.icon.Logout
 import com.kaspercito.makadimi.ui.icon.Settings
 import com.kaspercito.makadimi.ui.icon.Share
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.navigation.destination.home.ListenTogetherSettingsDestination
 import com.kaspercito.makadimi.ui.theme.typo
 import com.kaspercito.makadimi.viewModel.ListenTogetherViewModel
@@ -473,7 +473,7 @@ private fun BoxScope.BackButton(
     // refract — and keeps it reachable once the page has scrolled, which the in-flow one did not.
     LiquidGlassIconButton(
         backdrop = backdrop,
-        imageVector = SimpIcons.ArrowBackIosNew,
+        imageVector = MaKaDiMiIcons.ArrowBackIosNew,
         // NOT the default Color.White: every other caller sits on a ForceDark screen, but this page
         // follows the theme — at light theme a white glyph sits on light glass (or on the light
         // fallback pill) and disappears. onSurface flips with the scheme.
@@ -659,12 +659,12 @@ private fun RoomCodePoster(
                 // A silent clipboard write is indistinguishable from a dead button, and this one
                 // is the whole point of the screen — the tick is the only proof it did anything.
                 Crossfade(targetState = copied, label = "ltCopied") { done ->
-                    GlyphButton(if (done) SimpIcons.Check else SimpIcons.ContentCopy) {
+                    GlyphButton(if (done) MaKaDiMiIcons.Check else MaKaDiMiIcons.ContentCopy) {
                         onCopyCode()
                         copied = true
                     }
                 }
-                GlyphButton(SimpIcons.Share, onShareCode)
+                GlyphButton(MaKaDiMiIcons.Share, onShareCode)
             }
         }
     }
@@ -739,7 +739,7 @@ private fun ErrorCard(
             horizontalArrangement = Arrangement.spacedBy(12.dp),
         ) {
             Text(message, style = typo().bodyMedium, color = MaterialTheme.colorScheme.error, modifier = Modifier.weight(1f))
-            Icon(SimpIcons.Close, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(16.dp))
+            Icon(MaKaDiMiIcons.Close, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(16.dp))
         }
     }
 }
@@ -767,8 +767,8 @@ private fun JoinRequests(
                         color = MaterialTheme.colorScheme.onSurfaceVariant,
                     )
                 }
-                ActionGlyph(SimpIcons.Check, MaterialTheme.colorScheme.primary) { onApprove(request.userId) }
-                ActionGlyph(SimpIcons.Close, MaterialTheme.colorScheme.error) { onReject(request.userId) }
+                ActionGlyph(MaKaDiMiIcons.Check, MaterialTheme.colorScheme.primary) { onApprove(request.userId) }
+                ActionGlyph(MaKaDiMiIcons.Close, MaterialTheme.colorScheme.error) { onReject(request.userId) }
             }
         }
     }
@@ -809,8 +809,8 @@ private fun Suggestions(
                         maxLines = 1,
                     )
                 }
-                ActionGlyph(SimpIcons.Check, MaterialTheme.colorScheme.primary) { onApprove(suggestion.suggestionId) }
-                ActionGlyph(SimpIcons.Close, MaterialTheme.colorScheme.error) { onReject(suggestion.suggestionId) }
+                ActionGlyph(MaKaDiMiIcons.Check, MaterialTheme.colorScheme.primary) { onApprove(suggestion.suggestionId) }
+                ActionGlyph(MaKaDiMiIcons.Close, MaterialTheme.colorScheme.error) { onReject(suggestion.suggestionId) }
             }
         }
     }
@@ -897,7 +897,7 @@ private fun Members(
                 }
                 if (manageable) {
                     Icon(
-                        SimpIcons.ArrowForwardIos,
+                        MaKaDiMiIcons.ArrowForwardIos,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(14.dp),
@@ -925,14 +925,14 @@ private fun FooterActions(
     ) {
         if (onLeave != null) {
             TextAction(
-                icon = SimpIcons.Logout,
+                icon = MaKaDiMiIcons.Logout,
                 text = stringResource(Res.string.lt_leave_room),
                 color = MaterialTheme.colorScheme.error,
                 onClick = onLeave,
             )
         }
         TextAction(
-            icon = SimpIcons.Settings,
+            icon = MaKaDiMiIcons.Settings,
             text = stringResource(Res.string.settings),
             color = MaterialTheme.colorScheme.onSurfaceVariant,
             onClick = onSettings,

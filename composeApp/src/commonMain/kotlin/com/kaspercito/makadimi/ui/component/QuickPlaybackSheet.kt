@@ -51,7 +51,7 @@ import com.kaspercito.makadimi.ui.icon.Headphones
 import com.kaspercito.makadimi.ui.icon.Movie
 import com.kaspercito.makadimi.ui.icon.MovieOff
 import com.kaspercito.makadimi.ui.icon.RestartAlt
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.theme.LeafShape
 import com.kaspercito.makadimi.ui.theme.LeafShapeSmall
 import com.kaspercito.makadimi.ui.theme.glassPanel
@@ -165,7 +165,7 @@ fun QuickPlaybackSheet(
                 // --- Modo vídeo ---
                 QuickCard {
                     QuickSwitchRow(
-                        icon = if (videoOn) SimpIcons.Movie else SimpIcons.MovieOff,
+                        icon = if (videoOn) MaKaDiMiIcons.Movie else MaKaDiMiIcons.MovieOff,
                         title = stringResource(Res.string.quick_video_mode),
                         subtitle = stringResource(Res.string.quick_video_mode_desc),
                         checked = videoOn,
@@ -192,7 +192,7 @@ fun QuickPlaybackSheet(
             } else {
                 // --- Calidad de audio ---
                 QuickCard {
-                    QuickLabel(stringResource(Res.string.quick_audio_quality), icon = SimpIcons.Headphones)
+                    QuickLabel(stringResource(Res.string.quick_audio_quality), icon = MaKaDiMiIcons.Headphones)
                     val normalized = QUALITY.normalize(audioQuality)
                     QuickChips(
                         options = QUALITY.items.map { it.toString() },
@@ -208,7 +208,7 @@ fun QuickPlaybackSheet(
             Spacer(Modifier.height(12.dp))
             QuickCard {
                 QuickSwitchRow(
-                    icon = SimpIcons.Headphones,
+                    icon = MaKaDiMiIcons.Headphones,
                     title = stringResource(Res.string.data_saver),
                     subtitle = stringResource(Res.string.data_saver_description),
                     checked = dataSaver == DataStoreManager.TRUE,
@@ -218,7 +218,7 @@ fun QuickPlaybackSheet(
                     },
                 )
                 QuickSwitchRow(
-                    icon = SimpIcons.Headphones,
+                    icon = MaKaDiMiIcons.Headphones,
                     title = stringResource(Res.string.normalize_volume),
                     subtitle = "",
                     checked = normalizeVolume == DataStoreManager.TRUE,
@@ -253,7 +253,7 @@ fun QuickPlaybackSheet(
                             }.padding(horizontal = 18.dp, vertical = 14.dp),
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
-                    Icon(SimpIcons.RestartAlt, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary)
+                    Icon(MaKaDiMiIcons.RestartAlt, contentDescription = null, tint = MaterialTheme.colorScheme.onPrimary)
                     Spacer(Modifier.width(12.dp))
                     Column {
                         Text(

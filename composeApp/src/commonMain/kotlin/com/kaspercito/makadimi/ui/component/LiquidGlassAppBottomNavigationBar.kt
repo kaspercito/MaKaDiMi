@@ -9,7 +9,7 @@ import com.kaspercito.makadimi.ui.icon.Home
 import com.kaspercito.makadimi.ui.icon.Insights
 import com.kaspercito.makadimi.ui.icon.LibraryMusic
 import com.kaspercito.makadimi.ui.icon.Search
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.navigation.destination.home.AnalyticsDestination
 import com.kaspercito.makadimi.ui.navigation.destination.home.HomeDestination
 import com.kaspercito.makadimi.ui.navigation.destination.library.LibraryDestination
@@ -52,7 +52,7 @@ sealed class BottomNavScreen(
         title = Res.string.home,
         icon = {
             Icon(
-                SimpIcons.Home,
+                MaKaDiMiIcons.Home,
                 contentDescription = null,
             )
         },
@@ -64,7 +64,7 @@ sealed class BottomNavScreen(
         title = Res.string.search,
         icon = {
             Icon(
-                SimpIcons.Search,
+                MaKaDiMiIcons.Search,
                 contentDescription = null,
             )
         },
@@ -76,7 +76,7 @@ sealed class BottomNavScreen(
         title = Res.string.library,
         icon = {
             Icon(
-                imageVector = SimpIcons.LibraryMusic,
+                imageVector = MaKaDiMiIcons.LibraryMusic,
                 contentDescription = null,
             )
         },
@@ -89,7 +89,7 @@ sealed class BottomNavScreen(
         title = Res.string.analytics,
         icon = {
             Icon(
-                imageVector = SimpIcons.Insights,
+                imageVector = MaKaDiMiIcons.Insights,
                 contentDescription = null,
             )
         },
@@ -104,7 +104,7 @@ sealed class BottomNavScreen(
         title = Res.string.mix,
         icon = {
             Icon(
-                imageVector = SimpIcons.GraphicEq,
+                imageVector = MaKaDiMiIcons.GraphicEq,
                 contentDescription = null,
             )
         },

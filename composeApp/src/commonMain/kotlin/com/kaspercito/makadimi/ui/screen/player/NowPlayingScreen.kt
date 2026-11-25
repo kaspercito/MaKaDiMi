@@ -83,7 +83,7 @@ import com.kaspercito.makadimi.ui.component.QueueBottomSheet
 import com.kaspercito.makadimi.ui.component.QueuePosition
 import com.kaspercito.makadimi.ui.component.VoteLyricsDialog
 import com.kaspercito.makadimi.ui.icon.KeyboardArrowDown
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.navigation.destination.home.ListenTogetherDestination
 import com.kaspercito.makadimi.ui.navigation.destination.list.ArtistDestination
 import com.kaspercito.makadimi.ui.navigation.destination.player.FullscreenDestination
@@ -156,7 +156,7 @@ fun NowPlayingScreen(
             sharedViewModel = sharedViewModel,
             navController = navController,
             isExpanded = sheetState.currentValue == SheetValue.Expanded,
-            dismissIcon = SimpIcons.KeyboardArrowDown,
+            dismissIcon = MaKaDiMiIcons.KeyboardArrowDown,
             onDismiss = {
                 hideSheet()
             },

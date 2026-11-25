@@ -36,7 +36,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaspercito.makadimi.ui.icon.DownloadForOffline
 import com.kaspercito.makadimi.ui.icon.DownloadForOfflineOutlined
 import com.kaspercito.makadimi.ui.icon.KeyboardArrowDown
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.theme.typo
 import com.kaspercito.makadimi.viewModel.AutoEqStatus
 import com.kaspercito.makadimi.viewModel.AutoEqViewModel
@@ -101,7 +101,7 @@ fun AutoEqPicker(
                     },
             )
             Icon(
-                imageVector = SimpIcons.KeyboardArrowDown,
+                imageVector = MaKaDiMiIcons.KeyboardArrowDown,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(20.dp),
@@ -189,9 +189,9 @@ fun AutoEqPicker(
                                     Icon(
                                         imageVector =
                                             if (downloaded) {
-                                                SimpIcons.DownloadForOffline
+                                                MaKaDiMiIcons.DownloadForOffline
                                             } else {
-                                                SimpIcons.DownloadForOfflineOutlined
+                                                MaKaDiMiIcons.DownloadForOfflineOutlined
                                             },
                                         contentDescription = null,
                                         tint =

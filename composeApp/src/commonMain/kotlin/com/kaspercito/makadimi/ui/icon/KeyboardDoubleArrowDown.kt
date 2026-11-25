@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.KeyboardDoubleArrowDown: ImageVector
+val MaKaDiMiIcons.KeyboardDoubleArrowDown: ImageVector
   get() {
     if (_KeyboardDoubleArrowDown != null) {
       return _KeyboardDoubleArrowDown!!

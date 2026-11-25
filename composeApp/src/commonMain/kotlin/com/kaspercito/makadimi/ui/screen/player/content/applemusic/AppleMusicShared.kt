@@ -96,7 +96,7 @@ import com.kaspercito.makadimi.ui.icon.QueueMusic
 import com.kaspercito.makadimi.ui.icon.Repeat
 import com.kaspercito.makadimi.ui.icon.RepeatOne
 import com.kaspercito.makadimi.ui.icon.Shuffle
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.icon.Star
 import com.kaspercito.makadimi.ui.icon.StarBorder
 import com.kaspercito.makadimi.ui.icon.VolumeDown
@@ -357,7 +357,7 @@ internal fun AppleMusicHeaderActions(
             ) {
                 Crossfade(targetState = state.likeStatus, label = "appleMusicYtLiked") { liked ->
                     Icon(
-                        imageVector = if (liked) SimpIcons.CheckCircle else SimpIcons.AddCircleOutline,
+                        imageVector = if (liked) MaKaDiMiIcons.CheckCircle else MaKaDiMiIcons.AddCircleOutline,
                         contentDescription = "",
                         tint = Color.White,
                     )
@@ -380,14 +380,14 @@ internal fun AppleMusicHeaderActions(
         ) {
             Crossfade(targetState = state.controllerState.isLiked, label = "appleMusicFavorite") { liked ->
                 Icon(
-                    imageVector = if (liked) SimpIcons.Star else SimpIcons.StarBorder,
+                    imageVector = if (liked) MaKaDiMiIcons.Star else MaKaDiMiIcons.StarBorder,
                     contentDescription = "",
                     tint = Color.White,
                     modifier = Modifier.size(32.dp),
                 )
             }
         }
-        AppleMusicGlyphButton(icon = SimpIcons.MoreVert, onClick = { actions.onShowMoreSheet() })
+        AppleMusicGlyphButton(icon = MaKaDiMiIcons.MoreVert, onClick = { actions.onShowMoreSheet() })
     }
 }
 
@@ -623,7 +623,7 @@ internal fun AppleMusicTimesRow(
             ) { label ->
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     Icon(
-                        imageVector = SimpIcons.Headphones,
+                        imageVector = MaKaDiMiIcons.Headphones,
                         contentDescription = null,
                         tint = AppleMusicQualityLabel,
                         modifier = Modifier.size(13.dp),
@@ -671,7 +671,7 @@ internal fun AppleMusicTransportRow(
     ) {
         if (showShuffleAndRepeat) {
             AppleMusicGlyphButton(
-                icon = SimpIcons.Shuffle,
+                icon = MaKaDiMiIcons.Shuffle,
                 onClick = { onUIEvent(UIEvent.Shuffle) },
                 size = 40.dp,
                 tint = Color.White.copy(alpha = if (controllerState.isShuffle) 1f else 0.4f),
@@ -682,7 +682,7 @@ internal fun AppleMusicTransportRow(
             modifier = Modifier.appleMusicPressInflate().size(56.dp).clip(CircleShape),
         ) {
             Icon(
-                imageVector = SimpIcons.FastRewind,
+                imageVector = MaKaDiMiIcons.FastRewind,
                 contentDescription = "",
                 tint = Color.White.copy(alpha = if (controllerState.isPreviousAvailable) 1f else 0.4f),
                 modifier = Modifier.size(46.dp),
@@ -702,7 +702,7 @@ internal fun AppleMusicTransportRow(
         ) {
             Crossfade(targetState = controllerState.isPlaying, label = "appleMusicPlayPauseIcon") { isPlaying ->
                 Icon(
-                    imageVector = if (isPlaying) SimpIcons.Pause else SimpIcons.PlayArrow,
+                    imageVector = if (isPlaying) MaKaDiMiIcons.Pause else MaKaDiMiIcons.PlayArrow,
                     contentDescription = "",
                     tint = Color.White,
                     modifier = Modifier.size(66.dp),
@@ -714,7 +714,7 @@ internal fun AppleMusicTransportRow(
             modifier = Modifier.appleMusicPressInflate().size(56.dp).clip(CircleShape),
         ) {
             Icon(
-                imageVector = SimpIcons.FastForward,
+                imageVector = MaKaDiMiIcons.FastForward,
                 contentDescription = "",
                 tint = Color.White.copy(alpha = if (controllerState.isNextAvailable) 1f else 0.4f),
                 modifier = Modifier.size(46.dp),
@@ -723,7 +723,7 @@ internal fun AppleMusicTransportRow(
         if (showShuffleAndRepeat) {
             val repeatState = controllerState.repeatState
             AppleMusicGlyphButton(
-                icon = if (repeatState is RepeatState.One) SimpIcons.RepeatOne else SimpIcons.Repeat,
+                icon = if (repeatState is RepeatState.One) MaKaDiMiIcons.RepeatOne else MaKaDiMiIcons.Repeat,
                 onClick = { onUIEvent(UIEvent.Repeat) },
                 size = 40.dp,
                 tint = Color.White.copy(alpha = if (repeatState !is RepeatState.None) 1f else 0.4f),
@@ -739,7 +739,7 @@ internal fun AppleMusicVolumeRow(
 ) {
     Row(modifier = modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
         Icon(
-            imageVector = SimpIcons.VolumeDown,
+            imageVector = MaKaDiMiIcons.VolumeDown,
             contentDescription = "",
             tint = AppleMusicTextSecondary,
             modifier = Modifier.size(18.dp),
@@ -755,7 +755,7 @@ internal fun AppleMusicVolumeRow(
         }
         Spacer(modifier = Modifier.width(12.dp))
         Icon(
-            imageVector = SimpIcons.VolumeUp,
+            imageVector = MaKaDiMiIcons.VolumeUp,
             contentDescription = "",
             tint = AppleMusicTextSecondary,
             modifier = Modifier.size(18.dp),
@@ -831,7 +831,7 @@ internal fun AppleMusicActionRow(
         ) {
             // Re-tapping the active tab returns to MAIN — the dock is a toggle, not one-way nav.
             AppleMusicDockButton(
-                icon = SimpIcons.Lyrics,
+                icon = MaKaDiMiIcons.Lyrics,
                 active = viewState == AppleMusicView.LYRICS,
                 activeColor = activeColor,
                 activeContentColor = activeContentColor,
@@ -849,7 +849,7 @@ internal fun AppleMusicActionRow(
                 verticalAlignment = Alignment.CenterVertically,
             ) {
                 AppleMusicCapsuleSegment(
-                    icon = SimpIcons.Headphones,
+                    icon = MaKaDiMiIcons.Headphones,
                     // Headphones is a tall, narrow glyph and Groups a wide one; these are the sizes at
                     // which the two read as a matched pair rather than one looking bigger.
                     iconSize = 23.dp,
@@ -864,14 +864,14 @@ internal fun AppleMusicActionRow(
                             .background(Color.White.copy(alpha = 0.20f)),
                 )
                 AppleMusicCapsuleSegment(
-                    icon = SimpIcons.Groups,
+                    icon = MaKaDiMiIcons.Groups,
                     iconSize = 24.dp,
                     highlighted = room.inRoom,
                     onClick = onOpenListenTogether,
                 )
             }
             AppleMusicDockButton(
-                icon = SimpIcons.QueueMusic,
+                icon = MaKaDiMiIcons.QueueMusic,
                 active = viewState == AppleMusicView.QUEUE,
                 activeColor = activeColor,
                 activeContentColor = activeContentColor,

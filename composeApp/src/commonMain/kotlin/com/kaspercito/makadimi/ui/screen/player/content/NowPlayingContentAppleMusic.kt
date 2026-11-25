@@ -95,7 +95,7 @@ import com.kaspercito.makadimi.ui.component.VideoQualityButton
 import com.kaspercito.makadimi.ui.icon.Forward5
 import com.kaspercito.makadimi.ui.icon.Fullscreen
 import com.kaspercito.makadimi.ui.icon.Replay5
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.icon.Subtitles
 import com.kaspercito.makadimi.ui.icon.SubtitlesOff
 import com.kaspercito.makadimi.ui.screen.player.content.applemusic.AppleMusicBottomCluster
@@ -1060,7 +1060,7 @@ private fun AppleMusicArtworkPage(
                                             onClick = { actions.onEnterFullscreenVideo() },
                                             modifier = Modifier.align(Alignment.TopEnd),
                                         ) {
-                                            Icon(imageVector = SimpIcons.Fullscreen, contentDescription = "", tint = Color.White)
+                                            Icon(imageVector = MaKaDiMiIcons.Fullscreen, contentDescription = "", tint = Color.White)
                                         }
                                         Row(
                                             modifier = Modifier.align(Alignment.Center).fillMaxWidth(),
@@ -1071,7 +1071,7 @@ private fun AppleMusicArtworkPage(
                                                 modifier = Modifier.size(48.dp).clip(CircleShape),
                                             ) {
                                                 Icon(
-                                                    imageVector = SimpIcons.Replay5,
+                                                    imageVector = MaKaDiMiIcons.Replay5,
                                                     contentDescription = "",
                                                     tint = Color.White,
                                                     modifier = Modifier.size(36.dp).alpha(0.8f),
@@ -1082,7 +1082,7 @@ private fun AppleMusicArtworkPage(
                                                 modifier = Modifier.size(48.dp).clip(CircleShape),
                                             ) {
                                                 Icon(
-                                                    imageVector = SimpIcons.Forward5,
+                                                    imageVector = MaKaDiMiIcons.Forward5,
                                                     contentDescription = "",
                                                     tint = Color.White,
                                                     modifier = Modifier.size(36.dp).alpha(0.8f),
@@ -1096,7 +1096,7 @@ private fun AppleMusicArtworkPage(
                                                 modifier = Modifier.align(Alignment.BottomEnd),
                                             ) {
                                                 Icon(
-                                                    imageVector = if (showSubtitle) SimpIcons.SubtitlesOff else SimpIcons.Subtitles,
+                                                    imageVector = if (showSubtitle) MaKaDiMiIcons.SubtitlesOff else MaKaDiMiIcons.Subtitles,
                                                     contentDescription = "",
                                                     tint = Color.White,
                                                 )

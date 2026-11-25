@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.PauseCircle: ImageVector
+val MaKaDiMiIcons.PauseCircle: ImageVector
   get() {
     if (_PauseCircle != null) {
       return _PauseCircle!!

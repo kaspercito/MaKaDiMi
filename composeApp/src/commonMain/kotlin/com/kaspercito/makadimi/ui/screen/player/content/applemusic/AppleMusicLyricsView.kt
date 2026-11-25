@@ -54,7 +54,7 @@ import com.kaspercito.makadimi.ui.component.lyrics.toShareLyricsLines
 import com.kaspercito.makadimi.ui.icon.OpenInFull
 import com.kaspercito.makadimi.ui.icon.Share
 import com.kaspercito.makadimi.ui.icon.AvTimer
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.icon.ThumbsUpDown
 import com.kaspercito.makadimi.ui.screen.player.content.NowPlayingContentActions
 import com.kaspercito.makadimi.ui.screen.player.content.NowPlayingContentState
@@ -266,7 +266,7 @@ internal fun AppleMusicLyricsView(
                                 // Adjusting counts as touching the page, or the cluster hides mid-tap.
                                 onInteraction = { interactionTick++ },
                             ) { onClick ->
-                                AppleMusicFloatingCircleButton(icon = SimpIcons.AvTimer, onClick = onClick)
+                                AppleMusicFloatingCircleButton(icon = MaKaDiMiIcons.AvTimer, onClick = onClick)
                             }
                         }
                         // Only when the lyrics (or the translation) actually came from SimpMusic
@@ -274,10 +274,10 @@ internal fun AppleMusicLyricsView(
                         // always gated theirs; this one did not, so it invited a rating on
                         // YouTube/LRCLIB/Spotify lyrics that had nowhere to go.
                         if (lyricsData.canVote()) {
-                            AppleMusicFloatingCircleButton(icon = SimpIcons.ThumbsUpDown, onClick = { actions.onShowVoteDialog() })
+                            AppleMusicFloatingCircleButton(icon = MaKaDiMiIcons.ThumbsUpDown, onClick = { actions.onShowVoteDialog() })
                         }
-                        AppleMusicFloatingCircleButton(icon = SimpIcons.Share, onClick = { showShareSheet = true })
-                        AppleMusicFloatingCircleButton(icon = SimpIcons.OpenInFull, onClick = { actions.onShowFullscreenLyrics() })
+                        AppleMusicFloatingCircleButton(icon = MaKaDiMiIcons.Share, onClick = { showShareSheet = true })
+                        AppleMusicFloatingCircleButton(icon = MaKaDiMiIcons.OpenInFull, onClick = { actions.onShowFullscreenLyrics() })
                     }
                 }
             }

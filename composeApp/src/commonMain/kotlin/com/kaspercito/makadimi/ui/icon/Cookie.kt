@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.Cookie: ImageVector
+val MaKaDiMiIcons.Cookie: ImageVector
   get() {
     if (_Cookie != null) {
       return _Cookie!!

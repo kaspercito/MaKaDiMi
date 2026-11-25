@@ -8,6 +8,8 @@ import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.layout.size
+import makadimi.composeapp.generated.resources.makadimi_mark
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -31,7 +33,10 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.Button
 import androidx.compose.material3.TextButton
+import makadimi.composeapp.generated.resources.update_retry_download
+import makadimi.composeapp.generated.resources.update_download_failed
 import androidx.compose.material3.adaptive.currentWindowAdaptiveInfo
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
@@ -80,7 +85,7 @@ import com.kaspercito.makadimi.ui.component.LocalAppDialogOpen
 import com.kaspercito.makadimi.ui.component.LocalNowPlayingOpen
 import com.kaspercito.makadimi.ui.component.LocalUserStarted
 import com.kaspercito.makadimi.ui.icon.ArrowForwardIos
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.navigation.destination.home.AnalyticsDestination
 import com.kaspercito.makadimi.ui.navigation.destination.home.HomeDestination
 import com.kaspercito.makadimi.ui.navigation.destination.home.NotificationDestination
@@ -236,7 +241,8 @@ fun App(
         val data = intent.data
         Logger.d("MainActivity", "onCreate: $data")
         if (data != null) {
-            if (data.scheme == "simpmusic" && data.host == "notification") {
+            val isAppLink = data.scheme == "makadimi" || data.scheme == "simpmusic"
+            if (isAppLink && data.host == "notification") {
                 viewModel.setIntent(null)
                 navController.navigate(
                     NotificationDestination,
@@ -244,7 +250,7 @@ fun App(
             } else if (data.scheme == "wordbyword" && data.host == "lastfm-auth") {
                 // Last.fm sends the user back here after they approve access, carrying the request
                 // token: wordbyword://lastfm-auth?token=xxx. The callback is fixed on the API
-                // account, which is why the scheme is not "simpmusic".
+                // account, which is why the scheme is not "makadimi".
                 val token = data.getQueryParameter("token")
                 Logger.d("MainActivity", "Last.fm callback, token present: ${!token.isNullOrEmpty()}")
                 viewModel.setIntent(null)
@@ -253,18 +259,18 @@ fun App(
                 // of it. The token is handed straight to the shared view model, and the screen
                 // closes itself when it sees a session key appear.
                 token?.let { viewModel.completeLastfmLogin(it) }
-            } else if (data.host == "simpmusic.org" || data.scheme == "simpmusic") {
+            } else if (data.host == "simpmusic.org" || isAppLink) {
                 // https://simpmusic.org/app/watch?v=VIDEO_ID
                 // https://simpmusic.org/app/playlist?list=PLAYLIST_ID
                 // https://simpmusic.org/app/channel/CHANNEL_ID
-                // simpmusic://watch?v=VIDEO_ID  (host="watch", no path)
-                // simpmusic://playlist?list=PLAYLIST_ID
-                // simpmusic://channel/CHANNEL_ID
+                // makadimi://watch?v=VIDEO_ID  (host="watch", no path)
+                // makadimi://playlist?list=PLAYLIST_ID
+                // makadimi://channel/CHANNEL_ID
                 val segments = data.pathSegments
                 // For simpmusic.org: segments = ["app", "watch"] → appPath = segments[1]
-                // For simpmusic://: host IS the appPath (e.g. host="watch"), segments = []
+                // For makadimi://: host IS the appPath (e.g. host="watch"), segments = []
                 val appPath =
-                    if (data.scheme == "simpmusic") {
+                    if (isAppLink) {
                         data.host
                     } else {
                         segments.getOrNull(1)
@@ -298,10 +304,10 @@ fun App(
                     }
 
                     "channel", "c" -> {
-                        // simpmusic://channel/UCxxx → segments = ["UCxxx"]
+                        // makadimi://channel/UCxxx → segments = ["UCxxx"]
                         // simpmusic.org/app/channel/UCxxx → segments = ["app", "channel", "UCxxx"]
                         val artistId =
-                            if (data.scheme == "simpmusic") {
+                            if (isAppLink) {
                                 segments.firstOrNull()
                             } else {
                                 segments.getOrNull(2)
@@ -321,14 +327,14 @@ fun App(
                         }
                     }
 
-                    // simpmusic://library                     → the Library tab
-                    // simpmusic://library?type=favorite       → one of its collections
+                    // makadimi://library                     → the Library tab
+                    // makadimi://library?type=favorite       → one of its collections
                     // Added for the Playlists widget, whose shortcuts have to reach these
                     // screens from the home screen without the app already running.
                     "library" -> {
                         val type = data.getQueryParameter("type")
                         if (type.isNullOrBlank()) {
-                            // simpmusic://library?tab=wrapped → the Library tab on one of its chips,
+                            // makadimi://library?tab=wrapped → the Library tab on one of its chips,
                             // named as LibraryChipType stores them (a launch banner points at Wrapped).
                             val tab = libraryTabOf(data)
                             if (!isAppLinkAvailable(appPath, tab, localTrackingOn, youTubeLoggedIn)) {
@@ -342,7 +348,7 @@ fun App(
                         }
                     }
 
-                    // simpmusic://analytics — added for the launch banners.
+                    // makadimi://analytics — added for the launch banners.
                     "analytics" -> {
                         if (isAppLinkAvailable(appPath, null, localTrackingOn, youTubeLoggedIn)) {
                             navController.navigate(AnalyticsDestination)
@@ -351,7 +357,7 @@ fun App(
                         }
                     }
 
-                    // simpmusic://taste — the AI taste card, which sits on Your library. A link of its
+                    // makadimi://taste — the AI taste card, which sits on Your library. A link of its
                     // own rather than library?tab=your_library, so it can say that the card exists only
                     // while local tracking is on.
                     "taste" -> {
@@ -791,7 +797,7 @@ fun App(
                                                 navController = navController,
                                                 sharedViewModel = viewModel,
                                                 isExpanded = true,
-                                                dismissIcon = SimpIcons.ArrowForwardIos,
+                                                dismissIcon = MaKaDiMiIcons.ArrowForwardIos,
                                             ) {
                                                 isShowNowPlaylistScreen = false
                                             }
@@ -854,9 +860,12 @@ fun App(
                     // Descarga e instalación dentro de la app (Android). null = sin descarga en curso.
                     var updateProgress by remember { mutableStateOf<Float?>(null) }
                     var showAllowInstallHint by remember { mutableStateOf(false) }
+                    var downloadFailed by remember { mutableStateOf(false) }
                     val updateScope = rememberCoroutineScope()
                     val installInApp = response.assetUrl != null && canInstallUpdateInApp()
                     AlertDialog(
+                        shape = MaterialTheme.shapes.extraLarge,
+                        containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                         properties =
                             DialogProperties(
                                 dismissOnBackPress = false,
@@ -867,11 +876,12 @@ fun App(
                             viewModel.showedUpdateDialog = false
                         },
                         confirmButton = {
-                            TextButton(
+                            Button(
                                 enabled = updateProgress == null,
                                 onClick = {
                                     val apkUrl = response.assetUrl
                                     if (installInApp && apkUrl != null) {
+                                        downloadFailed = false
                                         showAllowInstallHint = false
                                         updateProgress = 0f
                                         updateScope.launch {
@@ -893,10 +903,7 @@ fun App(
                                                 }
 
                                                 UpdateInstallResult.Failed -> {
-                                                    // Si algo falla, queda el método de siempre: abrir la página.
-                                                    shouldShowUpdateDialog = false
-                                                    viewModel.showedUpdateDialog = false
-                                                    openUrl(com.kaspercito.makadimi.utils.BrandLinks.RELEASES_URL)
+                                                    downloadFailed = true
                                                 }
                                             }
                                         }
@@ -908,7 +915,11 @@ fun App(
                                 },
                             ) {
                                 Text(
-                                    stringResource(if (installInApp) Res.string.update_now else Res.string.download),
+                                    stringResource(when {
+                                        downloadFailed -> Res.string.update_retry_download
+                                        installInApp -> Res.string.update_now
+                                        else -> Res.string.download
+                                    }),
                                     style = typo().bodySmall,
                                 )
                             }
@@ -928,10 +939,19 @@ fun App(
                             }
                         },
                         title = {
-                            Text(
-                                stringResource(Res.string.update_available),
-                                style = typo().labelSmall,
-                            )
+                            Column {
+                                androidx.compose.foundation.Image(
+                                    painter = org.jetbrains.compose.resources.painterResource(Res.drawable.makadimi_mark),
+                                    contentDescription = null,
+                                    modifier = Modifier.size(48.dp),
+                                )
+                                Text(
+                                    response.tagName,
+                                    color = MaterialTheme.colorScheme.primary,
+                                    style = MaterialTheme.typography.headlineLarge,
+                                )
+                                Text(stringResource(Res.string.update_available), style = MaterialTheme.typography.titleMedium)
+                            }
                         },
                         text = {
                             val formatted =
@@ -969,6 +989,12 @@ fun App(
                                         rememberScrollState(),
                                     ),
                             ) {
+                                if (downloadFailed) {
+                                    Text(stringResource(Res.string.update_download_failed), color = MaterialTheme.colorScheme.error)
+                                    TextButton(onClick = { openUrl(com.kaspercito.makadimi.utils.BrandLinks.RELEASES_URL) }) {
+                                        Text(stringResource(Res.string.download))
+                                    }
+                                }
                                 updateProgress?.let { progress ->
                                     Text(
                                         text = "${stringResource(Res.string.update_downloading)} ${(progress * 100).toInt()}%",

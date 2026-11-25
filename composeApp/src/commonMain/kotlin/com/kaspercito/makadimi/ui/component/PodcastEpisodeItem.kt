@@ -29,7 +29,7 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import com.kaspercito.domain.data.model.podcast.PodcastBrowse
 import com.kaspercito.makadimi.ui.icon.MoreVert
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.theme.typo
 import org.jetbrains.compose.resources.painterResource
 import makadimi.composeapp.generated.resources.Res
@@ -126,7 +126,7 @@ fun PodcastEpisodeFullWidthItem(
             }
 
             if (onMoreClickListener != null) {
-                RippleIconButton(imageVector = SimpIcons.MoreVert, fillMaxSize = false) {
+                RippleIconButton(imageVector = MaKaDiMiIcons.MoreVert, fillMaxSize = false) {
                     onMoreClickListener.invoke()
                 }
             }

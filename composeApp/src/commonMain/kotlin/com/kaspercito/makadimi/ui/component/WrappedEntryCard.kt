@@ -30,7 +30,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import coil3.compose.AsyncImage
 import com.kaspercito.makadimi.ui.icon.PlayArrow
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.screen.home.wrapped.formatCount
 import com.kaspercito.makadimi.ui.screen.home.wrapped.wholeMinutes
 import com.kaspercito.makadimi.ui.theme.typo
@@ -68,7 +68,7 @@ fun WrappedEntryCard(
                 formatCount(wholeMinutes(wrapped.stats.listenedSeconds)),
                 formatCount(wrapped.stats.distinctArtists),
             ),
-        discIcon = SimpIcons.PlayArrow,
+        discIcon = MaKaDiMiIcons.PlayArrow,
         onClick = onClick,
         modifier = modifier,
     ) {

@@ -29,7 +29,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.WindowState
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaspercito.makadimi.ui.icon.Close
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.viewModel.SharedViewModel
 import java.awt.Cursor
 import java.awt.MouseInfo
@@ -134,7 +134,7 @@ fun MiniPlayerRoot(
                         .size(24.dp),
             ) {
                 Icon(
-                    imageVector = SimpIcons.Close,
+                    imageVector = MaKaDiMiIcons.Close,
                     contentDescription = "Close",
                     tint = Color.White.copy(alpha = 0.7f),
                     modifier = Modifier.size(16.dp),

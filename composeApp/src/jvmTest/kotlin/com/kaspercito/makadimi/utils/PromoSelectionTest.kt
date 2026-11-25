@@ -11,7 +11,7 @@ class PromoSelectionTest {
         Promo(
             id = "receipt",
             image = mapOf("en" to "https://x/receipt-en.png", "vi" to "https://x/receipt-vi.png"),
-            link = "simpmusic://analytics",
+            link = "makadimi://analytics",
             minVersion = "2.3.0",
             requires = listOf("local_tracking"),
         )
@@ -19,7 +19,7 @@ class PromoSelectionTest {
         Promo(
             id = "wrapped",
             image = mapOf("en" to "https://x/wrapped-en.png"),
-            link = "simpmusic://library?tab=wrapped",
+            link = "makadimi://library?tab=wrapped",
         )
 
     private fun eligible(
@@ -119,9 +119,9 @@ class PromoSelectionTest {
     @Test
     fun `skips a banner whose link a tap could not open`() {
         val links =
-            listOf("http://x", "simpmusic//analytics", "ftp://x", "simpmusic://wrapped", "HTTPS://x", "simpmusic://analytics")
+            listOf("http://x", "simpmusic//analytics", "ftp://x", "makadimi://wrapped", "HTTPS://x", "makadimi://analytics")
         val promos = links.mapIndexed { i, link -> receipt.copy(id = "p$i", link = link) }
-        assertEquals(listOf("HTTPS://x", "simpmusic://analytics"), eligible(promos = promos).map { it.first.link })
+        assertEquals(listOf("HTTPS://x", "makadimi://analytics"), eligible(promos = promos).map { it.first.link })
     }
 
     @Test
@@ -132,13 +132,13 @@ class PromoSelectionTest {
         ) = receipt.copy(id = id, link = link, requires = emptyList())
         val all =
             listOf(
-                promo("analytics", "simpmusic://analytics"),
-                promo("wrapped", "simpmusic://library?tab=wrapped"),
-                promo("taste", "simpmusic://taste"),
-                promo("youtube", "simpmusic://library?tab=youtube_music_playlist"),
-                promo("library", "simpmusic://library?tab=your_library"),
+                promo("analytics", "makadimi://analytics"),
+                promo("wrapped", "makadimi://library?tab=wrapped"),
+                promo("taste", "makadimi://taste"),
+                promo("youtube", "makadimi://library?tab=youtube_music_playlist"),
+                promo("library", "makadimi://library?tab=your_library"),
                 // A list named by ?type= is what opens, whatever ?tab= says.
-                promo("favorite", "simpmusic://library?type=favorite&tab=wrapped"),
+                promo("favorite", "makadimi://library?type=favorite&tab=wrapped"),
             )
         fun ids(
             localTracking: Boolean,

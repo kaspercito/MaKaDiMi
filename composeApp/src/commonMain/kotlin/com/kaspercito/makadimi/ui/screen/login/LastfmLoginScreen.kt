@@ -43,7 +43,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import com.kaspercito.makadimi.ui.component.RippleIconButton
 import com.kaspercito.makadimi.ui.icon.ArrowBackIosNew
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.theme.typo
 import com.kaspercito.makadimi.viewModel.LastfmLoginState
 import com.kaspercito.makadimi.viewModel.LogInViewModel
@@ -242,7 +242,7 @@ fun LastfmLoginScreen(
             navigationIcon = {
                 Box(Modifier.padding(horizontal = 5.dp)) {
                     RippleIconButton(
-                        SimpIcons.ArrowBackIosNew,
+                        MaKaDiMiIcons.ArrowBackIosNew,
                         Modifier.size(32.dp),
                         true,
                         tint = MaterialTheme.colorScheme.onSurface,

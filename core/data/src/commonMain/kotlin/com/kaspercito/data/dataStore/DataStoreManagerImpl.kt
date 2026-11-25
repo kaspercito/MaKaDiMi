@@ -1,5 +1,7 @@
 package com.kaspercito.data.dataStore
 
+import kotlinx.coroutines.flow.distinctUntilChanged
+
 import androidx.datastore.core.DataStore
 import androidx.datastore.preferences.core.Preferences
 import androidx.datastore.preferences.core.edit
@@ -178,6 +180,21 @@ internal class DataStoreManagerImpl(
         settingsDataStore.data.map { preferences ->
             preferences[stringPreferencesKey(SELECTED_LANGUAGE)] ?: SUPPORTED_LANGUAGE.codes.first()
         }
+
+    override val playlistFolders: Flow<Map<Long, String>> = settingsDataStore.data.map { preferences ->
+        preferences.asMap().entries.mapNotNull { (key, value) ->
+            val id = key.name.takeIf { it.startsWith("playlist_folder_") }
+                ?.removePrefix("playlist_folder_")?.toLongOrNull()
+            if (id != null && value is String) id to value else null
+        }.toMap()
+    }.distinctUntilChanged()
+
+    override suspend fun setPlaylistFolder(playlistId: Long, folder: String) {
+        val key = stringPreferencesKey("playlist_folder_$playlistId")
+        settingsDataStore.edit { preferences ->
+            if (folder.isBlank()) preferences.remove(key) else preferences[key] = folder.trim()
+        }
+    }
 
     override fun getString(key: String): Flow<String?> =
         settingsDataStore.data.map { preferences ->

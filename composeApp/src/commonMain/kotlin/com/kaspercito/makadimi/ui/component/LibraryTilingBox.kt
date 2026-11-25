@@ -45,7 +45,7 @@ import com.kaspercito.domain.data.model.library.LibraryCollectionPreview
 import com.kaspercito.domain.data.model.library.LibraryOverview
 import com.kaspercito.makadimi.ui.component.taste.libraryCardColor
 import com.kaspercito.makadimi.ui.icon.History
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.navigation.destination.home.RecentlySongsDestination
 import com.kaspercito.makadimi.ui.navigation.destination.library.LibraryDynamicPlaylistDestination
 import com.kaspercito.makadimi.ui.screen.library.LibraryDynamicPlaylistType
@@ -89,7 +89,7 @@ fun LibraryTilingBox(
             modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp),
             shape = CardShape,
         ) {
-            Icon(SimpIcons.History, contentDescription = null, modifier = Modifier.size(20.dp))
+            Icon(MaKaDiMiIcons.History, contentDescription = null, modifier = Modifier.size(20.dp))
             Text(
                 text = stringResource(Res.string.recently_added),
                 modifier = Modifier.padding(start = 8.dp),

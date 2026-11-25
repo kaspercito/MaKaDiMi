@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.SubtitlesOff: ImageVector
+val MaKaDiMiIcons.SubtitlesOff: ImageVector
   get() {
     if (_SubtitlesOff != null) {
       return _SubtitlesOff!!

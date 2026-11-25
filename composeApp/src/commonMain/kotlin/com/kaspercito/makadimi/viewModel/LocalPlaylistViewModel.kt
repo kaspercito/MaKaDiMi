@@ -90,6 +90,12 @@ class LocalPlaylistViewModel(
     private val songRepository: SongRepository,
     private val localPlaylistRepository: LocalPlaylistRepository,
 ) : BaseViewModel() {
+    val playlistFolders = dataStoreManager.playlistFolders
+
+    fun setPlaylistFolder(id: Long, folder: String) {
+        if (id != 0L) viewModelScope.launch { dataStoreManager.setPlaylistFolder(id, folder) }
+    }
+
     private val converter = Converters()
     private val downloadUtils: DownloadHandler by inject<DownloadHandler>()
 
@@ -496,6 +502,7 @@ class LocalPlaylistViewModel(
                 .deleteLocalPlaylist(id, getString(Res.string.delete))
                 .collectLatestResource(
                     onSuccess = {
+                        setPlaylistFolder(id, "")
                         makeToast(it)
                         hideLoadingDialog()
                     },

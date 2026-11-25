@@ -37,6 +37,11 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
+import com.kaspercito.makadimi.ui.navigation.destination.library.LibraryDynamicPlaylistDestination
+import makadimi.composeapp.generated.resources.playlist_all_folders
+import makadimi.composeapp.generated.resources.playlist_smart_title
+import makadimi.composeapp.generated.resources.collection_recent_downloads
+import makadimi.composeapp.generated.resources.playlist_offline_favorites
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
@@ -94,7 +99,7 @@ import com.kaspercito.makadimi.ui.component.selection.rememberSongSelectionState
 import com.kaspercito.makadimi.ui.icon.Add
 import com.kaspercito.makadimi.ui.icon.Groups
 import com.kaspercito.makadimi.ui.icon.PeopleAlt
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.navigation.destination.home.ListenTogetherDestination
 import com.kaspercito.makadimi.ui.navigation.destination.home.SettingsDestination
 import com.kaspercito.makadimi.ui.theme.typo
@@ -157,6 +162,8 @@ fun LibraryScreen(
     val nowPlaying by viewModel.nowPlayingVideoId.collectAsStateWithLifecycle()
     val youTubePlaylist by viewModel.youTubePlaylist.collectAsStateWithLifecycle()
     val listCanvasSong by viewModel.listCanvasSong.collectAsStateWithLifecycle()
+    val playlistFolders by viewModel.playlistFolders.collectAsStateWithLifecycle(initialValue = emptyMap())
+    var selectedFolder by rememberSaveable { mutableStateOf<String?>(null) }
     val yourLocalPlaylist by viewModel.yourLocalPlaylist.collectAsStateWithLifecycle()
     val favoritePlaylist by viewModel.favoritePlaylist.collectAsStateWithLifecycle()
     val downloadedPlaylist by viewModel.downloadedPlaylist.collectAsStateWithLifecycle()
@@ -189,7 +196,7 @@ fun LibraryScreen(
 
     var sectionsOpen by remember { mutableStateOf(false) }
     val currentFilter by viewModel.currentScreen.collectAsStateWithLifecycle()
-    // A chip asked for by a deep link (simpmusic://library?tab=…), applied once and cleared.
+    // A chip asked for by a deep link (makadimi://library?tab=…), applied once and cleared.
     val libraryTabRequest by sharedViewModel.libraryTabRequest.collectAsStateWithLifecycle()
     LaunchedEffect(libraryTabRequest) {
         libraryTabRequest?.let {
@@ -371,10 +378,56 @@ fun LibraryScreen(
             LibraryChipType.YOUTUBE_MIX_FOR_YOU -> Unit
 
             LibraryChipType.LOCAL_PLAYLIST -> {
+                val playlists = yourLocalPlaylist.data
+                val folders = remember(playlists, playlistFolders) {
+                    playlists.orEmpty().mapNotNull { playlistFolders[it.id] }.distinct().sorted()
+                }
+                val activeFolder = selectedFolder?.takeIf { it in folders }
+                val filteredPlaylists = remember(yourLocalPlaylist, playlistFolders, activeFolder) {
+                    if (activeFolder == null || playlists == null) yourLocalPlaylist
+                    else LocalResource.Success(playlists.filter { playlistFolders[it.id] == activeFolder })
+                }
                 GridLibraryPlaylist(
                     navController,
                     innerPadding.copy(top = topAppBarHeight),
-                    yourLocalPlaylist,
+                    filteredPlaylists,
+                    header = {
+                        Column(Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
+                            Text(stringResource(Res.string.playlist_smart_title), style = MaterialTheme.typography.titleMedium)
+                            androidx.compose.material3.TextButton(onClick = {
+                                navController.navigate(LibraryDynamicPlaylistDestination(
+                                    type = LibraryDynamicPlaylistType.Downloaded.toStringParams(),
+                                    recentDownloads = true,
+                                ))
+                            }) { Text(stringResource(Res.string.collection_recent_downloads)) }
+                            androidx.compose.material3.TextButton(onClick = {
+                                navController.navigate(LibraryDynamicPlaylistDestination(
+                                    type = LibraryDynamicPlaylistType.Downloaded.toStringParams(),
+                                    favoriteDownloads = true,
+                                ))
+                            }) { Text(stringResource(Res.string.playlist_offline_favorites)) }
+                        }
+                        if (folders.isNotEmpty()) {
+                            var open by remember { mutableStateOf(false) }
+                            Box(Modifier.padding(horizontal = 16.dp, vertical = 6.dp)) {
+                                androidx.compose.material3.FilledTonalButton(onClick = { open = true }) {
+                                    Text(activeFolder ?: stringResource(Res.string.playlist_all_folders))
+                                }
+                                androidx.compose.material3.DropdownMenu(expanded = open, onDismissRequest = { open = false }) {
+                                    androidx.compose.material3.DropdownMenuItem(
+                                        text = { Text(stringResource(Res.string.playlist_all_folders)) },
+                                        onClick = { selectedFolder = null; open = false },
+                                    )
+                                    folders.forEach { folder ->
+                                        androidx.compose.material3.DropdownMenuItem(
+                                            text = { Text(folder) },
+                                            onClick = { selectedFolder = folder; open = false },
+                                        )
+                                    }
+                                }
+                            }
+                        }
+                    },
                     onScrolling = onScrolling,
                     emptyText = Res.string.no_playlists_added,
                     createNewPlaylist = {
@@ -559,8 +612,8 @@ fun LibraryScreen(
                                 .data(accountThumbnail)
                                 .crossfade(550)
                                 .build(),
-                        placeholder = rememberVectorPainter(SimpIcons.PeopleAlt),
-                        error = rememberVectorPainter(SimpIcons.PeopleAlt),
+                        placeholder = rememberVectorPainter(MaKaDiMiIcons.PeopleAlt),
+                        error = rememberVectorPainter(MaKaDiMiIcons.PeopleAlt),
                         contentDescription = null,
                         modifier =
                             Modifier
@@ -575,7 +628,7 @@ fun LibraryScreen(
                 ListenTogetherIconButton { navController.navigate(ListenTogetherDestination) }
                 // Crear playlist desde cualquier pestaña de la biblioteca, como el "+" de Spotify.
                 RippleIconButton(
-                    imageVector = SimpIcons.Add,
+                    imageVector = MaKaDiMiIcons.Add,
                     tint = MaterialTheme.colorScheme.primary,
                 ) {
                     showAddSheet = true
@@ -614,16 +667,16 @@ fun LibraryScreen(
         }
         Box(Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
             androidx.compose.material3.FilledTonalButton(modifier = Modifier.fillMaxWidth(), onClick = { sectionsOpen = true }) {
-                androidx.compose.material3.Icon(SimpIcons.Tune, contentDescription = null, modifier = Modifier.size(18.dp))
+                androidx.compose.material3.Icon(MaKaDiMiIcons.Tune, contentDescription = null, modifier = Modifier.size(18.dp))
                 Text(sectionLabel(currentFilter), modifier = Modifier.weight(1f).padding(horizontal = 10.dp))
-                androidx.compose.material3.Icon(SimpIcons.KeyboardArrowDown, contentDescription = null)
+                androidx.compose.material3.Icon(MaKaDiMiIcons.KeyboardArrowDown, contentDescription = null)
             }
             androidx.compose.material3.DropdownMenu(expanded = sectionsOpen, onDismissRequest = { sectionsOpen = false }) {
                 sections.forEach { type ->
                     androidx.compose.material3.DropdownMenuItem(
                         text = { Text(sectionLabel(type)) },
                         trailingIcon = {
-                            if (type == currentFilter) androidx.compose.material3.Icon(SimpIcons.Check, contentDescription = null)
+                            if (type == currentFilter) androidx.compose.material3.Icon(MaKaDiMiIcons.Check, contentDescription = null)
                         },
                         onClick = {
                             sectionsOpen = false

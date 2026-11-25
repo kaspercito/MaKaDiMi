@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.PeopleAlt: ImageVector
+val MaKaDiMiIcons.PeopleAlt: ImageVector
   get() {
     if (_PeopleAlt != null) {
       return _PeopleAlt!!

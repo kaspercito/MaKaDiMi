@@ -40,7 +40,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaspercito.makadimi.ui.icon.Close
 import com.kaspercito.makadimi.ui.icon.Search
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.theme.LeafShape
 import com.kaspercito.makadimi.ui.theme.LeafShapeSmall
 import com.kaspercito.makadimi.extension.getScreenSizeInfo
@@ -99,11 +99,11 @@ fun SettingsHub(
             onValueChange = { query = it },
             singleLine = true,
             label = { Text(stringResource(Res.string.hub_search)) },
-            leadingIcon = { Icon(SimpIcons.Search, contentDescription = null) },
+            leadingIcon = { Icon(MaKaDiMiIcons.Search, contentDescription = null) },
             trailingIcon = {
                 if (query.isNotEmpty()) {
                     IconButton(onClick = { query = "" }) {
-                        Icon(SimpIcons.Close, contentDescription = stringResource(Res.string.clear))
+                        Icon(MaKaDiMiIcons.Close, contentDescription = stringResource(Res.string.clear))
                     }
                 }
             },

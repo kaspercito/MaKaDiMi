@@ -13,7 +13,7 @@ data class Promo(
     val id: String? = null,
     /** Language code to portrait banner URL. "en" stands in for any language without its own. */
     val image: Map<String, String> = emptyMap(),
-    /** A simpmusic:// deep link or an https:// page. */
+    /** A makadimi:// deep link or an https:// page. */
     val link: String? = null,
     /** Lowest app version that understands [link], e.g. "2.3.0". */
     val minVersion: String? = null,

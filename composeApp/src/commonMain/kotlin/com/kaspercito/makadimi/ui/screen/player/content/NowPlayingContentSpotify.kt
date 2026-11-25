@@ -147,7 +147,7 @@ import com.kaspercito.makadimi.ui.icon.PlaylistAdd
 import com.kaspercito.makadimi.ui.icon.QueueMusic
 import com.kaspercito.makadimi.ui.icon.Replay5
 import com.kaspercito.makadimi.ui.icon.Share
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.icon.Subtitles
 import com.kaspercito.makadimi.ui.icon.SubtitlesOff
 import com.kaspercito.makadimi.ui.icon.ThumbsUpDown
@@ -673,7 +673,7 @@ fun NowPlayingContentSpotify(
                                                                 Modifier.align(Alignment.TopEnd),
                                                             ) {
                                                                 Icon(
-                                                                    imageVector = SimpIcons.Fullscreen,
+                                                                    imageVector = MaKaDiMiIcons.Fullscreen,
                                                                     contentDescription = "",
                                                                     tint = Color.White,
                                                                 )
@@ -699,7 +699,7 @@ fun NowPlayingContentSpotify(
                                                                     },
                                                                 ) {
                                                                     Icon(
-                                                                        imageVector = SimpIcons.Replay5,
+                                                                        imageVector = MaKaDiMiIcons.Replay5,
                                                                         tint = Color.White,
                                                                         contentDescription = "",
                                                                         modifier =
@@ -723,7 +723,7 @@ fun NowPlayingContentSpotify(
                                                                     },
                                                                 ) {
                                                                     Icon(
-                                                                        imageVector = SimpIcons.Forward5,
+                                                                        imageVector = MaKaDiMiIcons.Forward5,
                                                                         tint = Color.White,
                                                                         contentDescription = "",
                                                                         modifier =
@@ -744,9 +744,9 @@ fun NowPlayingContentSpotify(
                                                                     Icon(
                                                                         imageVector =
                                                                             if (internalShowSubtitle) {
-                                                                                SimpIcons.SubtitlesOff
+                                                                                MaKaDiMiIcons.SubtitlesOff
                                                                             } else {
-                                                                                SimpIcons.Subtitles
+                                                                                MaKaDiMiIcons.Subtitles
                                                                             },
                                                                         contentDescription = "",
                                                                         tint = Color.White,
@@ -897,7 +897,7 @@ fun NowPlayingContentSpotify(
                             actions.onShowMoreSheet()
                         }) {
                             Icon(
-                                imageVector = SimpIcons.MoreVert,
+                                imageVector = MaKaDiMiIcons.MoreVert,
                                 contentDescription = "",
                                 tint = Color.White,
                             )
@@ -1060,7 +1060,7 @@ fun NowPlayingContentSpotify(
                                                     actions.onShowInfo()
                                                 },
                                             ) {
-                                                Icon(imageVector = SimpIcons.Info, tint = Color.White, contentDescription = "")
+                                                Icon(imageVector = MaKaDiMiIcons.Info, tint = Color.White, contentDescription = "")
                                             }
                                             // Where the sound goes: the phone's own outputs and the Cast
                                             // receivers in one sheet, the same one the Apple Music style opens.
@@ -1076,7 +1076,7 @@ fun NowPlayingContentSpotify(
                                                 onClick = { showOutputSheet = true },
                                             ) {
                                                 Icon(
-                                                    imageVector = SimpIcons.Headphones,
+                                                    imageVector = MaKaDiMiIcons.Headphones,
                                                     tint = if (state.castState.isRemote) Color.Cyan else Color.White,
                                                     contentDescription = stringResource(Res.string.audio_output),
                                                 )
@@ -1112,7 +1112,7 @@ fun NowPlayingContentSpotify(
                                                 },
                                             ) {
                                                 Icon(
-                                                    imageVector = SimpIcons.PlaylistAdd,
+                                                    imageVector = MaKaDiMiIcons.PlaylistAdd,
                                                     tint = Color.White,
                                                     contentDescription = "Add to Playlist",
                                                 )
@@ -1130,7 +1130,7 @@ fun NowPlayingContentSpotify(
                                                 },
                                             ) {
                                                 Icon(
-                                                    imageVector = SimpIcons.QueueMusic,
+                                                    imageVector = MaKaDiMiIcons.QueueMusic,
                                                     tint = Color.White,
                                                     contentDescription = "",
                                                 )
@@ -1298,7 +1298,7 @@ fun NowPlayingContentSpotify(
                                                     },
                                                 ) {
                                                     Icon(
-                                                        imageVector = SimpIcons.ThumbsUpDown,
+                                                        imageVector = MaKaDiMiIcons.ThumbsUpDown,
                                                         contentDescription = stringResource(Res.string.rate_lyrics),
                                                         tint = Color.White,
                                                         modifier = Modifier.size(16.dp),
@@ -1313,7 +1313,7 @@ fun NowPlayingContentSpotify(
                                                     onClick = { showLyricsOffsetBar = !showLyricsOffsetBar },
                                                 ) {
                                                     Icon(
-                                                        imageVector = SimpIcons.AvTimer,
+                                                        imageVector = MaKaDiMiIcons.AvTimer,
                                                         contentDescription = stringResource(Res.string.lyrics_offset),
                                                         tint = Color.White,
                                                         modifier = Modifier.size(16.dp),
@@ -1327,7 +1327,7 @@ fun NowPlayingContentSpotify(
                                                 onClick = { showShareLyricsSheet = true },
                                             ) {
                                                 Icon(
-                                                    imageVector = SimpIcons.Share,
+                                                    imageVector = MaKaDiMiIcons.Share,
                                                     contentDescription = stringResource(Res.string.share_lyrics),
                                                     tint = Color.White,
                                                     modifier = Modifier.size(16.dp),
@@ -1883,7 +1883,7 @@ internal fun NowPlayingTrackInfoRow(
                             actions.onAddToYouTubeLiked()
                         },
                     ) {
-                        Icon(imageVector = SimpIcons.CheckCircle, tint = Color.White, contentDescription = "")
+                        Icon(imageVector = MaKaDiMiIcons.CheckCircle, tint = Color.White, contentDescription = "")
                     }
                 } else {
                     IconButton(
@@ -1899,7 +1899,7 @@ internal fun NowPlayingTrackInfoRow(
                         },
                     ) {
                         Icon(
-                            imageVector = SimpIcons.AddCircleOutline,
+                            imageVector = MaKaDiMiIcons.AddCircleOutline,
                             tint = Color.White,
                             contentDescription = "",
                         )

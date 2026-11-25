@@ -51,7 +51,7 @@ import com.kaspercito.makadimi.ui.component.RippleIconButton
 import com.kaspercito.makadimi.ui.icon.ContentCopy
 import com.kaspercito.makadimi.ui.icon.Error
 import com.kaspercito.makadimi.ui.icon.Share
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.icon.TipsAndUpdates
 import com.kaspercito.makadimi.ui.screen.home.analytics.formatChartDay
 import com.kaspercito.makadimi.ui.theme.LocalIsDarkTheme
@@ -194,7 +194,7 @@ private fun TasteRowCard(
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     if (isError) {
                         Icon(
-                            imageVector = SimpIcons.Error,
+                            imageVector = MaKaDiMiIcons.Error,
                             contentDescription = null,
                             tint = MaterialTheme.colorScheme.error,
                             modifier = Modifier.size(16.dp),
@@ -246,7 +246,7 @@ private fun TasteDisc(
                 )
             } else {
                 Icon(
-                    imageVector = SimpIcons.TipsAndUpdates,
+                    imageVector = MaKaDiMiIcons.TipsAndUpdates,
                     contentDescription = null,
                     tint = if (enabled) onPrimary else MaterialTheme.colorScheme.onSurface.copy(alpha = 0.38f),
                     modifier = Modifier.size(DISC_GLYPH_SIZE),
@@ -290,7 +290,7 @@ private fun TasteReadingCard(
                 // leaves the date only a few characters on a 360dp phone.
                 val copiedMessage = stringResource(Res.string.copied_to_clipboard)
                 RippleIconButton(
-                    imageVector = SimpIcons.ContentCopy,
+                    imageVector = MaKaDiMiIcons.ContentCopy,
                     tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 ) {
                     copyToClipboard(label = profile.headline, text = "${profile.headline}\n\n${profile.summary}")
@@ -341,7 +341,7 @@ private fun TasteReadingCard(
                     contentPadding = ButtonDefaults.ButtonWithIconContentPadding,
                 ) {
                     Icon(
-                        imageVector = SimpIcons.Share,
+                        imageVector = MaKaDiMiIcons.Share,
                         contentDescription = null,
                         modifier = Modifier.size(18.dp),
                     )

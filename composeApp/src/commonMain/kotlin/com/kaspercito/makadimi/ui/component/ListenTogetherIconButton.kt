@@ -15,7 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaspercito.domain.repository.ListenTogetherRepository
 import com.kaspercito.makadimi.ui.icon.Groups
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import org.koin.compose.koinInject
 
 /**
@@ -34,7 +34,7 @@ fun ListenTogetherIconButton(onClick: () -> Unit) {
 
     Box {
         RippleIconButton(
-            imageVector = SimpIcons.Groups,
+            imageVector = MaKaDiMiIcons.Groups,
             tint = MaterialTheme.colorScheme.onBackground,
             onClick = onClick,
         )

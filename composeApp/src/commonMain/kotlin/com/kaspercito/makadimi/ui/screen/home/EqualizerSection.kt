@@ -44,7 +44,7 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import com.kaspercito.makadimi.ui.icon.Check
 import com.kaspercito.makadimi.ui.icon.KeyboardArrowDown
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.theme.typo
 import com.kaspercito.makadimi.viewModel.EQUALIZER_BAND_LABELS
 import com.kaspercito.makadimi.viewModel.SettingsViewModel
@@ -151,7 +151,7 @@ fun EqualizerSection(viewModel: SettingsViewModel = koinViewModel()) {
                         color = MaterialTheme.colorScheme.onSurface,
                     )
                     Icon(
-                        imageVector = SimpIcons.KeyboardArrowDown,
+                        imageVector = MaKaDiMiIcons.KeyboardArrowDown,
                         contentDescription = null,
                         tint = MaterialTheme.colorScheme.onSurfaceVariant,
                         modifier = Modifier.size(20.dp),
@@ -170,7 +170,7 @@ fun EqualizerSection(viewModel: SettingsViewModel = koinViewModel()) {
                                 // instead of shifting sideways as the tick moves.
                                 if (preset.name == activePreset?.name) {
                                     Icon(
-                                        imageVector = SimpIcons.Check,
+                                        imageVector = MaKaDiMiIcons.Check,
                                         contentDescription = null,
                                         tint = MaterialTheme.colorScheme.onSurface,
                                         modifier = Modifier.size(18.dp),

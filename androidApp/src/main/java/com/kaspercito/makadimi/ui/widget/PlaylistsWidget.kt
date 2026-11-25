@@ -102,7 +102,7 @@ private const val TILE_DECODE_PX = 256
  * glance where a generic icon plus a label has to be read — and those labels were what made the
  * first version cramped, since every tile had to be wide enough to fit its text.
  *
- * Tiles open `simpmusic://…` rather than passing extras: a widget tap often arrives with the app
+ * Tiles open `makadimi://…` rather than passing extras: a widget tap often arrives with the app
  * not running, and a deep link is handled the same on a cold start as on a warm one.
  */
 class PlaylistsWidget :
@@ -380,7 +380,7 @@ private suspend fun RecentlyType.toTile(context: Context): PlaylistTile? =
                 PlaylistTile(
                     title = it.title,
                     cover = context.loadBitmap(it.thumbnails, "RS${it.videoId}", TILE_DECODE_PX),
-                    uri = "simpmusic://watch?v=${it.videoId}",
+                    uri = "makadimi://watch?v=${it.videoId}",
                     song = it,
                 )
             }
@@ -390,7 +390,7 @@ private suspend fun RecentlyType.toTile(context: Context): PlaylistTile? =
                 PlaylistTile(
                     title = it.title,
                     cover = context.loadBitmap(it.thumbnails, "RA${it.browseId}", TILE_DECODE_PX),
-                    uri = "simpmusic://album?id=${it.browseId}",
+                    uri = "makadimi://album?id=${it.browseId}",
                 )
             }
 
@@ -399,7 +399,7 @@ private suspend fun RecentlyType.toTile(context: Context): PlaylistTile? =
                 PlaylistTile(
                     title = it.title,
                     cover = context.loadBitmap(it.thumbnails, "RP${it.id}", TILE_DECODE_PX),
-                    uri = "simpmusic://playlist?list=${it.id}",
+                    uri = "makadimi://playlist?list=${it.id}",
                 )
             }
 
@@ -408,7 +408,7 @@ private suspend fun RecentlyType.toTile(context: Context): PlaylistTile? =
                 PlaylistTile(
                     title = it.name,
                     cover = context.loadBitmap(it.thumbnails, "RAr${it.channelId}", TILE_DECODE_PX),
-                    uri = "simpmusic://channel/${it.channelId}",
+                    uri = "makadimi://channel/${it.channelId}",
                 )
             }
     }

@@ -140,7 +140,7 @@
     <string name="developer_blog">Developer Blog</string>
     <string name="developer_blog_tagline">Read dev notes, tutorials &amp; behind-the-scenes</string>
     <string name="blog_promo_title">Something new from the dev</string>
-    <string name="blog_promo_message">I just launched the MaKaDiMi blog at simpmusic.org — sharing the story behind MaKaDiMi, music-tech deep dives, and engineering notes. Give it a read if you're curious ✨</string>
+    <string name="blog_promo_message">Read the upstream project’s blog about music technology and engineering.</string>
     <string name="visit_blog">Visit blog</string>
     <string name="paypal">PayPal</string>
     <string name="title">Title</string>
@@ -1101,4 +1101,13 @@ Built with ❤️ on top of the open source project SimpMusic by Tuan Minh Nguye
     <string name="collection_narrow_results">Showing up to 200 songs. Narrow your search to find more specific results.</string>
     <string name="all_sections">All sections</string>
     <string name="fewer_sections">Fewer sections</string>
+    <string name="playlist_all_folders">All folders</string>
+    <string name="playlist_move_to_folder">Move to folder</string>
+    <string name="playlist_folder_name">Folder name</string>
+    <string name="playlist_folder_hint">Leave empty to remove the playlist from its folder.</string>
+    <string name="update_retry_download">Download again</string>
+    <string name="update_download_failed">The download could not be completed.</string>
+    <string name="playlist_smart_title">Smart playlists</string>
+    <string name="playlist_offline_favorites">Offline favorites</string>
+    <string name="playlist_manage_on_youtube">Manage on YouTube</string>
 </resources>

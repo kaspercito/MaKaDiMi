@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.Sync: ImageVector
+val MaKaDiMiIcons.Sync: ImageVector
   get() {
     if (_Sync != null) {
       return _Sync!!

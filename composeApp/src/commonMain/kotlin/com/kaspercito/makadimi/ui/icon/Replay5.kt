@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.Replay5: ImageVector
+val MaKaDiMiIcons.Replay5: ImageVector
   get() {
     if (_Replay5 != null) {
       return _Replay5!!

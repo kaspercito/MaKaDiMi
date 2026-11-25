@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.Search: ImageVector
+val MaKaDiMiIcons.Search: ImageVector
   get() {
     if (_Search != null) {
       return _Search!!

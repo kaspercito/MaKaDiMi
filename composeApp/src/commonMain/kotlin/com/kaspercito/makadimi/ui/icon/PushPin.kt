@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.PushPin: ImageVector
+val MaKaDiMiIcons.PushPin: ImageVector
   get() {
     if (_PushPin != null) {
       return _PushPin!!

@@ -19,7 +19,7 @@ import com.kaspercito.makadimi.ui.component.EndOfPage
 import com.kaspercito.makadimi.ui.component.MoodAndGenresContentItem
 import com.kaspercito.makadimi.ui.component.NormalAppBar
 import com.kaspercito.makadimi.ui.icon.ArrowBackIosNew
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.theme.typo
 import com.kaspercito.makadimi.viewModel.MoodViewModel
 import org.jetbrains.compose.resources.painterResource
@@ -52,7 +52,7 @@ fun MoodScreen(
             leftIcon = {
                 IconButton(onClick = { navController.navigateUp() }) {
                     Icon(
-                        SimpIcons.ArrowBackIosNew,
+                        MaKaDiMiIcons.ArrowBackIosNew,
                         contentDescription = "Back",
                     )
                 }

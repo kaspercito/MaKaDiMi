@@ -29,7 +29,7 @@ import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import com.kaspercito.makadimi.ui.component.RippleIconButton
 import com.kaspercito.makadimi.ui.icon.ArrowBackIosNew
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.viewModel.WrappedUiState
 import org.jetbrains.compose.resources.stringResource
 import makadimi.composeapp.generated.resources.Res
@@ -78,7 +78,7 @@ fun WrappedNotEnoughDataScreen(
             // be a surface. The reel's own close button floats over artwork, which is the case
             // glass exists for.
             RippleIconButton(
-                imageVector = SimpIcons.ArrowBackIosNew,
+                imageVector = MaKaDiMiIcons.ArrowBackIosNew,
                 tint = MaterialTheme.colorScheme.onSurface,
                 onClick = onBack,
             )

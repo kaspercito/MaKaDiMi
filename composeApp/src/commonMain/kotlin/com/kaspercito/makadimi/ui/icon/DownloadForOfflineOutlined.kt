@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.DownloadForOfflineOutlined: ImageVector
+val MaKaDiMiIcons.DownloadForOfflineOutlined: ImageVector
   get() {
     if (_DownloadForOfflineOutlined != null) {
       return _DownloadForOfflineOutlined!!

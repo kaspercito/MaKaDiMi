@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.OpenInFull: ImageVector
+val MaKaDiMiIcons.OpenInFull: ImageVector
   get() {
     if (_OpenInFull != null) {
       return _OpenInFull!!

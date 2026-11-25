@@ -85,7 +85,7 @@ import com.kaspercito.makadimi.ui.icon.ArrowBackIosNew
 import com.kaspercito.makadimi.ui.icon.PlayCircle
 import com.kaspercito.makadimi.ui.icon.Share
 import com.kaspercito.makadimi.ui.icon.Shuffle
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.navigation.destination.list.ArtistDestination
 import com.kaspercito.makadimi.ui.theme.typo
 import com.kaspercito.makadimi.viewModel.PodcastUIEvent
@@ -199,7 +199,7 @@ fun PodcastScreen(
                                             .windowInsetsPadding(WindowInsets.statusBars),
                                 ) {
                                     RippleIconButton(
-                                        imageVector = SimpIcons.ArrowBackIosNew,
+                                        imageVector = MaKaDiMiIcons.ArrowBackIosNew,
                                     ) {
                                         navController.navigateUp()
                                     }
@@ -308,7 +308,7 @@ fun PodcastScreen(
                                             ) {
                                                 // Play button
                                                 RippleIconButton(
-                                                    imageVector = SimpIcons.PlayCircle,
+                                                    imageVector = MaKaDiMiIcons.PlayCircle,
                                                     fillMaxSize = true,
                                                     modifier = Modifier.size(36.dp),
                                                 ) {
@@ -334,7 +334,7 @@ fun PodcastScreen(
                                                 // Shuffle
                                                 RippleIconButton(
                                                     modifier = Modifier.size(36.dp),
-                                                    imageVector = SimpIcons.Shuffle,
+                                                    imageVector = MaKaDiMiIcons.Shuffle,
                                                     fillMaxSize = true,
                                                 ) {
                                                     viewModel.onUIEvent(PodcastUIEvent.Shuffle(id))
@@ -345,7 +345,7 @@ fun PodcastScreen(
                                                 // More options
                                                 RippleIconButton(
                                                     modifier = Modifier.size(36.dp),
-                                                    imageVector = SimpIcons.Share,
+                                                    imageVector = MaKaDiMiIcons.Share,
                                                     fillMaxSize = true,
                                                 ) {
                                                     viewModel.onUIEvent(PodcastUIEvent.Share(id))
@@ -436,7 +436,7 @@ fun PodcastScreen(
                         navigationIcon = {
                             Box(Modifier.padding(horizontal = 5.dp)) {
                                 RippleIconButton(
-                                    SimpIcons.ArrowBackIosNew,
+                                    MaKaDiMiIcons.ArrowBackIosNew,
                                     Modifier.size(32.dp),
                                     true,
                                 ) {

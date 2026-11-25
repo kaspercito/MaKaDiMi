@@ -35,7 +35,7 @@ import com.kaspercito.makadimi.ui.icon.PlayArrow
 import com.kaspercito.makadimi.ui.icon.Repeat
 import com.kaspercito.makadimi.ui.icon.RepeatOne
 import com.kaspercito.makadimi.ui.icon.Shuffle
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.icon.SkipNext
 import com.kaspercito.makadimi.ui.icon.SkipPrevious
 import com.kaspercito.makadimi.viewModel.UIEvent
@@ -122,7 +122,7 @@ fun ExpressiveTransportRow(
     ) {
         if (showShuffleAndRepeat) {
             ExpressiveToggleButton(
-                icon = SimpIcons.Shuffle,
+                icon = MaKaDiMiIcons.Shuffle,
                 active = controllerState.isShuffle,
                 onClick = { onUIEvent(UIEvent.Shuffle) },
             )
@@ -145,7 +145,7 @@ fun ExpressiveTransportRow(
         ) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                 Icon(
-                    imageVector = SimpIcons.SkipPrevious,
+                    imageVector = MaKaDiMiIcons.SkipPrevious,
                     contentDescription = "",
                     tint =
                         colorScheme.onSecondaryContainer.copy(
@@ -197,7 +197,7 @@ fun ExpressiveTransportRow(
                         ) { isPlaying ->
                             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                                 Icon(
-                                    imageVector = if (isPlaying) SimpIcons.Pause else SimpIcons.PlayArrow,
+                                    imageVector = if (isPlaying) MaKaDiMiIcons.Pause else MaKaDiMiIcons.PlayArrow,
                                     contentDescription = "",
                                     tint = colorScheme.onPrimary,
                                     modifier = Modifier.size(36.dp),
@@ -225,7 +225,7 @@ fun ExpressiveTransportRow(
         ) {
             Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxSize()) {
                 Icon(
-                    imageVector = SimpIcons.SkipNext,
+                    imageVector = MaKaDiMiIcons.SkipNext,
                     contentDescription = "",
                     tint =
                         colorScheme.onSecondaryContainer.copy(
@@ -239,7 +239,7 @@ fun ExpressiveTransportRow(
             Spacer(modifier = Modifier.width(TOGGLE_SEPARATION))
             val repeatState = controllerState.repeatState
             ExpressiveToggleButton(
-                icon = if (repeatState is RepeatState.One) SimpIcons.RepeatOne else SimpIcons.Repeat,
+                icon = if (repeatState is RepeatState.One) MaKaDiMiIcons.RepeatOne else MaKaDiMiIcons.Repeat,
                 active = repeatState !is RepeatState.None,
                 onClick = { onUIEvent(UIEvent.Repeat) },
             )

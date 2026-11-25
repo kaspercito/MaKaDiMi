@@ -27,6 +27,7 @@ import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.exclude
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.only
 import androidx.compose.foundation.layout.padding
@@ -159,7 +160,7 @@ import makadimi.composeapp.generated.resources.most_played
 import makadimi.composeapp.generated.resources.home_history
 import com.kaspercito.makadimi.ui.icon.Notifications
 import com.kaspercito.makadimi.ui.icon.Settings
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.navigation.destination.home.HomeDestination
 import com.kaspercito.makadimi.ui.navigation.destination.home.ListenTogetherDestination
 import com.kaspercito.makadimi.ui.navigation.destination.home.MoodDestination
@@ -613,7 +614,7 @@ fun HomeScreen(
                 val link = banner.link
                 when {
                     // The same router as links from the web and the widgets.
-                    link.startsWith("simpmusic://") -> {
+                    link.startsWith("makadimi://") -> {
                         runCatching { Uri.parse(link) }.getOrNull()?.let {
                             sharedViewModel.setIntent(GenericIntent(data = it))
                         }
@@ -723,16 +724,23 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
             Crossfade(targetState = loading, label = "Home Shimmer") { loading ->
                 if (!loading) {
                     if (homeData.isEmpty()) {
-                        OfflineErrorState(
-                            onRetry = onRefresh,
-                            onOpenDownloaded = {
-                                navController.navigate(
-                                    LibraryDynamicPlaylistDestination(
-                                        type = LibraryDynamicPlaylistType.Downloaded.toStringParams(),
-                                    ),
-                                )
-                            },
-                        )
+                        Column(Modifier.fillMaxSize()) {
+                            val topPadding = with(LocalDensity.current) { topAppBarHeightPx.toDp() }
+                            Box(Modifier.padding(start = 15.dp, top = topPadding + 8.dp, end = 15.dp)) {
+                                HomeQuickAccess(navController)
+                            }
+                            OfflineErrorState(
+                                modifier = Modifier.weight(1f),
+                                onRetry = onRefresh,
+                                onOpenDownloaded = {
+                                    navController.navigate(
+                                        LibraryDynamicPlaylistDestination(
+                                            type = LibraryDynamicPlaylistType.Downloaded.toStringParams(),
+                                        ),
+                                    )
+                                },
+                            )
+                        }
                         return@Crossfade
                     }
                     LazyColumn(
@@ -1077,11 +1085,6 @@ fun HomeTopAppBar(navController: NavController) {
             // Cabecera MaKaDiMi: la marca como etiqueta neón pequeña y el saludo como titular.
             Column {
                 Text(
-                    text = stringResource(Res.string.app_name).uppercase(),
-                    style = typo().bodySmall.copy(letterSpacing = 4.sp, fontFamily = com.kaspercito.makadimi.ui.theme.monoFontFamily()),
-                    color = MaterialTheme.colorScheme.primary,
-                )
-                Text(
                     text =
                         when (hour) {
                             in 6..12 -> {
@@ -1100,7 +1103,7 @@ fun HomeTopAppBar(navController: NavController) {
                                 stringResource(Res.string.good_night)
                             }
                         },
-                    style = typo().headlineMedium,
+                    style = MaterialTheme.typography.headlineSmall.copy(fontWeight = FontWeight.SemiBold),
                     color = MaterialTheme.colorScheme.onBackground,
                     maxLines = 1,
                 )
@@ -1114,15 +1117,15 @@ fun HomeTopAppBar(navController: NavController) {
                         .glassPanel(RoundedCornerShape(topStart = 22.dp, topEnd = 8.dp, bottomEnd = 22.dp, bottomStart = 8.dp), alpha = 0.7f),
                 verticalAlignment = Alignment.CenterVertically,
             ) {
-            RippleIconButton(imageVector = SimpIcons.Notifications, tint = MaterialTheme.colorScheme.onBackground) {
+            RippleIconButton(imageVector = MaKaDiMiIcons.Notifications, tint = MaterialTheme.colorScheme.onBackground) {
                 navController.navigate(NotificationDestination)
             }
-            RippleIconButton(imageVector = SimpIcons.History, tint = MaterialTheme.colorScheme.onBackground) {
+            RippleIconButton(imageVector = MaKaDiMiIcons.History, tint = MaterialTheme.colorScheme.onBackground) {
                 navController.navigate(RecentlySongsDestination)
             }
             // Fourth button, immediately before Settings — the position the design canvas fixes.
             ListenTogetherIconButton { navController.navigate(ListenTogetherDestination) }
-            RippleIconButton(imageVector = SimpIcons.Settings, tint = MaterialTheme.colorScheme.onBackground) {
+            RippleIconButton(imageVector = MaKaDiMiIcons.Settings, tint = MaterialTheme.colorScheme.onBackground) {
                 navController.navigate(SettingsDestination)
             }
             }
@@ -1144,16 +1147,16 @@ fun HomeQuickAccess(navController: NavController) {
     val shape = RoundedCornerShape(topStart = 20.dp, topEnd = 6.dp, bottomEnd = 20.dp, bottomStart = 6.dp)
     val items =
         listOf(
-            Triple(SimpIcons.Favorite, stringResource(Res.string.favorite)) {
+            Triple(MaKaDiMiIcons.Favorite, stringResource(Res.string.favorite)) {
                 navController.navigate(LibraryDynamicPlaylistDestination(type = LibraryDynamicPlaylistType.Favorite.toStringParams()))
             },
-            Triple(SimpIcons.DownloadForOffline, stringResource(Res.string.downloaded)) {
+            Triple(MaKaDiMiIcons.DownloadForOffline, stringResource(Res.string.downloaded)) {
                 navController.navigate(LibraryDynamicPlaylistDestination(type = LibraryDynamicPlaylistType.Downloaded.toStringParams()))
             },
-            Triple(SimpIcons.TrendingUp, stringResource(Res.string.most_played)) {
+            Triple(MaKaDiMiIcons.TrendingUp, stringResource(Res.string.most_played)) {
                 navController.navigate(LibraryDynamicPlaylistDestination(type = LibraryDynamicPlaylistType.MostPlayed.toStringParams()))
             },
-            Triple(SimpIcons.History, stringResource(Res.string.home_history)) {
+            Triple(MaKaDiMiIcons.History, stringResource(Res.string.home_history)) {
                 navController.navigate(RecentlySongsDestination)
             },
         )

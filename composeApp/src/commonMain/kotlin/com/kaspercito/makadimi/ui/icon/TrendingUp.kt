@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.TrendingUp: ImageVector
+val MaKaDiMiIcons.TrendingUp: ImageVector
   get() {
     if (_TrendingUp != null) {
       return _TrendingUp!!

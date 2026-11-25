@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.ArrowOutward: ImageVector
+val MaKaDiMiIcons.ArrowOutward: ImageVector
   get() {
     if (_ArrowOutward != null) {
       return _ArrowOutward!!

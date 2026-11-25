@@ -20,6 +20,8 @@ fun NavGraphBuilder.libraryScreenGraph(
             innerPadding = innerPadding,
             navController = navController,
             type = data.type,
+            recentDownloads = data.recentDownloads,
+            favoriteDownloads = data.favoriteDownloads,
         )
     }
 }

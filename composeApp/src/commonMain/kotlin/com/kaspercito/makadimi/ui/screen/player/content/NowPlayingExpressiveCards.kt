@@ -103,7 +103,7 @@ import com.kaspercito.makadimi.ui.icon.Forward5
 import com.kaspercito.makadimi.ui.icon.Fullscreen
 import com.kaspercito.makadimi.ui.icon.Replay5
 import com.kaspercito.makadimi.ui.icon.Share
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.icon.Subtitles
 import com.kaspercito.makadimi.ui.icon.SubtitlesOff
 import com.kaspercito.makadimi.ui.icon.ThumbsUpDown
@@ -427,7 +427,7 @@ internal fun ExpressiveArtworkCardPage(
                                                 modifier = Modifier.align(Alignment.TopEnd),
                                             ) {
                                                 Icon(
-                                                    imageVector = SimpIcons.Fullscreen,
+                                                    imageVector = MaKaDiMiIcons.Fullscreen,
                                                     contentDescription = "",
                                                     // Over-video control, not a semantic surface
                                                     // foreground — stays white like Classic.
@@ -455,7 +455,7 @@ internal fun ExpressiveArtworkCardPage(
                                                     },
                                                 ) {
                                                     Icon(
-                                                        imageVector = SimpIcons.Replay5,
+                                                        imageVector = MaKaDiMiIcons.Replay5,
                                                         tint = Color.White,
                                                         contentDescription = "",
                                                         modifier =
@@ -479,7 +479,7 @@ internal fun ExpressiveArtworkCardPage(
                                                     },
                                                 ) {
                                                     Icon(
-                                                        imageVector = SimpIcons.Forward5,
+                                                        imageVector = MaKaDiMiIcons.Forward5,
                                                         tint = Color.White,
                                                         contentDescription = "",
                                                         modifier =
@@ -500,9 +500,9 @@ internal fun ExpressiveArtworkCardPage(
                                                     Icon(
                                                         imageVector =
                                                             if (internalShowSubtitle) {
-                                                                SimpIcons.SubtitlesOff
+                                                                MaKaDiMiIcons.SubtitlesOff
                                                             } else {
-                                                                SimpIcons.Subtitles
+                                                                MaKaDiMiIcons.Subtitles
                                                             },
                                                         contentDescription = "",
                                                         tint = Color.White,
@@ -602,7 +602,7 @@ internal fun ExpressiveBelowTheFold(
                                     },
                                 ) {
                                     Icon(
-                                        imageVector = SimpIcons.ThumbsUpDown,
+                                        imageVector = MaKaDiMiIcons.ThumbsUpDown,
                                         contentDescription = stringResource(Res.string.rate_lyrics),
                                         tint = colorScheme.onSurfaceVariant,
                                         modifier = Modifier.size(16.dp),
@@ -617,7 +617,7 @@ internal fun ExpressiveBelowTheFold(
                                     onClick = { showLyricsOffsetBar = !showLyricsOffsetBar },
                                 ) {
                                     Icon(
-                                        imageVector = SimpIcons.AvTimer,
+                                        imageVector = MaKaDiMiIcons.AvTimer,
                                         contentDescription = stringResource(Res.string.lyrics_offset),
                                         tint = colorScheme.onSurfaceVariant,
                                         modifier = Modifier.size(16.dp),
@@ -631,7 +631,7 @@ internal fun ExpressiveBelowTheFold(
                                 onClick = { showShareLyricsSheet = true },
                             ) {
                                 Icon(
-                                    imageVector = SimpIcons.Share,
+                                    imageVector = MaKaDiMiIcons.Share,
                                     contentDescription = stringResource(Res.string.share_lyrics),
                                     tint = colorScheme.onSurfaceVariant,
                                     modifier = Modifier.size(16.dp),

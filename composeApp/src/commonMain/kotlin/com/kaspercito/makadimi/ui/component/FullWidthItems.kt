@@ -85,7 +85,7 @@ import com.kaspercito.makadimi.ui.icon.DragHandle
 import com.kaspercito.makadimi.ui.icon.MoreVert
 import com.kaspercito.makadimi.ui.icon.PushPin
 import com.kaspercito.makadimi.ui.icon.QueueMusic
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.icon.SkipNext
 import com.kaspercito.makadimi.ui.theme.LocalForceDarkText
 import com.kaspercito.makadimi.ui.theme.seed
@@ -167,7 +167,7 @@ fun SongFullWidthItems(
                 ) {
                     Icon(
                         tint = contentColor,
-                        imageVector = if (playsNext) SimpIcons.SkipNext else SimpIcons.QueueMusic,
+                        imageVector = if (playsNext) MaKaDiMiIcons.SkipNext else MaKaDiMiIcons.QueueMusic,
                         contentDescription =
                             stringResource(if (playsNext) Res.string.play_next else Res.string.add_to_queue),
                     )
@@ -262,7 +262,7 @@ fun SongFullWidthItems(
                         ) {
                             if (isSelected) {
                                 Icon(
-                                    imageVector = SimpIcons.Check,
+                                    imageVector = MaKaDiMiIcons.Check,
                                     contentDescription = null,
                                     tint = Color.Black,
                                     modifier = Modifier.size(14.dp),
@@ -343,7 +343,7 @@ fun SongFullWidthItems(
                         ) {
                             Row {
                                 Icon(
-                                    imageVector = SimpIcons.DownloadForOffline,
+                                    imageVector = MaKaDiMiIcons.DownloadForOffline,
                                     tint = contentColor,
                                     contentDescription = "",
                                     modifier = Modifier.size(16.dp).padding(2.dp),
@@ -406,7 +406,7 @@ fun SongFullWidthItems(
                 // Hidden while selecting: the per-item menu moves up to the selection app bar,
                 // so one tap cannot mean both "act on this song" and "pick this song".
                 if (onMoreClickListener != null && !selectionMode) {
-                    RippleIconButton(imageVector = SimpIcons.MoreVert, fillMaxSize = false, tint = contentColor) {
+                    RippleIconButton(imageVector = MaKaDiMiIcons.MoreVert, fillMaxSize = false, tint = contentColor) {
                         if (itemVideoId.isNotBlank()) onMoreClickListener.invoke(itemVideoId)
                     }
                 }
@@ -416,7 +416,7 @@ fun SongFullWidthItems(
                     exit = fadeOut() + shrinkHorizontally(),
                 ) {
                     Icon(
-                        SimpIcons.DragHandle,
+                        MaKaDiMiIcons.DragHandle,
                         contentDescription = null,
                         tint = contentColor,
                         modifier = Modifier.padding(horizontal = 8.dp),
@@ -521,7 +521,7 @@ fun SuggestItems(
                 )
             }
             RippleIconButton(
-                imageVector = SimpIcons.Add,
+                imageVector = MaKaDiMiIcons.Add,
                 fillMaxSize = false,
                 onClick =
                     onAddClickListener ?: {
@@ -658,7 +658,7 @@ fun PlaylistFullWidthItems(
                 Row(verticalAlignment = Alignment.CenterVertically, horizontalArrangement = Arrangement.spacedBy(4.dp)) {
                     if (shouldPin) {
                         Image(
-                            imageVector = SimpIcons.PushPin,
+                            imageVector = MaKaDiMiIcons.PushPin,
                             contentDescription = null,
                             colorFilter = ColorFilter.tint(if (forceDark) Color.Cyan else MaterialTheme.colorScheme.primary),
                             modifier =

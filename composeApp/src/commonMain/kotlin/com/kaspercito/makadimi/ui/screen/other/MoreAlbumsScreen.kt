@@ -38,7 +38,7 @@ import com.kaspercito.makadimi.ui.component.EndOfPage
 import com.kaspercito.makadimi.ui.component.HomeItemContentPlaylist
 import com.kaspercito.makadimi.ui.component.RippleIconButton
 import com.kaspercito.makadimi.ui.icon.ArrowBackIosNew
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.navigation.destination.list.AlbumDestination
 import com.kaspercito.makadimi.ui.navigation.destination.list.MoreAlbumsDestination
 import com.kaspercito.makadimi.ui.theme.typo
@@ -149,7 +149,7 @@ fun MoreAlbumsScreen(
                     navigationIcon = {
                         Box(Modifier.padding(horizontal = 5.dp)) {
                             RippleIconButton(
-                                SimpIcons.ArrowBackIosNew,
+                                MaKaDiMiIcons.ArrowBackIosNew,
                                 Modifier
                                     .size(32.dp),
                                 true,

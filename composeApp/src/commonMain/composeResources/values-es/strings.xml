@@ -743,7 +743,7 @@
     <string name="library_favorite_empty_hint">Toca el corazón en cualquier canción para guardarla aquí.</string>
     <string name="live_badge">EN VIVO</string>
     <string name="play_all">Reproducir todo</string>
-    <string name="blog_promo_message">Acabo de lanzar el blog de MaKaDiMi en simpmusic.org: cuento la historia detrás de MaKaDiMi, análisis de tecnología musical y notas de ingeniería. Échale un vistazo si tienes curiosidad ✨</string>
+    <string name="blog_promo_message">Lee el blog del proyecto original sobre tecnología musical e ingeniería.</string>
     <string name="add_to_queue_disabled_radio">Añadir a la cola (desactivado mientras suena una radio o mix)</string>
     <string name="add_to_queue_disabled_endless">Añadir a la cola (desactivado con la cola infinita activada)</string>
     <string name="lyrics_offset_message">Desplaza cada línea de la letra estos milisegundos. Usa un número positivo si oyes el audio más tarde de lo que lo ves (lo que pasa con los audífonos Bluetooth) y uno negativo para que la letra aparezca antes.</string>
@@ -1061,4 +1061,13 @@
     <string name="collection_narrow_results">Mostrando hasta 200 canciones. Afina la búsqueda para encontrar la que quieres.</string>
     <string name="all_sections">Ver todas las secciones</string>
     <string name="fewer_sections">Ver menos secciones</string>
+    <string name="playlist_all_folders">Todas las carpetas</string>
+    <string name="playlist_move_to_folder">Mover a carpeta</string>
+    <string name="playlist_folder_name">Nombre de carpeta</string>
+    <string name="playlist_folder_hint">Deja el nombre vacío para sacar la playlist de su carpeta.</string>
+    <string name="update_retry_download">Volver a descargar</string>
+    <string name="update_download_failed">No se pudo completar la descarga.</string>
+    <string name="playlist_smart_title">Playlists inteligentes</string>
+    <string name="playlist_offline_favorites">Favoritas sin conexión</string>
+    <string name="playlist_manage_on_youtube">Gestionar en YouTube</string>
 </resources>

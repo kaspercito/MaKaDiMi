@@ -47,7 +47,7 @@ import com.kaspercito.makadimi.ui.component.EntryCard
 import com.kaspercito.makadimi.ui.component.ShareImageSheet
 import com.kaspercito.makadimi.ui.component.lyrics.ShareLyricsCardMaxWidth
 import com.kaspercito.makadimi.ui.icon.Share
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.theme.fontFamily
 import com.kaspercito.makadimi.viewModel.AnalyticsUiState
 import kotlinx.datetime.LocalDate
@@ -138,7 +138,7 @@ internal fun ReceiptEntryCard(
     EntryCard(
         title = stringResource(Res.string.receipt_entry_title),
         subtitle = stringResource(Res.string.receipt_entry_subtitle, receipt.period),
-        discIcon = SimpIcons.Share,
+        discIcon = MaKaDiMiIcons.Share,
         onClick = onClick,
         modifier = modifier,
     ) {

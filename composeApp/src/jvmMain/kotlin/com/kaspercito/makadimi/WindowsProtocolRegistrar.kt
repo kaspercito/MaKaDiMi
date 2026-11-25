@@ -3,12 +3,12 @@ package com.kaspercito.makadimi
 import com.kaspercito.logger.Logger
 
 /**
- * Registers the "simpmusic://" custom URI protocol handler in Windows Registry
+ * Registers the "makadimi://" custom URI protocol handler in Windows Registry
  * under HKEY_CURRENT_USER (no admin rights required).
  *
  * Registry structure:
  * ```
- * HKCU\Software\Classes\simpmusic
+ * HKCU\Software\Classes\makadimi
  *     (Default) = "URL:MaKaDiMi Protocol"
  *     URL Protocol = ""
  *     \DefaultIcon
@@ -19,11 +19,11 @@ import com.kaspercito.logger.Logger
  */
 object WindowsProtocolRegistrar {
     private const val TAG = "WindowsProtocolRegistrar"
-    private const val SCHEME = "simpmusic"
+    private const val SCHEME = "makadimi"
 
     /**
      * The Last.fm auth callback. Its scheme is fixed by the callback URL registered on the Last.fm
-     * API account, so it cannot be folded into "simpmusic".
+     * API account, so it cannot be folded into "makadimi".
      */
     private const val LASTFM_SCHEME = "wordbyword"
 
@@ -77,7 +77,7 @@ object WindowsProtocolRegistrar {
     ): Boolean {
         return try {
             val result = regQuery("${regKeyOf(scheme)}\\shell\\open\\command", null)
-            // Registry stores path with quotes: "C:\path\to\SimpMusic.exe" "%1"
+            // Registry stores path with quotes: "C:\path\to\MaKaDiMi.exe" "%1"
             // Normalize both for comparison
             val normalizedExe = currentExePath.replace("\\", "/").lowercase()
             result?.replace("\\", "/")?.lowercase()?.contains(normalizedExe) == true
@@ -89,8 +89,8 @@ object WindowsProtocolRegistrar {
     private fun resolveExePath(): String? {
         // JPackage directory structure:
         //   <app>/runtime/...  (java.home points here)
-        //   <app>/SimpMusic.exe
-        // So we go: java.home → parent (runtime) → parent (app) → SimpMusic.exe
+        //   <app>/MaKaDiMi.exe
+        // So we go: java.home → parent (runtime) → parent (app) → MaKaDiMi.exe
         val javaHome = System.getProperty("java.home") ?: return null
         val javaHomeDir = java.io.File(javaHome)
 

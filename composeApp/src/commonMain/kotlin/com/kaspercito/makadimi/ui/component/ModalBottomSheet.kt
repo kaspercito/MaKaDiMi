@@ -1,5 +1,7 @@
 package com.kaspercito.makadimi.ui.component
 
+import com.kaspercito.makadimi.ui.icon.OpenInNew
+
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.Crossfade
 import androidx.compose.animation.core.FastOutLinearInEasing
@@ -8,6 +10,9 @@ import androidx.compose.foundation.BorderStroke
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.MarqueeAnimationMode
+import makadimi.composeapp.generated.resources.playlist_manage_on_youtube
+import makadimi.composeapp.generated.resources.playlist_move_to_folder
+import com.kaspercito.makadimi.ui.icon.LibraryMusic
 import androidx.compose.foundation.background
 import androidx.compose.foundation.basicMarquee
 import androidx.compose.foundation.clickable
@@ -164,7 +169,7 @@ import com.kaspercito.makadimi.ui.icon.QueueMusic
 import com.kaspercito.makadimi.ui.icon.Remove
 import com.kaspercito.makadimi.ui.icon.Sensors
 import com.kaspercito.makadimi.ui.icon.Share
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.icon.Speed
 import com.kaspercito.makadimi.ui.icon.Sync
 import com.kaspercito.makadimi.ui.icon.SyncDisabled
@@ -516,7 +521,7 @@ fun InfoPlayerBottomSheet(
                             }
                         }) {
                             Icon(
-                                imageVector = SimpIcons.KeyboardArrowDown,
+                                imageVector = MaKaDiMiIcons.KeyboardArrowDown,
                                 contentDescription = "",
                                 tint = rememberSurfaceDarkColors().content,
                             )
@@ -1098,7 +1103,7 @@ fun QueueBottomSheet(
                             }
                         }) {
                             Icon(
-                                imageVector = SimpIcons.KeyboardArrowDown,
+                                imageVector = MaKaDiMiIcons.KeyboardArrowDown,
                                 contentDescription = "",
                                 tint = rememberSurfaceDarkColors().content,
                             )
@@ -1304,22 +1309,22 @@ private fun QueueItemActions(
         onDone()
     }
     if (index > 0) {
-        ActionButton(icon = SimpIcons.KeyboardDoubleArrowUp, text = Res.string.move_up) {
+        ActionButton(icon = MaKaDiMiIcons.KeyboardDoubleArrowUp, text = Res.string.move_up) {
             act { musicServiceHandler.moveItemUp(index) }
         }
     }
     if (index < queueSize - 1) {
-        ActionButton(icon = SimpIcons.KeyboardDoubleArrowDown, text = Res.string.move_down) {
+        ActionButton(icon = MaKaDiMiIcons.KeyboardDoubleArrowDown, text = Res.string.move_down) {
             act { musicServiceHandler.moveItemDown(index) }
         }
     }
     // Hidden on the playing track and on the one already next: there is nowhere to move them.
     if (current >= 0 && index != current && index != current + 1) {
-        ActionButton(icon = SimpIcons.SkipNext, text = Res.string.move_to_play_next) {
+        ActionButton(icon = MaKaDiMiIcons.SkipNext, text = Res.string.move_to_play_next) {
             act { musicServiceHandler.moveItemToPlayNext(index) }
         }
     }
-    ActionButton(icon = SimpIcons.Delete, text = Res.string.delete_from_queue) {
+    ActionButton(icon = MaKaDiMiIcons.Delete, text = Res.string.delete_from_queue) {
         act { musicServiceHandler.removeMediaItem(index) }
     }
 }
@@ -1673,9 +1678,9 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                         ActionTile(
                             icon =
                                 when (uiState.songUIState.downloadState) {
-                                    DownloadState.STATE_DOWNLOADING, DownloadState.STATE_PREPARING -> SimpIcons.Downloading
-                                    DownloadState.STATE_DOWNLOADED -> SimpIcons.DownloadForOffline
-                                    else -> SimpIcons.DownloadForOfflineOutlined
+                                    DownloadState.STATE_DOWNLOADING, DownloadState.STATE_PREPARING -> MaKaDiMiIcons.Downloading
+                                    DownloadState.STATE_DOWNLOADED -> MaKaDiMiIcons.DownloadForOffline
+                                    else -> MaKaDiMiIcons.DownloadForOfflineOutlined
                                 },
                             label =
                                 when (uiState.songUIState.downloadState) {
@@ -1687,7 +1692,7 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                             modifier = Modifier.weight(1f),
                         ) { viewModel.onUIEvent(NowPlayingBottomSheetUIEvent.Download) }
                         ActionTile(
-                            icon = SimpIcons.PlaylistAdd,
+                            icon = MaKaDiMiIcons.PlaylistAdd,
                             label = Res.string.add_to_a_playlist,
                             modifier = Modifier.weight(1f),
                         ) {
@@ -1695,7 +1700,7 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                             addToAPlaylist = true
                         }
                         ActionTile(
-                            icon = SimpIcons.Sensors,
+                            icon = MaKaDiMiIcons.Sensors,
                             label = Res.string.start_radio,
                             modifier = Modifier.weight(1f),
                         ) {
@@ -1708,7 +1713,7 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                             hideModalBottomSheet()
                         }
                         ActionTile(
-                            icon = SimpIcons.Share,
+                            icon = MaKaDiMiIcons.Share,
                             label = Res.string.share,
                             modifier = Modifier.weight(1f),
                         ) { viewModel.onUIEvent(NowPlayingBottomSheetUIEvent.Share) }
@@ -1726,14 +1731,14 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                     // A queue row is already in the queue: its own rows above move it instead.
                     if (queuePosition == null) {
                         ActionButton(
-                            icon = SimpIcons.PlayCircle,
+                            icon = MaKaDiMiIcons.PlayCircle,
                             text = Res.string.play_next,
                         ) {
                             viewModel.onUIEvent(NowPlayingBottomSheetUIEvent.PlayNext)
                         }
                         val addToQueueBlock = rememberAddToQueueBlock()
                         ActionButton(
-                            icon = SimpIcons.QueueMusic,
+                            icon = MaKaDiMiIcons.QueueMusic,
                             text = addToQueueBlock.addToQueueLabel(),
                             enable = addToQueueBlock == null,
                         ) {
@@ -1741,13 +1746,13 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                         }
                     }
                     ActionButton(
-                        icon = SimpIcons.PeopleAlt,
+                        icon = MaKaDiMiIcons.PeopleAlt,
                         text = Res.string.artists,
                     ) {
                         artist = true
                     }
                     ActionButton(
-                        icon = SimpIcons.Album,
+                        icon = MaKaDiMiIcons.Album,
                         // Three states, not two. A track can carry an album ID with no title: the
                         // row it was parsed from links an album but never spells its name out.
                         // That case still navigates, so it must not read "No album" — but the name
@@ -1777,7 +1782,7 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                     Crossfade(targetState = changeMainLyricsProviderEnable) {
                         if (it) {
                             ActionButton(
-                                icon = SimpIcons.Lyrics,
+                                icon = MaKaDiMiIcons.Lyrics,
                                 text = Res.string.main_lyrics_provider,
                             ) {
                                 mainLyricsProvider = true
@@ -1793,7 +1798,7 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                             Crossfade(targetState = isRunning) { running ->
                                 if (running) {
                                     ActionButton(
-                                        icon = SimpIcons.AccessAlarm,
+                                        icon = MaKaDiMiIcons.AccessAlarm,
                                         textString =
                                             if (isEndOfSong) {
                                                 stringResource(Res.string.sleep_timer_end_of_song)
@@ -1808,7 +1813,7 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                                     }
                                 } else {
                                     ActionButton(
-                                        icon = SimpIcons.AccessAlarm,
+                                        icon = MaKaDiMiIcons.AccessAlarm,
                                         text = Res.string.sleep_timer_off,
                                     ) {
                                         sleepTimer = true
@@ -1820,7 +1825,7 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                     Crossfade(targetState = setSleepTimerEnable) {
                         if (it) {
                             ActionButton(
-                                icon = SimpIcons.Speed,
+                                icon = MaKaDiMiIcons.Speed,
                                 text =
                                     if (crossfadeEnabled != DataStoreManager.TRUE) {
                                         Res.string.playback_speed_pitch
@@ -1836,7 +1841,7 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                     Crossfade(targetState = setSleepTimerEnable) {
                         if (it) {
                             ActionButton(
-                                icon = SimpIcons.Movie,
+                                icon = MaKaDiMiIcons.Movie,
                                 text = Res.string.quick_playback_title,
                             ) {
                                 quickPlayback = true
@@ -1846,7 +1851,7 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                     Crossfade(targetState = onDelete != null) {
                         if (it) {
                             ActionButton(
-                                icon = SimpIcons.Delete,
+                                icon = MaKaDiMiIcons.Delete,
                                 text = Res.string.delete_song_from_playlist,
                             ) {
                                 hideModalBottomSheet()
@@ -1857,7 +1862,7 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                     Crossfade(targetState = onLibraryDelete != null) {
                         if (it) {
                             ActionButton(
-                                icon = SimpIcons.Delete,
+                                icon = MaKaDiMiIcons.Delete,
                                 text = Res.string.delete,
                             ) {
                                 hideModalBottomSheet()
@@ -2030,9 +2035,9 @@ fun CheckBoxActionButton(
                 } else {
                     Crossfade(stateChecked) {
                         if (it) {
-                            Icon(SimpIcons.CheckCircle, "")
+                            Icon(MaKaDiMiIcons.CheckCircle, "")
                         } else {
-                            Icon(SimpIcons.AddCircleOutline, "")
+                            Icon(MaKaDiMiIcons.AddCircleOutline, "")
                         }
                     }
                 }
@@ -2090,7 +2095,7 @@ fun HeartCheckBox(
                 )
             } else {
                 Image(
-                    imageVector = SimpIcons.FavoriteBorder,
+                    imageVector = MaKaDiMiIcons.FavoriteBorder,
                     contentDescription = "Favorite unchecked",
                     modifier = Modifier.fillMaxSize().padding(4.dp),
                     colorFilter = ColorFilter.tint(tint),
@@ -2140,7 +2145,7 @@ fun PlaybackSpeedPitchBottomSheet(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Image(
-                        imageVector = SimpIcons.Speed,
+                        imageVector = MaKaDiMiIcons.Speed,
                         contentDescription = stringResource(Res.string.playback_speed),
                         modifier = Modifier.size(24.dp),
                         colorFilter = ColorFilter.tint(rememberSurfaceDarkColors().subtitle),
@@ -2156,7 +2161,7 @@ fun PlaybackSpeedPitchBottomSheet(
                         },
                     ) {
                         Icon(
-                            SimpIcons.Remove,
+                            MaKaDiMiIcons.Remove,
                             contentDescription = "Decrease speed",
                             tint = rememberSurfaceDarkColors().subtitle,
                         )
@@ -2178,7 +2183,7 @@ fun PlaybackSpeedPitchBottomSheet(
                         },
                     ) {
                         Icon(
-                            SimpIcons.Add,
+                            MaKaDiMiIcons.Add,
                             contentDescription = "Increase speed",
                             tint = rememberSurfaceDarkColors().subtitle,
                         )
@@ -2196,7 +2201,7 @@ fun PlaybackSpeedPitchBottomSheet(
                         verticalAlignment = Alignment.CenterVertically,
                     ) {
                         Icon(
-                            SimpIcons.Tune,
+                            MaKaDiMiIcons.Tune,
                             contentDescription = stringResource(Res.string.pitch),
                             modifier = Modifier.size(24.dp),
                             tint = rememberSurfaceDarkColors().subtitle,
@@ -2209,7 +2214,7 @@ fun PlaybackSpeedPitchBottomSheet(
                             },
                         ) {
                             Icon(
-                                SimpIcons.Remove,
+                                MaKaDiMiIcons.Remove,
                                 contentDescription = "Decrease pitch",
                                 tint = rememberSurfaceDarkColors().subtitle,
                             )
@@ -2228,7 +2233,7 @@ fun PlaybackSpeedPitchBottomSheet(
                             },
                         ) {
                             Icon(
-                                SimpIcons.Add,
+                                MaKaDiMiIcons.Add,
                                 contentDescription = "Increase pitch",
                                 tint = rememberSurfaceDarkColors().subtitle,
                             )
@@ -2320,7 +2325,7 @@ fun SleepTimerBottomSheet(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     Image(
-                        imageVector = SimpIcons.AccessAlarm,
+                        imageVector = MaKaDiMiIcons.AccessAlarm,
                         contentDescription = null,
                         colorFilter = ColorFilter.tint(seed),
                         modifier = Modifier.size(20.dp),
@@ -2645,7 +2650,7 @@ fun AddToPlaylistModalBottomSheet(
                                                 modifier = Modifier.padding(12.dp).align(Alignment.CenterStart),
                                             ) {
                                                 Image(
-                                                    imageVector = SimpIcons.PlaylistAdd,
+                                                    imageVector = MaKaDiMiIcons.PlaylistAdd,
                                                     contentDescription = "",
                                                     colorFilter = ColorFilter.tint(rememberSurfaceDarkColors().content),
                                                 )
@@ -2682,13 +2687,13 @@ fun AddToPlaylistModalBottomSheet(
                                                 Crossfade(targetState = playlist.tracks?.contains(videoId) == true) {
                                                     if (it) {
                                                         Image(
-                                                            imageVector = SimpIcons.Done,
+                                                            imageVector = MaKaDiMiIcons.Done,
                                                             contentDescription = "",
                                                             colorFilter = ColorFilter.tint(rememberSurfaceDarkColors().content),
                                                         )
                                                     } else {
                                                         Image(
-                                                            imageVector = SimpIcons.PlaylistAdd,
+                                                            imageVector = MaKaDiMiIcons.PlaylistAdd,
                                                             contentDescription = "",
                                                             colorFilter = ColorFilter.tint(rememberSurfaceDarkColors().content),
                                                         )
@@ -2782,7 +2787,7 @@ fun ArtistModalBottomSheet(
                                     modifier = Modifier.padding(20.dp).align(Alignment.CenterStart),
                                 ) {
                                     Image(
-                                        imageVector = SimpIcons.PeopleAlt,
+                                        imageVector = MaKaDiMiIcons.PeopleAlt,
                                         contentDescription = "",
                                         colorFilter = ColorFilter.tint(rememberSurfaceDarkColors().content),
                                     )
@@ -2915,7 +2920,7 @@ fun PlaylistBottomSheet(
                 if (onAddToQueue != null) {
                     val addToQueueBlock = rememberAddToQueueBlock()
                     ActionButton(
-                        icon = SimpIcons.QueueMusic,
+                        icon = MaKaDiMiIcons.QueueMusic,
                         text = addToQueueBlock.addToQueueLabel(),
                         enable = addToQueueBlock == null,
                     ) {
@@ -2924,15 +2929,15 @@ fun PlaylistBottomSheet(
                     }
                 }
                 if (isYourYouTubePlaylist) {
-                    ActionButton(icon = SimpIcons.Edit, text = Res.string.edit_title) {
+                    ActionButton(icon = MaKaDiMiIcons.Edit, text = Res.string.edit_title) {
                         showEditTitle = true
                     }
                     ActionButton(
                         icon =
                             if (isSavedToLocal) {
-                                SimpIcons.SyncDisabled
+                                MaKaDiMiIcons.SyncDisabled
                             } else {
-                                SimpIcons.Sync
+                                MaKaDiMiIcons.Sync
                             },
                         text =
                             if (isSavedToLocal) {
@@ -2947,7 +2952,7 @@ fun PlaylistBottomSheet(
                     }
                 }
                 val shareTitle = stringResource(Res.string.share)
-                ActionButton(icon = SimpIcons.Share, text = Res.string.share) {
+                ActionButton(icon = MaKaDiMiIcons.Share, text = Res.string.share) {
                     val url = "https://music.youtube.com/playlist?list=${playlistId.replaceFirst("VL", "")}"
                     shareUrl(shareTitle, url)
                 }
@@ -2964,6 +2969,7 @@ fun LocalPlaylistBottomSheet(
     onDismiss: () -> Unit,
     title: String,
     ytPlaylistId: String? = null,
+    onMoveToFolder: () -> Unit,
     onEditTitle: (newTitle: String) -> Unit,
     onEditThumbnail: (newThumbnailUri: String) -> Unit,
     onAddToQueue: () -> Unit,
@@ -3098,15 +3104,15 @@ fun LocalPlaylistBottomSheet(
                         shape = RoundedCornerShape(50),
                     ) {}
                     Spacer(modifier = Modifier.height(5.dp))
-                    ActionButton(icon = SimpIcons.Edit, text = Res.string.edit_title) {
+                    ActionButton(icon = MaKaDiMiIcons.Edit, text = Res.string.edit_title) {
                         showEditTitle = true
                     }
-                    ActionButton(icon = SimpIcons.AddPhotoAlternate, text = Res.string.edit_thumbnail) {
+                    ActionButton(icon = MaKaDiMiIcons.AddPhotoAlternate, text = Res.string.edit_thumbnail) {
                         resultLauncher.launch()
                     }
                     val addToQueueBlock = rememberAddToQueueBlock()
                     ActionButton(
-                        icon = SimpIcons.QueueMusic,
+                        icon = MaKaDiMiIcons.QueueMusic,
                         text = addToQueueBlock.addToQueueLabel(),
                         enable = addToQueueBlock == null,
                     ) {
@@ -3115,9 +3121,9 @@ fun LocalPlaylistBottomSheet(
                     ActionButton(
                         icon =
                             if (ytPlaylistId != null) {
-                                SimpIcons.SyncDisabled
+                                MaKaDiMiIcons.SyncDisabled
                             } else {
-                                SimpIcons.Sync
+                                MaKaDiMiIcons.Sync
                             },
                         text =
                             if (ytPlaylistId != null) {
@@ -3129,19 +3135,34 @@ fun LocalPlaylistBottomSheet(
                         onSync()
                     }
                     ActionButton(
-                        icon = SimpIcons.Update,
+                        icon = MaKaDiMiIcons.Update,
                         text = Res.string.update_playlist,
                         enable = (ytPlaylistId != null),
                     ) {
                         onUpdatePlaylist()
                     }
-                    ActionButton(icon = SimpIcons.Delete, text = Res.string.delete_playlist) {
+                    ActionButton(
+                        icon = MaKaDiMiIcons.LibraryMusic,
+                        text = Res.string.playlist_move_to_folder,
+                        onClick = onMoveToFolder,
+                    )
+                    ActionButton(icon = MaKaDiMiIcons.Delete, text = Res.string.delete_playlist) {
                         onDelete()
                         hideModalBottomSheet()
                     }
+                    ytPlaylistId?.let { playlistId ->
+                        ActionButton(
+                            icon = MaKaDiMiIcons.OpenInNew,
+                            text = Res.string.playlist_manage_on_youtube,
+                        ) {
+                            com.kaspercito.makadimi.expect.openUrl(
+                                "https://www.youtube.com/playlist?list=${playlistId.removePrefix("VL")}",
+                            )
+                        }
+                    }
                     val shareTitle = stringResource(Res.string.share_url)
                     ActionButton(
-                        icon = SimpIcons.Share,
+                        icon = MaKaDiMiIcons.Share,
                         text = if (ytPlaylistId != null) Res.string.share else Res.string.sync_first,
                         enable = (ytPlaylistId != null),
                     ) {
@@ -3225,7 +3246,7 @@ fun SortPlaylistBottomSheet(
                             Spacer(modifier = Modifier.weight(1f))
                             if (isSelected) {
                                 Image(
-                                    imageVector = SimpIcons.Done,
+                                    imageVector = MaKaDiMiIcons.Done,
                                     contentDescription = "Selected",
                                     colorFilter = ColorFilter.tint(seed),
                                     modifier = Modifier.size(32.dp),
@@ -3360,7 +3381,7 @@ fun DevCookieLogInBottomSheet(
                             copyToClipboard(cookie.first, cookie.second ?: "")
                             showToast(copied, ToastGravity.Bottom)
                         }) {
-                            Icon(imageVector = SimpIcons.ContentCopy, contentDescription = "Copy")
+                            Icon(imageVector = MaKaDiMiIcons.ContentCopy, contentDescription = "Copy")
                         }
                     }
                 }

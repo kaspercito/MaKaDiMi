@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.FullscreenExit: ImageVector
+val MaKaDiMiIcons.FullscreenExit: ImageVector
   get() {
     if (_FullscreenExit != null) {
       return _FullscreenExit!!

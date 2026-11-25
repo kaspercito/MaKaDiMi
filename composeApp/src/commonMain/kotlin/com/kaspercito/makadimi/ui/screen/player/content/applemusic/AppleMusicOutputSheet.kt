@@ -55,7 +55,7 @@ import com.kaspercito.makadimi.ui.component.rememberSurfaceDarkColors
 import com.kaspercito.makadimi.ui.icon.Check
 import com.kaspercito.makadimi.ui.icon.Headphones
 import com.kaspercito.makadimi.ui.icon.MusicCast
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.icon.Smartphone
 import com.kaspercito.makadimi.ui.icon.Speaker
 import com.kaspercito.makadimi.ui.theme.typo
@@ -186,7 +186,7 @@ internal fun AppleMusicOutputSheet(
                     )
                     cast.receivers.forEach { receiver ->
                         OutputRow(
-                            icon = SimpIcons.MusicCast,
+                            icon = MaKaDiMiIcons.MusicCast,
                             name = receiver.name,
                             status = if (receiver.isConnected) stringResource(Res.string.audio_output_playing_here) else null,
                             selected = receiver.isConnected,
@@ -244,7 +244,7 @@ private fun OutputRow(
             }
         }
         AnimatedVisibility(visible = selected, enter = fadeIn() + scaleIn(), exit = fadeOut() + scaleOut()) {
-            Icon(imageVector = SimpIcons.Check, contentDescription = null, tint = colors.content, modifier = Modifier.size(24.dp))
+            Icon(imageVector = MaKaDiMiIcons.Check, contentDescription = null, tint = colors.content, modifier = Modifier.size(24.dp))
         }
     }
 }
@@ -280,7 +280,7 @@ private fun AudioOutput.kindLabel(): String? =
 private fun AudioOutput.icon(): ImageVector =
     when (kind) {
         // The phone's own speaker on Android; the system default on desktop, which is a computer.
-        AudioOutputKind.DEVICE_SPEAKER -> if (getPlatform() == Platform.Android) SimpIcons.Smartphone else SimpIcons.Speaker
-        AudioOutputKind.WIRED, AudioOutputKind.BLUETOOTH, AudioOutputKind.USB -> SimpIcons.Headphones
-        AudioOutputKind.HDMI, AudioOutputKind.OTHER -> SimpIcons.Speaker
+        AudioOutputKind.DEVICE_SPEAKER -> if (getPlatform() == Platform.Android) MaKaDiMiIcons.Smartphone else MaKaDiMiIcons.Speaker
+        AudioOutputKind.WIRED, AudioOutputKind.BLUETOOTH, AudioOutputKind.USB -> MaKaDiMiIcons.Headphones
+        AudioOutputKind.HDMI, AudioOutputKind.OTHER -> MaKaDiMiIcons.Speaker
     }

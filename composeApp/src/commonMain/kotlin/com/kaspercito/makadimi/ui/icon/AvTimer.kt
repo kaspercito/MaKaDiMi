@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.AvTimer: ImageVector
+val MaKaDiMiIcons.AvTimer: ImageVector
   get() {
     if (_AvTimer != null) {
       return _AvTimer!!

@@ -13,7 +13,7 @@ import androidx.compose.ui.graphics.Color
 import com.kaspercito.makadimi.ui.icon.Close
 import com.kaspercito.makadimi.ui.icon.MoreVert
 import com.kaspercito.makadimi.ui.icon.SelectAll
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.theme.typo
 import org.jetbrains.compose.resources.stringResource
 import makadimi.composeapp.generated.resources.Res
@@ -54,7 +54,7 @@ fun SongSelectionTopAppBar(
         navigationIcon = {
             IconButton(onClick = { state.exit() }) {
                 Icon(
-                    imageVector = SimpIcons.Close,
+                    imageVector = MaKaDiMiIcons.Close,
                     contentDescription = stringResource(Res.string.exit_selection),
                 )
             }
@@ -69,7 +69,7 @@ fun SongSelectionTopAppBar(
         actions = {
             IconButton(onClick = onSelectAll) {
                 Icon(
-                    imageVector = SimpIcons.SelectAll,
+                    imageVector = MaKaDiMiIcons.SelectAll,
                     contentDescription = stringResource(Res.string.select_all),
                 )
             }
@@ -78,7 +78,7 @@ fun SongSelectionTopAppBar(
             if (state.count > 0) {
                 IconButton(onClick = onOpenActions) {
                     Icon(
-                        imageVector = SimpIcons.MoreVert,
+                        imageVector = MaKaDiMiIcons.MoreVert,
                         contentDescription = null,
                     )
                 }

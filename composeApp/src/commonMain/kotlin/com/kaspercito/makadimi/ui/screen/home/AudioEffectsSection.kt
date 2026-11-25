@@ -35,7 +35,7 @@ import com.kaspercito.domain.data.player.ReverbPreset
 import com.kaspercito.makadimi.ui.component.Chip
 import com.kaspercito.makadimi.ui.component.RippleIconButton
 import com.kaspercito.makadimi.ui.icon.Help
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.theme.typo
 import com.kaspercito.makadimi.viewModel.SettingsViewModel
 import org.jetbrains.compose.resources.StringResource
@@ -242,7 +242,7 @@ fun ReverbSection(viewModel: SettingsViewModel = koinViewModel()) {
                 }
             }
             RippleIconButton(
-                imageVector = SimpIcons.Help,
+                imageVector = MaKaDiMiIcons.Help,
                 tint = MaterialTheme.colorScheme.onSurfaceVariant,
                 onClick = { showHelp = true },
             )

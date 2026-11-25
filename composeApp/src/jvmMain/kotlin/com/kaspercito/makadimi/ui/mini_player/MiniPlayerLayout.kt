@@ -69,7 +69,7 @@ import com.kaspercito.makadimi.ui.component.RichSyncLyricsLineItem
 import com.kaspercito.makadimi.ui.component.RippleIconButton
 import com.kaspercito.makadimi.ui.icon.Favorite
 import com.kaspercito.makadimi.ui.icon.FavoriteBorder
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.icon.SkipNext
 import com.kaspercito.makadimi.ui.icon.SkipPrevious
 import com.kaspercito.makadimi.ui.icon.VolumeOff
@@ -201,7 +201,7 @@ fun CompactMiniLayout(
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     RippleIconButton(
-                        imageVector = SimpIcons.SkipPrevious,
+                        imageVector = MaKaDiMiIcons.SkipPrevious,
                         modifier = Modifier.size(28.dp),
                         tint = if (controllerState.isPreviousAvailable) Color.White else Color.Gray,
                         onClick = {
@@ -218,7 +218,7 @@ fun CompactMiniLayout(
                     )
 
                     RippleIconButton(
-                        imageVector = SimpIcons.SkipNext,
+                        imageVector = MaKaDiMiIcons.SkipNext,
                         modifier = Modifier.size(28.dp),
                         tint = if (controllerState.isNextAvailable) Color.White else Color.Gray,
                         onClick = {
@@ -317,9 +317,9 @@ fun MediumMiniLayout(
                                 Icon(
                                     imageVector =
                                         if (controllerState.isLiked) {
-                                            SimpIcons.Favorite
+                                            MaKaDiMiIcons.Favorite
                                         } else {
-                                            SimpIcons.FavoriteBorder
+                                            MaKaDiMiIcons.FavoriteBorder
                                         },
                                     contentDescription = "Like",
                                     tint =
@@ -334,7 +334,7 @@ fun MediumMiniLayout(
                         }
 
                         RippleIconButton(
-                            imageVector = SimpIcons.SkipPrevious,
+                            imageVector = MaKaDiMiIcons.SkipPrevious,
                             modifier = Modifier.size(28.dp),
                             tint = if (controllerState.isPreviousAvailable) Color.White else Color.Gray,
                             onClick = {
@@ -351,7 +351,7 @@ fun MediumMiniLayout(
                         )
 
                         RippleIconButton(
-                            imageVector = SimpIcons.SkipNext,
+                            imageVector = MaKaDiMiIcons.SkipNext,
                             modifier = Modifier.size(28.dp),
                             tint = if (controllerState.isNextAvailable) Color.White else Color.Gray,
                             onClick = {
@@ -379,9 +379,9 @@ fun MediumMiniLayout(
                                 Icon(
                                     imageVector =
                                         if (controllerState.volume > 0f) {
-                                            SimpIcons.VolumeUp
+                                            MaKaDiMiIcons.VolumeUp
                                         } else {
-                                            SimpIcons.VolumeOff
+                                            MaKaDiMiIcons.VolumeOff
                                         },
                                     contentDescription = if (controllerState.volume > 0f) "Mute" else "Unmute",
                                     tint = Color.White.copy(alpha = 0.7f),
@@ -624,9 +624,9 @@ fun SquareMiniLayout(
                     Icon(
                         imageVector =
                             if (controllerState.isLiked) {
-                                SimpIcons.Favorite
+                                MaKaDiMiIcons.Favorite
                             } else {
-                                SimpIcons.FavoriteBorder
+                                MaKaDiMiIcons.FavoriteBorder
                             },
                         contentDescription = "Like",
                         tint =
@@ -641,7 +641,7 @@ fun SquareMiniLayout(
 
                 // Previous
                 RippleIconButton(
-                    imageVector = SimpIcons.SkipPrevious,
+                    imageVector = MaKaDiMiIcons.SkipPrevious,
                     modifier = Modifier.size(36.dp),
                     tint = if (controllerState.isPreviousAvailable) Color.White else Color.Gray,
                     onClick = {
@@ -660,7 +660,7 @@ fun SquareMiniLayout(
 
                 // Next
                 RippleIconButton(
-                    imageVector = SimpIcons.SkipNext,
+                    imageVector = MaKaDiMiIcons.SkipNext,
                     modifier = Modifier.size(36.dp),
                     tint = if (controllerState.isNextAvailable) Color.White else Color.Gray,
                     onClick = {
@@ -683,9 +683,9 @@ fun SquareMiniLayout(
                     Icon(
                         imageVector =
                             if (controllerState.volume > 0f) {
-                                SimpIcons.VolumeUp
+                                MaKaDiMiIcons.VolumeUp
                             } else {
-                                SimpIcons.VolumeOff
+                                MaKaDiMiIcons.VolumeOff
                             },
                         contentDescription = if (controllerState.volume > 0f) "Mute" else "Unmute",
                         tint = Color.White.copy(alpha = 0.7f),
@@ -823,9 +823,9 @@ fun ExpandedMiniLayout(
                             Icon(
                                 imageVector =
                                     if (controllerState.isLiked) {
-                                        SimpIcons.Favorite
+                                        MaKaDiMiIcons.Favorite
                                     } else {
-                                        SimpIcons.FavoriteBorder
+                                        MaKaDiMiIcons.FavoriteBorder
                                     },
                                 contentDescription = "Like",
                                 tint =
@@ -839,7 +839,7 @@ fun ExpandedMiniLayout(
                         }
 
                         RippleIconButton(
-                            imageVector = SimpIcons.SkipPrevious,
+                            imageVector = MaKaDiMiIcons.SkipPrevious,
                             modifier = Modifier.size(28.dp),
                             tint = if (controllerState.isPreviousAvailable) Color.White else Color.Gray,
                             onClick = {
@@ -858,7 +858,7 @@ fun ExpandedMiniLayout(
                         )
 
                         RippleIconButton(
-                            imageVector = SimpIcons.SkipNext,
+                            imageVector = MaKaDiMiIcons.SkipNext,
                             modifier = Modifier.size(32.dp),
                             tint = if (controllerState.isNextAvailable) Color.White else Color.Gray,
                             onClick = {
@@ -881,9 +881,9 @@ fun ExpandedMiniLayout(
                             Icon(
                                 imageVector =
                                     if (controllerState.volume > 0f) {
-                                        SimpIcons.VolumeUp
+                                        MaKaDiMiIcons.VolumeUp
                                     } else {
-                                        SimpIcons.VolumeOff
+                                        MaKaDiMiIcons.VolumeOff
                                     },
                                 contentDescription = if (controllerState.volume > 0f) "Mute" else "Unmute",
                                 tint = Color.White.copy(alpha = 0.7f),

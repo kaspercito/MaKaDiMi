@@ -34,7 +34,7 @@ import com.kaspercito.makadimi.ui.component.DevLogInType
 import com.kaspercito.makadimi.ui.component.RippleIconButton
 import com.kaspercito.makadimi.ui.icon.ArrowBackIosNew
 import com.kaspercito.makadimi.ui.icon.LogoDev
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.theme.typo
 import com.kaspercito.makadimi.viewModel.LogInViewModel
 import org.jetbrains.compose.resources.stringResource
@@ -114,7 +114,7 @@ fun DiscordLoginScreen(
             navigationIcon = {
                 Box(Modifier.padding(horizontal = 5.dp)) {
                     RippleIconButton(
-                        SimpIcons.ArrowBackIosNew,
+                        MaKaDiMiIcons.ArrowBackIosNew,
                         Modifier.size(32.dp),
                         true,
                         tint = MaterialTheme.colorScheme.onSurface,
@@ -130,7 +130,7 @@ fun DiscordLoginScreen(
                     },
                 ) {
                     Icon(
-                        SimpIcons.LogoDev,
+                        MaKaDiMiIcons.LogoDev,
                         "Developer Mode",
                     )
                 }

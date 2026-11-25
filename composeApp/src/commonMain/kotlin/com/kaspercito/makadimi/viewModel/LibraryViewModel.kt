@@ -128,6 +128,8 @@ class LibraryViewModel(
     val libraryOverview: StateFlow<LibraryOverview?> get() = _libraryOverview.asStateFlow()
 
     @OptIn(ExperimentalCoroutinesApi::class)
+    val playlistFolders = dataStoreManager.playlistFolders
+
     val youtubeLoggedIn = dataStoreManager.loggedIn.mapLatest { it == DataStoreManager.TRUE }
 
     /** A Spotify account is linked: the Library offers the Spotify chip only then. */
@@ -176,8 +178,12 @@ class LibraryViewModel(
         }
     }
 
+    private var recentObserver: kotlinx.coroutines.Job? = null
+    private var playlistObserver: kotlinx.coroutines.Job? = null
+
     fun getRecentlyAdded() {
-        viewModelScope.launch {
+        if (recentObserver?.isActive == true) return
+        recentObserver = viewModelScope.launch {
             commonRepository.getAllRecentData().collectLatest { data ->
                 val temp: MutableList<RecentlyType> = mutableListOf()
                 temp.addAll(data)
@@ -285,8 +291,9 @@ class LibraryViewModel(
     }
 
     fun getLocalPlaylist() {
+        if (playlistObserver?.isActive == true) return
         _yourLocalPlaylist.value = LocalResource.Loading()
-        viewModelScope.launch {
+        playlistObserver = viewModelScope.launch {
             localPlaylistRepository.getAllLocalPlaylists().collect { values ->
 //                    _listLocalPlaylist.postValue(values)
                 _yourLocalPlaylist.value = LocalResource.Success(values.reversed())

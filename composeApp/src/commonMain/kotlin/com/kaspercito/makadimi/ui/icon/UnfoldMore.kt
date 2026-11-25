@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.UnfoldMore: ImageVector
+val MaKaDiMiIcons.UnfoldMore: ImageVector
   get() {
     if (_UnfoldMore != null) {
       return _UnfoldMore!!

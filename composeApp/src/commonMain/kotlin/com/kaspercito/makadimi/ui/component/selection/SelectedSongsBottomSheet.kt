@@ -32,7 +32,7 @@ import com.kaspercito.makadimi.ui.icon.Download
 import com.kaspercito.makadimi.ui.icon.Favorite
 import com.kaspercito.makadimi.ui.icon.PlaylistAdd
 import com.kaspercito.makadimi.ui.icon.QueueMusic
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.icon.SkipNext
 import com.kaspercito.makadimi.ui.theme.typo
 import kotlinx.coroutines.launch
@@ -122,33 +122,33 @@ fun SelectedSongsBottomSheet(
                     )
                     if (onPlayNext != null) {
                         ActionButton(
-                            icon = SimpIcons.SkipNext,
+                            icon = MaKaDiMiIcons.SkipNext,
                             text = Res.string.play_next,
                         ) { hideThen(onPlayNext) }
                     }
                     if (onAddToQueue != null) {
                         val addToQueueBlock = rememberAddToQueueBlock()
                         ActionButton(
-                            icon = SimpIcons.QueueMusic,
+                            icon = MaKaDiMiIcons.QueueMusic,
                             text = addToQueueBlock.addToQueueLabel(),
                             enable = addToQueueBlock == null,
                         ) { hideThen(onAddToQueue) }
                     }
                     if (onAddToPlaylist != null) {
                         ActionButton(
-                            icon = SimpIcons.PlaylistAdd,
+                            icon = MaKaDiMiIcons.PlaylistAdd,
                             text = Res.string.add_to_a_playlist,
                         ) { hideThen(onAddToPlaylist) }
                     }
                     if (onDownload != null) {
                         ActionButton(
-                            icon = SimpIcons.Download,
+                            icon = MaKaDiMiIcons.Download,
                             text = Res.string.download,
                         ) { hideThen(onDownload) }
                     }
                     if (onAddToFavorite != null) {
                         ActionButton(
-                            icon = SimpIcons.Favorite,
+                            icon = MaKaDiMiIcons.Favorite,
                             text = Res.string.favorite,
                         ) { hideThen(onAddToFavorite) }
                     }

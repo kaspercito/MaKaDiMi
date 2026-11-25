@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.PlayArrow: ImageVector
+val MaKaDiMiIcons.PlayArrow: ImageVector
   get() {
     if (_PlayArrow != null) {
       return _PlayArrow!!

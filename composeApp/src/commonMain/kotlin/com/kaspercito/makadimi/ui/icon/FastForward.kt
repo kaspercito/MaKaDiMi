@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.FastForward: ImageVector
+val MaKaDiMiIcons.FastForward: ImageVector
   get() {
     if (_FastForward != null) {
       return _FastForward!!

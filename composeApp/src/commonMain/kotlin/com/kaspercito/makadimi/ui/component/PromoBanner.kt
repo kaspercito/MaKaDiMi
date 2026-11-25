@@ -23,7 +23,7 @@ import com.kyant.backdrop.highlight.Highlight
 import com.kaspercito.makadimi.expect.ui.layerBackdrop
 import com.kaspercito.makadimi.expect.ui.rememberBackdrop
 import com.kaspercito.makadimi.ui.icon.Close
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 
 /** True while App.kt has a dialog of its own on screen. Home's launch banner waits until it is closed. */
 val LocalAppDialogOpen = compositionLocalOf { false }
@@ -94,7 +94,7 @@ fun PromoBanner(
                 // A sibling of the picture, never inside it: the glass samples what lies under it.
                 LiquidGlassIconButton(
                     backdrop = backdrop,
-                    imageVector = SimpIcons.Close,
+                    imageVector = MaKaDiMiIcons.Close,
                     highlight = Highlight(width = 1.dp),
                     modifier =
                         Modifier

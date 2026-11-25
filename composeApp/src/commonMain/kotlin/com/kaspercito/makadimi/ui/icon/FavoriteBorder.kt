@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.FavoriteBorder: ImageVector
+val MaKaDiMiIcons.FavoriteBorder: ImageVector
   get() {
     if (_FavoriteBorder != null) {
       return _FavoriteBorder!!

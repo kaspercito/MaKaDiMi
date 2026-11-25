@@ -28,7 +28,7 @@ import com.kaspercito.makadimi.expect.ui.PlatformBackdrop
 import com.kaspercito.makadimi.ui.icon.Add
 import com.kaspercito.makadimi.ui.icon.Remove
 import com.kaspercito.makadimi.ui.icon.RestartAlt
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.theme.typo
 import com.kaspercito.makadimi.viewModel.NowPlayingScreenData
 import org.jetbrains.compose.resources.stringResource
@@ -65,7 +65,7 @@ fun LyricsOffsetBar(
             modifier = modifier.clip(CircleShape).background(containerColor),
             verticalAlignment = Alignment.CenterVertically,
         ) {
-            RippleIconButton(imageVector = SimpIcons.Remove, tint = contentColor) {
+            RippleIconButton(imageVector = MaKaDiMiIcons.Remove, tint = contentColor) {
                 onOffsetChange(offsetMs - LYRICS_OFFSET_STEP_MS)
             }
             Text(
@@ -76,11 +76,11 @@ fun LyricsOffsetBar(
                 maxLines = 1,
                 modifier = Modifier.widthIn(min = 72.dp),
             )
-            RippleIconButton(imageVector = SimpIcons.Add, tint = contentColor) {
+            RippleIconButton(imageVector = MaKaDiMiIcons.Add, tint = contentColor) {
                 onOffsetChange(offsetMs + LYRICS_OFFSET_STEP_MS)
             }
             AnimatedVisibility(visible = offsetMs != 0) {
-                RippleIconButton(imageVector = SimpIcons.RestartAlt, tint = contentColor) { onOffsetChange(0) }
+                RippleIconButton(imageVector = MaKaDiMiIcons.RestartAlt, tint = contentColor) { onOffsetChange(0) }
             }
         }
     }

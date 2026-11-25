@@ -19,7 +19,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import com.kaspercito.makadimi.ui.icon.Explicit
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.theme.typo
 import org.jetbrains.compose.resources.stringResource
 import makadimi.composeapp.generated.resources.Res
@@ -32,7 +32,7 @@ fun ExplicitBadge(modifier: Modifier = Modifier) {
         contentAlignment = Alignment.Center,
     ) {
         Icon(
-            imageVector = SimpIcons.Explicit,
+            imageVector = MaKaDiMiIcons.Explicit,
             "Explicit",
             tint = Color.LightGray,
         )

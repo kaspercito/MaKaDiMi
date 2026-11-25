@@ -69,7 +69,7 @@ import com.kaspercito.makadimi.ui.component.capture.rememberCaptureController
 import com.kaspercito.makadimi.ui.component.liquidGlass
 import com.kaspercito.makadimi.ui.icon.Close
 import com.kaspercito.makadimi.ui.icon.Share
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.screen.home.wrapped.cards.WrappedBiggestDayCard
 import com.kaspercito.makadimi.ui.screen.home.wrapped.cards.WrappedClockCard
 import com.kaspercito.makadimi.ui.screen.home.wrapped.cards.WrappedDecadesCard
@@ -506,7 +506,7 @@ private fun WrappedHeader(
             )
             LiquidGlassIconButton(
                 backdrop = backdrop,
-                imageVector = SimpIcons.Close,
+                imageVector = MaKaDiMiIcons.Close,
                 tint = MaterialTheme.colorScheme.onSurface,
                 // Round buttons need the rim named: Highlight's default is a DIRECTIONAL sweep that
                 // an elongated pill catches along its long edge and a circle barely catches at all.
@@ -564,7 +564,7 @@ private fun WrappedFooter(
             verticalAlignment = Alignment.CenterVertically,
         ) {
             Icon(
-                imageVector = SimpIcons.Share,
+                imageVector = MaKaDiMiIcons.Share,
                 contentDescription = null,
                 tint = MaterialTheme.colorScheme.onSurface,
                 modifier = Modifier.size(15.dp),

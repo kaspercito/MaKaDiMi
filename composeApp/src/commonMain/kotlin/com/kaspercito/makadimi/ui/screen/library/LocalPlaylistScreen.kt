@@ -63,7 +63,12 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.Text
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.TextButton
+import makadimi.composeapp.generated.resources.save
+import makadimi.composeapp.generated.resources.playlist_move_to_folder
+import makadimi.composeapp.generated.resources.playlist_folder_name
+import makadimi.composeapp.generated.resources.playlist_folder_hint
 import androidx.compose.material3.FilterChip
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.material3.TopAppBar
@@ -161,7 +166,7 @@ import com.kaspercito.makadimi.ui.icon.MoreVert
 import com.kaspercito.makadimi.ui.icon.Pause
 import com.kaspercito.makadimi.ui.icon.PlayArrow
 import com.kaspercito.makadimi.ui.icon.Shuffle
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.icon.Sort
 import com.kaspercito.makadimi.ui.icon.TipsAndUpdates
 import com.kaspercito.makadimi.ui.theme.LocalIsDarkTheme
@@ -234,7 +239,7 @@ fun LocalPlaylistScreen(
 
     val uiState by viewModel.uiState.collectAsStateWithLifecycle()
 
-    val aiPainter = rememberVectorPainter(SimpIcons.TipsAndUpdates)
+    val aiPainter = rememberVectorPainter(MaKaDiMiIcons.TipsAndUpdates)
     val limit = 1.5f
     val transition = rememberInfiniteTransition(label = "shimmer")
     val progressAnimated by transition.animateFloat(
@@ -636,7 +641,7 @@ fun LocalPlaylistScreen(
                                 ) {
                                     LiquidGlassIconButton(
                                         backdrop = artworkBackdrop,
-                                        imageVector = SimpIcons.ArrowBackIosNew,
+                                        imageVector = MaKaDiMiIcons.ArrowBackIosNew,
                                         modifier =
                                             Modifier
                                                 .size(48.dp),
@@ -697,7 +702,7 @@ fun LocalPlaylistScreen(
                                             onClick = { showSearchBar = true },
                                         ) {
                                             Icon(
-                                                imageVector = SimpIcons.Search,
+                                                imageVector = MaKaDiMiIcons.Search,
                                                 contentDescription = "Search in playlist",
                                                 tint = Color.White,
                                             )
@@ -706,7 +711,7 @@ fun LocalPlaylistScreen(
                                             onClick = onPlaylistMoreClick,
                                         ) {
                                             Icon(
-                                                imageVector = SimpIcons.MoreVert,
+                                                imageVector = MaKaDiMiIcons.MoreVert,
                                                 contentDescription = "More",
                                                 tint = Color.White,
                                             )
@@ -835,7 +840,7 @@ fun LocalPlaylistScreen(
                                                     contentAlignment = Alignment.Center,
                                                 ) {
                                                     Icon(
-                                                        imageVector = SimpIcons.Shuffle,
+                                                        imageVector = MaKaDiMiIcons.Shuffle,
                                                         contentDescription = "Shuffle",
                                                         tint = Color.White,
                                                         modifier = Modifier.size(22.dp),
@@ -861,9 +866,9 @@ fun LocalPlaylistScreen(
                                                         Icon(
                                                             imageVector =
                                                                 if (isThisPlaying) {
-                                                                    SimpIcons.Pause
+                                                                    MaKaDiMiIcons.Pause
                                                                 } else {
-                                                                    SimpIcons.PlayArrow
+                                                                    MaKaDiMiIcons.PlayArrow
                                                                 },
                                                             contentDescription = null,
                                                             tint = Color.Black,
@@ -938,7 +943,7 @@ fun LocalPlaylistScreen(
                                                                     contentAlignment = Alignment.Center,
                                                                 ) {
                                                                     Icon(
-                                                                        imageVector = SimpIcons.DownloadForOffline,
+                                                                        imageVector = MaKaDiMiIcons.DownloadForOffline,
                                                                         tint = Color.White,
                                                                         contentDescription = "Download",
                                                                         modifier = Modifier.size(22.dp),
@@ -956,7 +961,7 @@ fun LocalPlaylistScreen(
                                 Box(Modifier.padding(start = 12.dp)) {
                                     LiquidGlassIconButton(
                                         backdrop = headerBackdrop,
-                                        imageVector = SimpIcons.ArrowBackIosNew,
+                                        imageVector = MaKaDiMiIcons.ArrowBackIosNew,
                                         shape = LeafShape,
                                         // Same directional style as the like/⋯ pill, a touch thicker. The default
                                         // width of 0.5.dp becomes a ~2px stroke (HighlightModifier: ceil(width.toPx()) * 2),
@@ -1029,7 +1034,7 @@ fun LocalPlaylistScreen(
                                         onClick = { showSearchBar = true },
                                     ) {
                                         Icon(
-                                            imageVector = SimpIcons.Search,
+                                            imageVector = MaKaDiMiIcons.Search,
                                             contentDescription = "Search in playlist",
                                             tint = Color.White,
                                         )
@@ -1038,7 +1043,7 @@ fun LocalPlaylistScreen(
                                         onClick = onPlaylistMoreClick,
                                     ) {
                                         Icon(
-                                            imageVector = SimpIcons.MoreVert,
+                                            imageVector = MaKaDiMiIcons.MoreVert,
                                             contentDescription = "More",
                                             tint = Color.White,
                                         )
@@ -1082,7 +1087,7 @@ fun LocalPlaylistScreen(
                                             contentAlignment = Alignment.Center,
                                         ) {
                                             Icon(
-                                                imageVector = SimpIcons.Shuffle,
+                                                imageVector = MaKaDiMiIcons.Shuffle,
                                                 contentDescription = "Shuffle",
                                                 tint = Color.White,
                                                 modifier = Modifier.size(22.dp),
@@ -1108,9 +1113,9 @@ fun LocalPlaylistScreen(
                                                 Icon(
                                                     imageVector =
                                                         if (isThisPlaying) {
-                                                            SimpIcons.Pause
+                                                            MaKaDiMiIcons.Pause
                                                         } else {
-                                                            SimpIcons.PlayArrow
+                                                            MaKaDiMiIcons.PlayArrow
                                                         },
                                                     contentDescription = null,
                                                     tint = Color.Black,
@@ -1185,7 +1190,7 @@ fun LocalPlaylistScreen(
                                                             contentAlignment = Alignment.Center,
                                                         ) {
                                                             Icon(
-                                                                imageVector = SimpIcons.DownloadForOffline,
+                                                                imageVector = MaKaDiMiIcons.DownloadForOffline,
                                                                 tint = Color.White,
                                                                 contentDescription = "Download",
                                                                 modifier = Modifier.size(22.dp),
@@ -1295,7 +1300,7 @@ fun LocalPlaylistScreen(
                                             verticalAlignment = Alignment.CenterVertically,
                                         ) {
                                             Icon(
-                                                imageVector = SimpIcons.Sort,
+                                                imageVector = MaKaDiMiIcons.Sort,
                                                 contentDescription = "Sort playlist",
                                                 tint = Color.White,
                                                 modifier = Modifier.size(20.dp),
@@ -1449,7 +1454,7 @@ fun LocalPlaylistScreen(
             extraActions =
                 listOf(
                     SongSelectionAction(
-                        icon = SimpIcons.Delete,
+                        icon = MaKaDiMiIcons.Delete,
                         label = removeLabel,
                         tint = Color.Red,
                     ) {
@@ -1486,6 +1491,37 @@ fun LocalPlaylistScreen(
             song = track,
         )
     }
+    var editingFolder by rememberSaveable { mutableStateOf(false) }
+    if (editingFolder) {
+        val folders by viewModel.playlistFolders.collectAsStateWithLifecycle(initialValue = emptyMap())
+        var folderDraft by rememberSaveable(uiState.id) { mutableStateOf<String?>(null) }
+        val folder = folderDraft ?: folders[uiState.id].orEmpty()
+        AlertDialog(
+            onDismissRequest = { editingFolder = false },
+            title = { Text(stringResource(Res.string.playlist_move_to_folder)) },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    androidx.compose.material3.OutlinedTextField(
+                        value = folder,
+                        onValueChange = { folderDraft = it },
+                        label = { Text(stringResource(Res.string.playlist_folder_name)) },
+                        singleLine = true,
+                        modifier = Modifier.fillMaxWidth(),
+                    )
+                    Text(stringResource(Res.string.playlist_folder_hint), style = MaterialTheme.typography.bodySmall)
+                }
+            },
+            confirmButton = {
+                androidx.compose.material3.Button(onClick = {
+                    viewModel.setPlaylistFolder(uiState.id, folder)
+                    editingFolder = false
+                }) { Text(stringResource(Res.string.save)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { editingFolder = false }) { Text(stringResource(Res.string.cancel)) }
+            },
+        )
+    }
     if (playlistBottomSheetShow) {
         Logger.w("PlaylistScreen", "PlaylistBottomSheet")
         LocalPlaylistBottomSheet(
@@ -1493,6 +1529,10 @@ fun LocalPlaylistScreen(
             onDismiss = { playlistBottomSheetShow = false },
             title = uiState.title,
             ytPlaylistId = uiState.ytPlaylistId,
+            onMoveToFolder = {
+                playlistBottomSheetShow = false
+                editingFolder = true
+            },
             onEditTitle =
                 { newTitle ->
                     viewModel.updatePlaylistTitle(newTitle, uiState.id)
@@ -1606,7 +1646,7 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                     verticalAlignment = Alignment.CenterVertically,
                 ) {
                     RippleIconButton(
-                        imageVector = SimpIcons.ArrowBackIosNew,
+                        imageVector = MaKaDiMiIcons.ArrowBackIosNew,
                     ) {
                         showSearchBar = false
                     }
@@ -1647,7 +1687,7 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                             if (searchQuery.isNotEmpty()) viewModel.setSearchQuery("") else showSearchBar = false
                         },
                     ) {
-                        Icon(SimpIcons.Close, null, tint = Color.White)
+                        Icon(MaKaDiMiIcons.Close, null, tint = Color.White)
                     }
                 }
             }
@@ -1731,7 +1771,7 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
             navigationIcon = {
                 Box(Modifier.padding(horizontal = 5.dp)) {
                     RippleIconButton(
-                        SimpIcons.ArrowBackIosNew,
+                        MaKaDiMiIcons.ArrowBackIosNew,
                         Modifier
                             .size(32.dp),
                         true,

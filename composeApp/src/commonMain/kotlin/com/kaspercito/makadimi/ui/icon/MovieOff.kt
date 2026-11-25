@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.MovieOff: ImageVector
+val MaKaDiMiIcons.MovieOff: ImageVector
   get() {
     if (_MovieOff != null) {
       return _MovieOff!!

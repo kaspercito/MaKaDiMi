@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.ThumbDown: ImageVector
+val MaKaDiMiIcons.ThumbDown: ImageVector
   get() {
     if (_ThumbDown != null) {
       return _ThumbDown!!

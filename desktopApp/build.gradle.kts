@@ -195,7 +195,7 @@ compose.desktop {
                             <string>com.kaspercito.makadimi.deeplink</string>
                             <key>CFBundleURLSchemes</key>
                             <array>
-                                <string>simpmusic</string>
+                                <string>makadimi</string>
                             </array>
                         </dict>
                     </array>
@@ -403,7 +403,7 @@ tasks.register("packageConveyorAppImage") {
             |Terminal=false
             |Categories=Audio;AudioVideo;
             |StartupWMClass=MaKaDiMi
-            |MimeType=x-scheme-handler/simpmusic;x-scheme-handler/wordbyword;
+            |MimeType=x-scheme-handler/makadimi;x-scheme-handler/wordbyword;
             |
             """.trimMargin(),
         )

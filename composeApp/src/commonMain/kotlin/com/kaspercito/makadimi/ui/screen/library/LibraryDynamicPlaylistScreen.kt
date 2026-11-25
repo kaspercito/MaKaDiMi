@@ -71,7 +71,7 @@ import com.kaspercito.makadimi.ui.icon.Close
 import com.kaspercito.makadimi.ui.icon.PlayCircle
 import com.kaspercito.makadimi.ui.icon.Search
 import com.kaspercito.makadimi.ui.icon.Shuffle
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.navigation.destination.list.AlbumDestination
 import com.kaspercito.makadimi.ui.navigation.destination.list.ArtistDestination
 import com.kaspercito.makadimi.ui.screen.home.analytics.monthFullName
@@ -124,6 +124,8 @@ fun LibraryDynamicPlaylistScreen(
     innerPadding: PaddingValues,
     navController: NavController,
     type: String,
+    recentDownloads: Boolean = false,
+    favoriteDownloads: Boolean = false,
     viewModel: LibraryDynamicPlaylistViewModel = koinViewModel(),
     analyticsViewModel: AnalyticsViewModel = koinViewModel(),
     sharedViewModel: SharedViewModel = koinInject(),
@@ -187,8 +189,8 @@ fun LibraryDynamicPlaylistScreen(
             if (search.isEmpty()) it else it.filter { row -> matchesQuery(row.second.title, row.second.artistName, search) }
         }
     }
-    var recentDownloadsOnly by rememberSaveable { mutableStateOf(false) }
-    var favoriteDownloadsOnly by rememberSaveable { mutableStateOf(false) }
+    var recentDownloadsOnly by rememberSaveable(recentDownloads) { mutableStateOf(recentDownloads) }
+    var favoriteDownloadsOnly by rememberSaveable(favoriteDownloads) { mutableStateOf(favoriteDownloads) }
     val today = now().date
     val visibleDownloads = remember(downloaded, search, recentDownloadsOnly, favoriteDownloadsOnly, today) {
         if (search.isEmpty() && !recentDownloadsOnly && !favoriteDownloadsOnly) downloaded else {
@@ -574,7 +576,7 @@ fun LibraryDynamicPlaylistScreen(
                 navigationIcon = {
                     Box(Modifier.padding(horizontal = 5.dp)) {
                         RippleIconButton(
-                            SimpIcons.ArrowBackIosNew,
+                            MaKaDiMiIcons.ArrowBackIosNew,
                             Modifier
                                 .size(32.dp),
                             true,
@@ -587,7 +589,7 @@ fun LibraryDynamicPlaylistScreen(
                 actions = {
                     if (isSongType) {
                         RippleIconButton(
-                            SimpIcons.PlayCircle,
+                            MaKaDiMiIcons.PlayCircle,
                             Modifier
                                 .size(48.dp),
                             fillMaxSize = true,
@@ -618,7 +620,7 @@ fun LibraryDynamicPlaylistScreen(
                             }
                         }
                         RippleIconButton(
-                            SimpIcons.Shuffle,
+                            MaKaDiMiIcons.Shuffle,
                             Modifier.size(32.dp),
                             true,
                             tint = MaterialTheme.colorScheme.onBackground,
@@ -651,7 +653,7 @@ fun LibraryDynamicPlaylistScreen(
                     }
                     Box(Modifier.padding(horizontal = 5.dp)) {
                         RippleIconButton(
-                            if (showSearchBar) SimpIcons.Close else SimpIcons.Search,
+                            if (showSearchBar) MaKaDiMiIcons.Close else MaKaDiMiIcons.Search,
                             Modifier
                                 .size(32.dp),
                             true,
@@ -735,7 +737,7 @@ fun LibraryDynamicPlaylistScreen(
                                     style = typo().bodySmall,
                                 )
                             },
-                            leadingIcon = { Icon(SimpIcons.Search, contentDescription = null) },
+                            leadingIcon = { Icon(MaKaDiMiIcons.Search, contentDescription = null) },
                         )
                     }
                 },
@@ -973,7 +975,7 @@ sealed class LibraryDynamicPlaylistType {
          * `recap_2026_01` back into a [MonthlyRecap], or null for anything else.
          *
          * Validated rather than trusted: this arrives from a persisted navigation argument and,
-         * through the `simpmusic://library?type=` deep link, from outside the app entirely. A month
+         * through the `makadimi://library?type=` deep link, from outside the app entirely. A month
          * of 0 or 13 would reach `Month(month)` and throw somewhere far away from here.
          */
         private fun parseMonthlyRecap(input: String): MonthlyRecap? {

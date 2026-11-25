@@ -109,7 +109,7 @@ import com.kaspercito.makadimi.ui.icon.QueueMusic
 import com.kaspercito.makadimi.ui.icon.Repeat
 import com.kaspercito.makadimi.ui.icon.RepeatOne
 import com.kaspercito.makadimi.ui.icon.Shuffle
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.screen.player.content.applemusic.AudioOutputSheetHost
 import com.kaspercito.makadimi.ui.screen.player.content.expressive.ExpressiveTransportRow
 import com.kaspercito.makadimi.ui.screen.player.content.expressive.WavySeekBar
@@ -400,7 +400,7 @@ private fun NowPlayingM3ExpressiveLayout(
                         modifier = Modifier.size(44.dp),
                     ) {
                         Icon(
-                            imageVector = SimpIcons.MoreVert,
+                            imageVector = MaKaDiMiIcons.MoreVert,
                             contentDescription = "",
                         )
                     }
@@ -776,7 +776,7 @@ internal fun ExpressiveTrackInfoRow(
             ) {
                 Crossfade(targetState = state.likeStatus) { liked ->
                     Icon(
-                        imageVector = if (liked) SimpIcons.CheckCircle else SimpIcons.AddCircleOutline,
+                        imageVector = if (liked) MaKaDiMiIcons.CheckCircle else MaKaDiMiIcons.AddCircleOutline,
                         contentDescription = "",
                     )
                 }
@@ -805,7 +805,7 @@ internal fun ExpressiveTrackInfoRow(
         ) {
             Crossfade(targetState = state.controllerState.isLiked) { liked ->
                 Icon(
-                    imageVector = if (liked) SimpIcons.Favorite else SimpIcons.FavoriteBorder,
+                    imageVector = if (liked) MaKaDiMiIcons.Favorite else MaKaDiMiIcons.FavoriteBorder,
                     contentDescription = "",
                 )
             }
@@ -958,7 +958,7 @@ private fun ExpressiveConnectedGroup(
             onClick = { actions.onShowInfo() },
         ) {
             Icon(
-                imageVector = SimpIcons.Info,
+                imageVector = MaKaDiMiIcons.Info,
                 contentDescription = "",
                 tint = colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(22.dp),
@@ -972,7 +972,7 @@ private fun ExpressiveConnectedGroup(
             onClick = onOpenOutput,
         ) {
             Icon(
-                imageVector = SimpIcons.Headphones,
+                imageVector = MaKaDiMiIcons.Headphones,
                 contentDescription = stringResource(Res.string.audio_output),
                 tint = if (state.castState.isRemote) colorScheme.primary else colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(22.dp),
@@ -985,7 +985,7 @@ private fun ExpressiveConnectedGroup(
         ) {
             Crossfade(targetState = state.controllerState.isShuffle, label = "expressiveShuffle") { isShuffle ->
                 Icon(
-                    imageVector = SimpIcons.Shuffle,
+                    imageVector = MaKaDiMiIcons.Shuffle,
                     contentDescription = "",
                     tint = if (isShuffle) colorScheme.onPrimaryContainer else colorScheme.onSurfaceVariant,
                     modifier = Modifier.size(22.dp),
@@ -1001,7 +1001,7 @@ private fun ExpressiveConnectedGroup(
                 when (rs) {
                     is RepeatState.None -> {
                         Icon(
-                            imageVector = SimpIcons.Repeat,
+                            imageVector = MaKaDiMiIcons.Repeat,
                             contentDescription = "",
                             tint = colorScheme.onSurfaceVariant,
                             modifier = Modifier.size(22.dp),
@@ -1010,7 +1010,7 @@ private fun ExpressiveConnectedGroup(
 
                     RepeatState.All -> {
                         Icon(
-                            imageVector = SimpIcons.Repeat,
+                            imageVector = MaKaDiMiIcons.Repeat,
                             contentDescription = "",
                             tint = colorScheme.onPrimaryContainer,
                             modifier = Modifier.size(22.dp),
@@ -1019,7 +1019,7 @@ private fun ExpressiveConnectedGroup(
 
                     RepeatState.One -> {
                         Icon(
-                            imageVector = SimpIcons.RepeatOne,
+                            imageVector = MaKaDiMiIcons.RepeatOne,
                             contentDescription = "",
                             tint = colorScheme.onPrimaryContainer,
                             modifier = Modifier.size(22.dp),
@@ -1033,7 +1033,7 @@ private fun ExpressiveConnectedGroup(
             onClick = { actions.onShowAddToPlaylist() },
         ) {
             Icon(
-                imageVector = SimpIcons.PlaylistAdd,
+                imageVector = MaKaDiMiIcons.PlaylistAdd,
                 contentDescription = "Add to Playlist",
                 tint = colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(22.dp),
@@ -1044,7 +1044,7 @@ private fun ExpressiveConnectedGroup(
             onClick = { actions.onShowQueue() },
         ) {
             Icon(
-                imageVector = SimpIcons.QueueMusic,
+                imageVector = MaKaDiMiIcons.QueueMusic,
                 contentDescription = "",
                 tint = colorScheme.onSurfaceVariant,
                 modifier = Modifier.size(22.dp),

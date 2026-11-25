@@ -72,7 +72,7 @@ import com.kaspercito.makadimi.ui.component.RippleIconButton
 import com.kaspercito.makadimi.ui.component.rememberHolderPainter
 import com.kaspercito.makadimi.ui.icon.ArrowBackIosNew
 import com.kaspercito.makadimi.ui.icon.RssFeed
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.navigation.destination.list.AlbumDestination
 import com.kaspercito.makadimi.ui.navigation.destination.list.ArtistDestination
 import com.kaspercito.makadimi.ui.theme.typo
@@ -199,7 +199,7 @@ fun NotificationScreen(
                 },
                 navigationIcon = {
                     RippleIconButton(
-                        imageVector = SimpIcons.ArrowBackIosNew,
+                        imageVector = MaKaDiMiIcons.ArrowBackIosNew,
                         tint = MaterialTheme.colorScheme.onSurface,
                     ) {
                         navController.navigateUp()
@@ -332,7 +332,7 @@ fun BlogNotificationItem(notification: NotificationEntity) {
                 contentAlignment = Alignment.Center,
             ) {
                 Icon(
-                    imageVector = SimpIcons.RssFeed,
+                    imageVector = MaKaDiMiIcons.RssFeed,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.onSurface,
                     modifier = Modifier.size(26.dp),

@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.PlaylistAdd: ImageVector
+val MaKaDiMiIcons.PlaylistAdd: ImageVector
   get() {
     if (_PlaylistAdd != null) {
       return _PlaylistAdd!!

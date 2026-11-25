@@ -1206,7 +1206,7 @@ class SettingsViewModel(
     fun setLocationAuto() {
         viewModelScope.launch {
             dataStoreManager.putString(LOCATION_MANUAL, "")
-            dataStoreManager.setLocation(SUPPORTED_LOCATION.fromCountry(systemLocaleNative().country))
+            dataStoreManager.setLocation(SUPPORTED_LOCATION.fromCountry(deviceCountryNative(), systemLocaleNative().country))
             _locationAuto.value = true
             getLocation()
         }

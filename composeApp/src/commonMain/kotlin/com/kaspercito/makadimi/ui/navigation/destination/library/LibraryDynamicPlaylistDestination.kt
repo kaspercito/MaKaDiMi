@@ -8,4 +8,6 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class LibraryDynamicPlaylistDestination(
     val type: String,
+    val recentDownloads: Boolean = false,
+    val favoriteDownloads: Boolean = false,
 )

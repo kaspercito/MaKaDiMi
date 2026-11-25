@@ -67,7 +67,7 @@ import com.kaspercito.makadimi.extension.findActivity
 import com.kaspercito.makadimi.ui.component.QrScanner
 import com.kaspercito.makadimi.ui.component.rememberSurfaceDarkColors
 import com.kaspercito.makadimi.ui.icon.Close
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.theme.seed
 import com.kaspercito.makadimi.ui.theme.typo
 import com.kaspercito.makadimi.viewModel.LoginSyncSenderViewModel
@@ -178,7 +178,7 @@ actual fun LoginSyncDialog(onDismiss: () -> Unit) {
                         modifier = Modifier.weight(1f),
                     )
                     IconButton(onClick = ::close) {
-                        Icon(imageVector = SimpIcons.Close, contentDescription = stringResource(Res.string.cancel), tint = colors.content)
+                        Icon(imageVector = MaKaDiMiIcons.Close, contentDescription = stringResource(Res.string.cancel), tint = colors.content)
                     }
                 }
                 Text(

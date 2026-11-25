@@ -12,7 +12,6 @@ import com.kaspercito.common.Config.SHARE
 import com.kaspercito.common.Config.SONG_CLICK
 import com.kaspercito.common.Config.VIDEO_CLICK
 import com.kaspercito.common.LibraryChipType
-import com.kaspercito.common.SELECTED_LANGUAGE
 import com.kaspercito.common.STATUS_DONE
 import com.kaspercito.domain.data.entities.AlbumEntity
 import com.kaspercito.domain.data.entities.DownloadState
@@ -190,8 +189,6 @@ class SharedViewModel(
     private var _sleepTimerState = MutableStateFlow(SleepTimerState(false, 0))
     val sleepTimerState: StateFlow<SleepTimerState> = _sleepTimerState
 
-    private var regionCode: String? = null
-    private var language: String? = null
 
     private var _format: MutableStateFlow<NewFormatEntity?> = MutableStateFlow(null)
     val format: SharedFlow<NewFormatEntity?> = _format.asSharedFlow()
@@ -1184,11 +1181,6 @@ class SharedViewModel(
 
     override fun onCleared() {
         Logger.w("Check onCleared", "onCleared")
-    }
-
-    fun getLocation() {
-        regionCode = runBlocking { dataStoreManager.location.first() }
-        language = runBlocking { dataStoreManager.getString(SELECTED_LANGUAGE).first() }
     }
 
     private fun checkAllDownloadingLocalPlaylists() {

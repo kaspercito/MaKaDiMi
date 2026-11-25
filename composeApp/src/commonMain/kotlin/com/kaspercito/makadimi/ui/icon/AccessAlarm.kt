@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.AccessAlarm: ImageVector
+val MaKaDiMiIcons.AccessAlarm: ImageVector
   get() {
     if (_AccessAlarm != null) {
       return _AccessAlarm!!

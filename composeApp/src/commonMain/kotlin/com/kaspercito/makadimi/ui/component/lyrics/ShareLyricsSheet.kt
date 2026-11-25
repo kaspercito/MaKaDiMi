@@ -57,7 +57,7 @@ import com.kaspercito.makadimi.ui.component.capture.rememberCaptureController
 import com.kaspercito.makadimi.ui.icon.Download
 import com.kaspercito.makadimi.ui.icon.KeyboardArrowDown
 import com.kaspercito.makadimi.ui.icon.Share
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.screen.player.content.applemusic.appleMusicVerticalFadeEdges
 import kotlinx.coroutines.launch
 import multiplatform.network.cmptoast.ToastGravity
@@ -263,7 +263,7 @@ internal fun ShareLyricsSheetHeader(
             contentAlignment = Alignment.Center,
         ) {
             Icon(
-                imageVector = SimpIcons.KeyboardArrowDown,
+                imageVector = MaKaDiMiIcons.KeyboardArrowDown,
                 contentDescription = null,
                 tint = content,
                 modifier = Modifier.size(26.dp),
@@ -428,7 +428,7 @@ private fun ShareLyricsPreview(
         Row(horizontalArrangement = Arrangement.spacedBy(12.dp)) {
             ShareLyricsPill(
                 text = stringResource(Res.string.share_lyrics_save),
-                icon = SimpIcons.Download,
+                icon = MaKaDiMiIcons.Download,
                 container = Color.Transparent,
                 label = content,
                 outlined = true,
@@ -436,7 +436,7 @@ private fun ShareLyricsPreview(
             )
             ShareLyricsPill(
                 text = stringResource(Res.string.share_lyrics_share_action),
-                icon = SimpIcons.Share,
+                icon = MaKaDiMiIcons.Share,
                 container = content,
                 label = onFilled,
                 onClick = onShare,

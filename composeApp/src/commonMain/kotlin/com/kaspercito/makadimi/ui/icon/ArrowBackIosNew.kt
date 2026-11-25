@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.ArrowBackIosNew: ImageVector
+val MaKaDiMiIcons.ArrowBackIosNew: ImageVector
   get() {
     if (_ArrowBackIosNew != null) {
       return _ArrowBackIosNew!!

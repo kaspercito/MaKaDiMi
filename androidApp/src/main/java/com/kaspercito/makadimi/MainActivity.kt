@@ -47,6 +47,7 @@ import com.kaspercito.makadimi.service.test.notification.NotifyWork
 import com.kaspercito.makadimi.utils.ComposeResUtils
 import com.kaspercito.makadimi.utils.VersionManager
 import com.kaspercito.makadimi.viewModel.SharedViewModel
+import com.kaspercito.makadimi.viewModel.deviceCountryNative
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import org.koin.android.ext.android.inject
@@ -214,7 +215,6 @@ class MainActivity : AppCompatActivity() {
                 }
             }
         }
-        viewModel.getLocation()
 
         if (!BuildConfig.DEBUG) viewModel.checkOfficialBuild(packageName, signingCertSha256())
         setContent {
@@ -281,7 +281,7 @@ class MainActivity : AppCompatActivity() {
         }
 
         if (getString(LOCATION_MANUAL) != STATUS_DONE) {
-            val region = SUPPORTED_LOCATION.fromCountry(systemLocale.country)
+            val region = SUPPORTED_LOCATION.fromCountry(deviceCountryNative(), systemLocale.country)
             if (getString("location") != region) {
                 putString("location", region)
             }

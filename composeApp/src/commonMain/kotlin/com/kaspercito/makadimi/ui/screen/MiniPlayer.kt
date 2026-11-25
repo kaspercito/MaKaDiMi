@@ -136,7 +136,7 @@ import com.kaspercito.makadimi.ui.icon.Headphones
 import com.kaspercito.makadimi.ui.icon.OpenInFull
 import com.kaspercito.makadimi.ui.icon.PictureInPictureAlt
 import com.kaspercito.makadimi.ui.icon.QueueMusic
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.icon.VolumeOff
 import com.kaspercito.makadimi.ui.icon.VolumeUp
 import com.kaspercito.makadimi.ui.screen.player.content.toAudioQualityLabel
@@ -789,7 +789,7 @@ fun MiniPlayer(
                                         contentAlignment = Alignment.Center,
                                     ) {
                                         Icon(
-                                            imageVector = SimpIcons.OpenInFull,
+                                            imageVector = MaKaDiMiIcons.OpenInFull,
                                             contentDescription = null,
                                             tint = Color.White,
                                             modifier = Modifier.size(14.dp),
@@ -912,7 +912,7 @@ fun MiniPlayer(
                                 verticalAlignment = Alignment.CenterVertically,
                             ) {
                                 Icon(
-                                    imageVector = SimpIcons.Headphones,
+                                    imageVector = MaKaDiMiIcons.Headphones,
                                     contentDescription = null,
                                     tint = textColor.copy(alpha = 0.45f),
                                     modifier = Modifier.size(13.dp),
@@ -988,7 +988,7 @@ fun MiniPlayer(
                         },
                     ) {
                         Icon(
-                            imageVector = SimpIcons.QueueMusic,
+                            imageVector = MaKaDiMiIcons.QueueMusic,
                             tint = textColor,
                             contentDescription = "",
                         )
@@ -997,7 +997,7 @@ fun MiniPlayer(
                     if (getPlatform() == Platform.Desktop) {
                         IconButton(onClick = { toggleMiniPlayer() }) {
                             Icon(
-                                imageVector = SimpIcons.PictureInPictureAlt,
+                                imageVector = MaKaDiMiIcons.PictureInPictureAlt,
                                 tint = textColor,
                                 contentDescription = "Mini Player",
                             )
@@ -1050,9 +1050,9 @@ fun MiniPlayer(
                             Icon(
                                 imageVector =
                                     if (controllerState.volume > 0f) {
-                                        SimpIcons.VolumeUp
+                                        MaKaDiMiIcons.VolumeUp
                                     } else {
-                                        SimpIcons.VolumeOff
+                                        MaKaDiMiIcons.VolumeOff
                                     },
                                 tint = textColor,
                                 contentDescription = if (controllerState.volume > 0f) "Mute" else "Unmute",
@@ -1176,9 +1176,9 @@ fun MiniPlayer(
                                     Icon(
                                         imageVector =
                                             if (controllerState.volume > 0f) {
-                                                SimpIcons.VolumeUp
+                                                MaKaDiMiIcons.VolumeUp
                                             } else {
-                                                SimpIcons.VolumeOff
+                                                MaKaDiMiIcons.VolumeOff
                                             },
                                         tint = textColor.copy(alpha = 0.7f),
                                         contentDescription = null,
@@ -1189,7 +1189,7 @@ fun MiniPlayer(
                         }
                     }
                     IconButton(onClick = { onClose() }) {
-                        Icon(SimpIcons.Close, "", tint = textColor)
+                        Icon(MaKaDiMiIcons.Close, "", tint = textColor)
                     }
                 }
             }

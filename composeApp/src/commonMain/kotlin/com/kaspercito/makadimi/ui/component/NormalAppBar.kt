@@ -15,7 +15,7 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.tooling.preview.Preview
 import com.kaspercito.makadimi.ui.icon.ArrowBackIosNew
 import com.kaspercito.makadimi.ui.icon.MoreVert
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import org.jetbrains.compose.resources.painterResource
 import makadimi.composeapp.generated.resources.Res
 
@@ -57,7 +57,7 @@ fun NormalAppBarPreview() {
         leftIcon = {
             IconButton(onClick = { }) {
                 Icon(
-                    SimpIcons.ArrowBackIosNew,
+                    MaKaDiMiIcons.ArrowBackIosNew,
                     contentDescription = "Back",
                 )
             }
@@ -65,7 +65,7 @@ fun NormalAppBarPreview() {
         rightIcon = {
             IconButton(onClick = { }) {
                 Icon(
-                    SimpIcons.MoreVert,
+                    MaKaDiMiIcons.MoreVert,
                     contentDescription = "Back",
                 )
             }

@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.History: ImageVector
+val MaKaDiMiIcons.History: ImageVector
   get() {
     if (_History != null) {
       return _History!!

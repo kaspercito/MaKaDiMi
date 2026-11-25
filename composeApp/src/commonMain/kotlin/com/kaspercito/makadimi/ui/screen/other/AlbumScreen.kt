@@ -104,7 +104,7 @@ import com.kaspercito.makadimi.ui.icon.MoreVert
 import com.kaspercito.makadimi.ui.icon.Pause
 import com.kaspercito.makadimi.ui.icon.PlayArrow
 import com.kaspercito.makadimi.ui.icon.Shuffle
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.navigation.destination.list.AlbumDestination
 import com.kaspercito.makadimi.ui.navigation.destination.list.ArtistDestination
 import com.kaspercito.makadimi.ui.theme.seed
@@ -346,7 +346,7 @@ fun AlbumScreen(
                                             // Back button — liquid glass effect (Kyant backdrop)
                                             LiquidGlassIconButton(
                                                 backdrop = artworkBackdrop,
-                                                imageVector = SimpIcons.ArrowBackIosNew,
+                                                imageVector = MaKaDiMiIcons.ArrowBackIosNew,
                                                 modifier =
                                                     Modifier
                                                         .align(Alignment.TopStart)
@@ -383,7 +383,7 @@ fun AlbumScreen(
                                                     onClick = { albumBottomSheetShow = true },
                                                 ) {
                                                     Icon(
-                                                        imageVector = SimpIcons.MoreVert,
+                                                        imageVector = MaKaDiMiIcons.MoreVert,
                                                         contentDescription = "More",
                                                         tint = Color.White,
                                                     )
@@ -502,7 +502,7 @@ fun AlbumScreen(
                                                                 contentAlignment = Alignment.Center,
                                                             ) {
                                                                 Icon(
-                                                                    imageVector = SimpIcons.Shuffle,
+                                                                    imageVector = MaKaDiMiIcons.Shuffle,
                                                                     contentDescription = "Shuffle",
                                                                     tint = Color.White,
                                                                     modifier = Modifier.size(22.dp),
@@ -529,7 +529,7 @@ fun AlbumScreen(
                                                                 Row(verticalAlignment = Alignment.CenterVertically) {
                                                                     Icon(
                                                                         imageVector =
-                                                                            if (isThisPlaying) SimpIcons.Pause else SimpIcons.PlayArrow,
+                                                                            if (isThisPlaying) MaKaDiMiIcons.Pause else MaKaDiMiIcons.PlayArrow,
                                                                         contentDescription = null,
                                                                         tint = Color.Black,
                                                                         modifier = Modifier.size(22.dp),
@@ -604,7 +604,7 @@ fun AlbumScreen(
                                                                                 contentAlignment = Alignment.Center,
                                                                             ) {
                                                                                 Icon(
-                                                                                    imageVector = SimpIcons.DownloadForOffline,
+                                                                                    imageVector = MaKaDiMiIcons.DownloadForOffline,
                                                                                     tint = Color.White,
                                                                                     contentDescription = "Download",
                                                                                     modifier = Modifier.size(22.dp),
@@ -622,7 +622,7 @@ fun AlbumScreen(
                                             Box(Modifier.padding(start = 12.dp)) {
                                                 LiquidGlassIconButton(
                                                     backdrop = headerBackdrop,
-                                                    imageVector = SimpIcons.ArrowBackIosNew,
+                                                    imageVector = MaKaDiMiIcons.ArrowBackIosNew,
                                                     shape = LeafShape,
                                                     // Same directional style as the like/⋯ pill, a touch thicker. The default
                                                     // width of 0.5.dp becomes a ~2px stroke (HighlightModifier: ceil(width.toPx()) * 2),
@@ -665,7 +665,7 @@ fun AlbumScreen(
                                                     onClick = { albumBottomSheetShow = true },
                                                 ) {
                                                     Icon(
-                                                        imageVector = SimpIcons.MoreVert,
+                                                        imageVector = MaKaDiMiIcons.MoreVert,
                                                         contentDescription = "More",
                                                         tint = Color.White,
                                                     )
@@ -706,7 +706,7 @@ fun AlbumScreen(
                                                         contentAlignment = Alignment.Center,
                                                     ) {
                                                         Icon(
-                                                            imageVector = SimpIcons.Shuffle,
+                                                            imageVector = MaKaDiMiIcons.Shuffle,
                                                             contentDescription = "Shuffle",
                                                             tint = Color.White,
                                                             modifier = Modifier.size(22.dp),
@@ -733,7 +733,7 @@ fun AlbumScreen(
                                                         Row(verticalAlignment = Alignment.CenterVertically) {
                                                             Icon(
                                                                 imageVector =
-                                                                    if (isThisPlaying) SimpIcons.Pause else SimpIcons.PlayArrow,
+                                                                    if (isThisPlaying) MaKaDiMiIcons.Pause else MaKaDiMiIcons.PlayArrow,
                                                                 contentDescription = null,
                                                                 tint = Color.Black,
                                                                 modifier = Modifier.size(22.dp),
@@ -808,7 +808,7 @@ fun AlbumScreen(
                                                                         contentAlignment = Alignment.Center,
                                                                     ) {
                                                                         Icon(
-                                                                            imageVector = SimpIcons.DownloadForOffline,
+                                                                            imageVector = MaKaDiMiIcons.DownloadForOffline,
                                                                             tint = Color.White,
                                                                             contentDescription = "Download",
                                                                             modifier = Modifier.size(22.dp),
@@ -956,7 +956,7 @@ fun AlbumScreen(
                         navigationIcon = {
                             Box(Modifier.padding(horizontal = 5.dp)) {
                                 RippleIconButton(
-                                    SimpIcons.ArrowBackIosNew,
+                                    MaKaDiMiIcons.ArrowBackIosNew,
                                     Modifier
                                         .size(32.dp),
                                     true,

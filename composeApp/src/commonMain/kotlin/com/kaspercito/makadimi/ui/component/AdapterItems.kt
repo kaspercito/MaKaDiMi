@@ -112,7 +112,7 @@ import com.kaspercito.makadimi.ui.navigation.destination.list.BrowseDestination
 import com.kaspercito.makadimi.ui.navigation.destination.list.PlaylistDestination
 import com.kaspercito.makadimi.ui.navigation.destination.list.PodcastDestination
 import com.kaspercito.makadimi.ui.icon.PlayArrow
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.theme.LocalForceDarkText
 import com.kaspercito.makadimi.ui.theme.typo
 import com.kaspercito.makadimi.viewModel.HomeViewModel
@@ -435,7 +435,7 @@ internal fun BoxScope.HoverPlayButton(
         contentAlignment = Alignment.Center,
     ) {
         Icon(
-            imageVector = SimpIcons.PlayArrow,
+            imageVector = MaKaDiMiIcons.PlayArrow,
             contentDescription = null,
             tint = MaterialTheme.colorScheme.onPrimary,
             modifier = Modifier.size(24.dp),

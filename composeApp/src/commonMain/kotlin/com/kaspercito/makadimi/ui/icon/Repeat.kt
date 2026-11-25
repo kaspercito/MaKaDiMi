@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.Repeat: ImageVector
+val MaKaDiMiIcons.Repeat: ImageVector
   get() {
     if (_Repeat != null) {
       return _Repeat!!

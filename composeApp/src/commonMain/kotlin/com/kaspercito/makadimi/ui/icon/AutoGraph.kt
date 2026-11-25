@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.AutoGraph: ImageVector
+val MaKaDiMiIcons.AutoGraph: ImageVector
   get() {
     if (_AutoGraph != null) {
       return _AutoGraph!!

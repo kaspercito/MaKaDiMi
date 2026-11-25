@@ -26,7 +26,7 @@ import com.kaspercito.common.VIDEO_QUALITY
 import com.kaspercito.domain.manager.DataStoreManager
 import com.kaspercito.domain.mediaservice.handler.MediaPlayerHandler
 import com.kaspercito.makadimi.ui.icon.Check
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.icon.Tune
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
@@ -82,7 +82,7 @@ fun VideoQualityButton(
             },
         ) {
             Icon(
-                imageVector = SimpIcons.Tune,
+                imageVector = MaKaDiMiIcons.Tune,
                 contentDescription = stringResource(Res.string.quick_video_quality),
                 tint = tint,
                 modifier = Modifier.size(iconSize),
@@ -116,7 +116,7 @@ fun VideoQualityButton(
                     leadingIcon = {
                         if (selected) {
                             Icon(
-                                imageVector = SimpIcons.Check,
+                                imageVector = MaKaDiMiIcons.Check,
                                 contentDescription = null,
                                 tint = MaterialTheme.colorScheme.primary,
                                 modifier = Modifier.size(20.dp),

@@ -37,6 +37,9 @@ actual suspend fun downloadAndInstallUpdate(
         }
 
         val apk = withContext(Dispatchers.IO) { downloadApk(context.cacheDir, url, fileName, onProgress) }
+        @Suppress("DEPRECATION")
+        val downloadedPackage = context.packageManager.getPackageArchiveInfo(apk.path, 0)
+        check(downloadedPackage?.packageName == context.packageName)
         val uri = FileProvider.getUriForFile(context, "${context.packageName}.FileProvider", apk)
         val install =
             Intent(Intent.ACTION_VIEW)

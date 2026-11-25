@@ -127,7 +127,7 @@ import com.kaspercito.makadimi.ui.icon.Pause
 import com.kaspercito.makadimi.ui.icon.PlayArrow
 import com.kaspercito.makadimi.ui.icon.Search
 import com.kaspercito.makadimi.ui.icon.Shuffle
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.navigation.destination.list.ArtistDestination
 import com.kaspercito.makadimi.ui.theme.LocalIsDarkTheme
 import com.kaspercito.makadimi.ui.theme.seed
@@ -509,7 +509,7 @@ fun PlaylistScreen(
                                                 ) {
                                                     LiquidGlassIconButton(
                                                         backdrop = artworkBackdrop,
-                                                        imageVector = SimpIcons.ArrowBackIosNew,
+                                                        imageVector = MaKaDiMiIcons.ArrowBackIosNew,
                                                         modifier =
                                                             Modifier
                                                                 .size(48.dp),
@@ -543,13 +543,13 @@ fun PlaylistScreen(
                                                                 showSearchBar = !showSearchBar
                                                             },
                                                         ) {
-                                                            Icon(SimpIcons.Search, null, tint = Color.White)
+                                                            Icon(MaKaDiMiIcons.Search, null, tint = Color.White)
                                                         }
                                                         IconButton(
                                                             onClick = onPlaylistMoreClick,
                                                         ) {
                                                             Icon(
-                                                                imageVector = SimpIcons.MoreVert,
+                                                                imageVector = MaKaDiMiIcons.MoreVert,
                                                                 contentDescription = "More",
                                                                 tint = Color.White,
                                                             )
@@ -671,7 +671,7 @@ fun PlaylistScreen(
                                                                         contentAlignment = Alignment.Center,
                                                                     ) {
                                                                         Icon(
-                                                                            imageVector = SimpIcons.Shuffle,
+                                                                            imageVector = MaKaDiMiIcons.Shuffle,
                                                                             contentDescription = "Shuffle",
                                                                             tint = Color.White,
                                                                             modifier = Modifier.size(22.dp),
@@ -697,7 +697,7 @@ fun PlaylistScreen(
                                                                     Row(verticalAlignment = Alignment.CenterVertically) {
                                                                         Icon(
                                                                             imageVector =
-                                                                                if (isThisPlaying) SimpIcons.Pause else SimpIcons.PlayArrow,
+                                                                                if (isThisPlaying) MaKaDiMiIcons.Pause else MaKaDiMiIcons.PlayArrow,
                                                                             contentDescription = null,
                                                                             tint = Color.Black,
                                                                             modifier = Modifier.size(22.dp),
@@ -775,7 +775,7 @@ fun PlaylistScreen(
                                                                                         contentAlignment = Alignment.Center,
                                                                                     ) {
                                                                                         Icon(
-                                                                                            imageVector = SimpIcons.DownloadForOffline,
+                                                                                            imageVector = MaKaDiMiIcons.DownloadForOffline,
                                                                                             tint = Color.White,
                                                                                             contentDescription = "Download",
                                                                                             modifier = Modifier.size(22.dp),
@@ -794,7 +794,7 @@ fun PlaylistScreen(
                                                 Box(Modifier.padding(start = 12.dp)) {
                                                     LiquidGlassIconButton(
                                                         backdrop = headerBackdrop,
-                                                        imageVector = SimpIcons.ArrowBackIosNew,
+                                                        imageVector = MaKaDiMiIcons.ArrowBackIosNew,
                                                         shape = LeafShape,
                                                         // Same directional style as the like/⋯ pill, a touch thicker. The default
                                                         // width of 0.5.dp becomes a ~2px stroke (HighlightModifier: ceil(width.toPx()) * 2),
@@ -840,13 +840,13 @@ fun PlaylistScreen(
                                                             showSearchBar = !showSearchBar
                                                         },
                                                     ) {
-                                                        Icon(SimpIcons.Search, null, tint = Color.White)
+                                                        Icon(MaKaDiMiIcons.Search, null, tint = Color.White)
                                                     }
                                                     IconButton(
                                                         onClick = onPlaylistMoreClick,
                                                     ) {
                                                         Icon(
-                                                            imageVector = SimpIcons.MoreVert,
+                                                            imageVector = MaKaDiMiIcons.MoreVert,
                                                             contentDescription = "More",
                                                             tint = Color.White,
                                                         )
@@ -886,7 +886,7 @@ fun PlaylistScreen(
                                                                 contentAlignment = Alignment.Center,
                                                             ) {
                                                                 Icon(
-                                                                    imageVector = SimpIcons.Shuffle,
+                                                                    imageVector = MaKaDiMiIcons.Shuffle,
                                                                     contentDescription = "Shuffle",
                                                                     tint = Color.White,
                                                                     modifier = Modifier.size(22.dp),
@@ -912,7 +912,7 @@ fun PlaylistScreen(
                                                             Row(verticalAlignment = Alignment.CenterVertically) {
                                                                 Icon(
                                                                     imageVector =
-                                                                        if (isThisPlaying) SimpIcons.Pause else SimpIcons.PlayArrow,
+                                                                        if (isThisPlaying) MaKaDiMiIcons.Pause else MaKaDiMiIcons.PlayArrow,
                                                                     contentDescription = null,
                                                                     tint = Color.Black,
                                                                     modifier = Modifier.size(22.dp),
@@ -990,7 +990,7 @@ fun PlaylistScreen(
                                                                                 contentAlignment = Alignment.Center,
                                                                             ) {
                                                                                 Icon(
-                                                                                    imageVector = SimpIcons.DownloadForOffline,
+                                                                                    imageVector = MaKaDiMiIcons.DownloadForOffline,
                                                                                     tint = Color.White,
                                                                                     contentDescription = "Download",
                                                                                     modifier = Modifier.size(22.dp),
@@ -1179,7 +1179,7 @@ fun PlaylistScreen(
                             verticalAlignment = Alignment.CenterVertically,
                         ) {
                             RippleIconButton(
-                                imageVector = SimpIcons.ArrowBackIosNew,
+                                imageVector = MaKaDiMiIcons.ArrowBackIosNew,
                             ) {
                                 navController.navigateUp()
                             }
@@ -1220,7 +1220,7 @@ fun PlaylistScreen(
                                     showSearchBar = !showSearchBar
                                 },
                             ) {
-                                Icon(SimpIcons.Close, null, tint = Color.White)
+                                Icon(MaKaDiMiIcons.Close, null, tint = Color.White)
                             }
                         }
                     }
@@ -1345,7 +1345,7 @@ fun PlaylistScreen(
                         navigationIcon = {
                             Box(Modifier.padding(horizontal = 5.dp)) {
                                 RippleIconButton(
-                                    SimpIcons.ArrowBackIosNew,
+                                    MaKaDiMiIcons.ArrowBackIosNew,
                                     Modifier
                                         .size(32.dp),
                                     true,
@@ -1360,7 +1360,7 @@ fun PlaylistScreen(
                                     showSearchBar = !showSearchBar
                                 },
                             ) {
-                                Icon(SimpIcons.Search, null, tint = Color.White)
+                                Icon(MaKaDiMiIcons.Search, null, tint = Color.White)
                             }
                         },
                         colors =

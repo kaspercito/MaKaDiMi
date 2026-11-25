@@ -359,15 +359,11 @@ actual fun systemLocaleNative(): SystemLocale {
     )
 }
 
-actual fun deviceCountryNative(): String? =
-    runCatching {
-        val telephony =
-            getKoin().get<Context>().getSystemService(Context.TELEPHONY_SERVICE) as? android.telephony.TelephonyManager
-        // La red a la que estás conectado dice dónde estás; la SIM, de dónde es tu línea. No necesitan permisos.
-        listOf(telephony?.networkCountryIso, telephony?.simCountryIso)
-            .firstOrNull { !it.isNullOrBlank() }
-            ?.uppercase()
-    }.getOrNull()
+actual fun deviceCountryNative(): String? {
+    val telephony = getKoin().get<Context>().getSystemService(android.telephony.TelephonyManager::class.java) ?: return null
+    return runCatching { telephony.networkCountryIso }.getOrNull()?.takeIf { it.isNotBlank() }
+        ?: runCatching { telephony.simCountryIso }.getOrNull()?.takeIf { it.isNotBlank() }
+}
 
 actual fun clearLanguageOverrideNative() {
     try {

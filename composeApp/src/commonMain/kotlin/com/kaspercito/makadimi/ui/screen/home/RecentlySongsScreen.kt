@@ -50,7 +50,7 @@ import com.kaspercito.makadimi.ui.component.selection.SelectedSongsBottomSheet
 import com.kaspercito.makadimi.ui.component.selection.SongSelectionTopAppBar
 import com.kaspercito.makadimi.ui.component.selection.rememberSongSelectionState
 import com.kaspercito.makadimi.ui.icon.ArrowBackIosNew
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.navigation.destination.list.AlbumDestination
 import com.kaspercito.makadimi.ui.navigation.destination.list.ArtistDestination
 import com.kaspercito.makadimi.ui.navigation.destination.list.PlaylistDestination
@@ -273,7 +273,7 @@ fun RecentlySongsScreen(
             navigationIcon = {
                 Box(Modifier.padding(horizontal = 5.dp)) {
                     RippleIconButton(
-                        SimpIcons.ArrowBackIosNew,
+                        MaKaDiMiIcons.ArrowBackIosNew,
                         Modifier.size(32.dp),
                         true,
                         tint = MaterialTheme.colorScheme.onSurface,

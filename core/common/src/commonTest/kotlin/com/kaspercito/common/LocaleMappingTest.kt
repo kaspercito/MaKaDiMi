@@ -31,7 +31,9 @@ class LocaleMappingTest {
     }
 
     @Test
-    fun supportedCountryIsKeptAndUnknownBecomesUs() {
+    fun selectsTheFirstSupportedRegionAndFallsBackToEcuador() {
+        assertEquals("CO", SUPPORTED_LOCATION.fromCountry(" co ", "EC"))
+        assertEquals("MX", SUPPORTED_LOCATION.fromCountry(null, "XX", "mx"))
         assertEquals("EC", SUPPORTED_LOCATION.fromCountry("EC"))
         assertEquals("EC", SUPPORTED_LOCATION.fromCountry("ec"))
         assertEquals("EC", SUPPORTED_LOCATION.fromCountry("XX"))

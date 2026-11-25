@@ -56,7 +56,7 @@ import com.kaspercito.makadimi.ui.component.EndOfPage
 import com.kaspercito.makadimi.ui.component.LiquidGlassIconButton
 import com.kaspercito.makadimi.ui.icon.ArrowBackIosNew
 import com.kaspercito.makadimi.ui.icon.Check
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.theme.typo
 import com.kaspercito.makadimi.viewModel.ListenTogetherSettingsViewModel
 import org.jetbrains.compose.resources.stringResource
@@ -288,7 +288,7 @@ fun ListenTogetherSettingsScreen(
         // the backdrop source, exactly the arrangement the main Listen Together page uses.
         LiquidGlassIconButton(
             backdrop = backdrop,
-            imageVector = SimpIcons.ArrowBackIosNew,
+            imageVector = MaKaDiMiIcons.ArrowBackIosNew,
             tint = MaterialTheme.colorScheme.onSurface,
             shape = LeafShape,
             modifier =
@@ -351,7 +351,7 @@ private fun ServerOption(
             contentAlignment = Alignment.Center,
         ) {
             if (selected) {
-                Icon(SimpIcons.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
+                Icon(MaKaDiMiIcons.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary, modifier = Modifier.size(16.dp))
             }
         }
         Column(Modifier.weight(1f)) {

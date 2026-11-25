@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.FastRewind: ImageVector
+val MaKaDiMiIcons.FastRewind: ImageVector
   get() {
     if (_FastRewind != null) {
       return _FastRewind!!

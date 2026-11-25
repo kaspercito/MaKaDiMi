@@ -132,7 +132,7 @@ import com.kaspercito.makadimi.ui.icon.MovieOff
 import com.kaspercito.makadimi.ui.icon.PersonAdd
 import com.kaspercito.makadimi.ui.icon.Sensors
 import com.kaspercito.makadimi.ui.icon.Shuffle
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.navigation.destination.library.LibraryDynamicPlaylistDestination
 import com.kaspercito.makadimi.ui.navigation.destination.list.AlbumDestination
 import com.kaspercito.makadimi.ui.navigation.destination.list.ArtistDestination
@@ -523,7 +523,7 @@ fun ArtistScreen(
                                     // Back button — liquid glass, sibling of the backdrop source.
                                     LiquidGlassIconButton(
                                         backdrop = artworkBackdrop,
-                                        imageVector = SimpIcons.ArrowBackIosNew,
+                                        imageVector = MaKaDiMiIcons.ArrowBackIosNew,
                                         shape = LeafShape,
                                         // Matching the other three headers: the pill-style directional rim, thickened
                                         // from the 0.5.dp default so it stays visible around a 48dp circle.
@@ -553,7 +553,7 @@ fun ArtistScreen(
                                         if (artistMotion != null) {
                                             IconButton(onClick = { showHeaderVideo = !showHeaderVideo }) {
                                                 Icon(
-                                                    imageVector = if (showHeaderVideo) SimpIcons.MovieOff else SimpIcons.Movie,
+                                                    imageVector = if (showHeaderVideo) MaKaDiMiIcons.MovieOff else MaKaDiMiIcons.Movie,
                                                     contentDescription = null,
                                                     tint = Color.White,
                                                 )
@@ -562,7 +562,7 @@ fun ArtistScreen(
                                         IconButton(
                                             onClick = { shareUrl(shareTitle, "https://music.youtube.com/channel/$channelId") },
                                         ) {
-                                            Icon(SimpIcons.IosShare, contentDescription = shareTitle, tint = Color.White)
+                                            Icon(MaKaDiMiIcons.IosShare, contentDescription = shareTitle, tint = Color.White)
                                         }
                                     }
                                 }
@@ -597,7 +597,7 @@ fun ArtistScreen(
                                         contentAlignment = Alignment.Center,
                                     ) {
                                         Icon(
-                                            imageVector = SimpIcons.Sensors,
+                                            imageVector = MaKaDiMiIcons.Sensors,
                                             contentDescription = "Radio",
                                             tint = artistAccent,
                                             modifier = Modifier.size(22.dp),
@@ -623,7 +623,7 @@ fun ArtistScreen(
                                         contentAlignment = Alignment.Center,
                                     ) {
                                         Icon(
-                                            imageVector = SimpIcons.Shuffle,
+                                            imageVector = MaKaDiMiIcons.Shuffle,
                                             contentDescription = "Shuffle",
                                             tint = mutedPaletteBg,
                                             modifier = Modifier.size(28.dp),
@@ -648,7 +648,7 @@ fun ArtistScreen(
                                         contentAlignment = Alignment.Center,
                                     ) {
                                         Icon(
-                                            imageVector = if (isFollowed) SimpIcons.Check else SimpIcons.PersonAdd,
+                                            imageVector = if (isFollowed) MaKaDiMiIcons.Check else MaKaDiMiIcons.PersonAdd,
                                             contentDescription = if (isFollowed) "Followed" else "Follow",
                                             tint = if (isFollowed) mutedPaletteBg else artistAccent,
                                             modifier = Modifier.size(22.dp),
@@ -701,7 +701,7 @@ fun ArtistScreen(
                                 Box(Modifier.padding(horizontal = 5.dp)) {
                                     IconButton(onClick = { navController.navigateUp() }) {
                                         Icon(
-                                            imageVector = SimpIcons.ArrowBackIosNew,
+                                            imageVector = MaKaDiMiIcons.ArrowBackIosNew,
                                             contentDescription = "Back",
                                             tint = Color.White,
                                             modifier = Modifier.size(20.dp),

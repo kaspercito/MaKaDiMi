@@ -10,7 +10,7 @@ import androidx.compose.ui.graphics.vector.path
 import androidx.compose.ui.unit.dp
 
 @Suppress("CheckReturnValue")
-val SimpIcons.CalendarToday: ImageVector
+val MaKaDiMiIcons.CalendarToday: ImageVector
   get() {
     if (_CalendarToday != null) {
       return _CalendarToday!!

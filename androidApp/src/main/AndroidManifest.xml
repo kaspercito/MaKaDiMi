@@ -180,11 +180,12 @@
                 <category android:name="android.intent.category.DEFAULT" />
                 <category android:name="android.intent.category.BROWSABLE" />
 
+                <data android:scheme="makadimi" />
                 <data android:scheme="simpmusic" />
             </intent-filter>
 
             <!-- Last.fm auth callback. The scheme is fixed by the callback URL registered on the
-                 Last.fm API account, so it is not "simpmusic". -->
+                 Last.fm API account, so it is not "makadimi". -->
             <intent-filter>
                 <action android:name="android.intent.action.VIEW" />
 

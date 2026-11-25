@@ -60,11 +60,10 @@ import com.kaspercito.domain.data.type.ChartItem
 import com.kaspercito.domain.data.type.MonthlyRecapItem
 import com.kaspercito.domain.data.type.PlaylistType
 import com.kaspercito.domain.utils.LocalResource
-import com.kaspercito.logger.Logger
 import com.kaspercito.makadimi.extension.angledGradientBackground
 import com.kaspercito.makadimi.extension.isScrollingUp
 import com.kaspercito.makadimi.ui.icon.Add
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.navigation.destination.list.AlbumDestination
 import com.kaspercito.makadimi.ui.navigation.destination.list.LocalPlaylistDestination
 import com.kaspercito.makadimi.ui.navigation.destination.list.PlaylistDestination
@@ -144,7 +143,6 @@ internal inline fun <reified T> GridLibraryPlaylist(
     noinline createNewPlaylist: (() -> Unit)? = null,
     noinline onReload: () -> Unit,
 ) {
-    Logger.w("GridLibraryPlaylist", "Generic Type: ${T::class.simpleName}")
     val isScrollingUp by state.isScrollingUp()
 
     LaunchedEffect(state) {
@@ -183,7 +181,7 @@ internal inline fun <reified T> GridLibraryPlaylist(
             val fullList = (data as? LocalResource.Success)?.data ?: emptyList()
             var query by rememberSaveable { mutableStateOf("") }
             var sortAz by rememberSaveable { mutableStateOf(false) }
-            val searchable = fullList.size >= LIBRARY_SEARCH_MIN_ITEMS
+            val searchable = fullList.size >= LIBRARY_SEARCH_MIN_ITEMS || T::class == LocalPlaylistEntity::class && fullList.isNotEmpty()
             val list =
                 remember(fullList, query, sortAz) {
                     var result: List<T> = fullList
@@ -257,7 +255,7 @@ internal inline fun <reified T> GridLibraryPlaylist(
                                     ) {
                                         Icon(
                                             modifier = Modifier.size(84.dp),
-                                            imageVector = SimpIcons.Add,
+                                            imageVector = MaKaDiMiIcons.Add,
                                             tint = Color.White,
                                             contentDescription = null,
                                         )
@@ -284,7 +282,10 @@ internal inline fun <reified T> GridLibraryPlaylist(
                             }
                         }
                     }
-                    items(list) { item ->
+                    val playlistKey: ((T) -> Any)? = if (T::class == LocalPlaylistEntity::class) {
+                        { item -> (item as LocalPlaylistEntity).id }
+                    } else null
+                    items(list, key = playlistKey) { item ->
                         if (item !is PlaylistType) {
                             return@items
                         }

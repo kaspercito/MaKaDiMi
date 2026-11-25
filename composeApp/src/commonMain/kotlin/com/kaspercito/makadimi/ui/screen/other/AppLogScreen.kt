@@ -78,7 +78,7 @@ import com.kaspercito.makadimi.ui.icon.PlayArrow
 import com.kaspercito.makadimi.ui.icon.RestartAlt
 import com.kaspercito.makadimi.ui.icon.Search
 import com.kaspercito.makadimi.ui.icon.Share
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.icon.UnfoldLess
 import com.kaspercito.makadimi.ui.icon.UnfoldMore
 import com.kaspercito.makadimi.ui.theme.LocalIsDarkTheme
@@ -239,7 +239,7 @@ fun AppLogScreen(
                 navigationIcon = {
                     Box(Modifier.padding(horizontal = 5.dp)) {
                         RippleIconButton(
-                            SimpIcons.ArrowBackIosNew,
+                            MaKaDiMiIcons.ArrowBackIosNew,
                             Modifier.size(32.dp),
                             true,
                             tint = onSurface,
@@ -250,14 +250,14 @@ fun AppLogScreen(
                 },
                 actions = {
                     // Android Studio's Logcat toolbar, in its order: clear, pause, restart, stick.
-                    RippleIconButton(SimpIcons.Delete, tint = onSurface) {
+                    RippleIconButton(MaKaDiMiIcons.Delete, tint = onSurface) {
                         clearedAt = nowEpochMillis()
                         LogClear.set(clearedAt)
                     }
-                    RippleIconButton(if (paused) SimpIcons.PlayArrow else SimpIcons.Pause, tint = onSurface) {
+                    RippleIconButton(if (paused) MaKaDiMiIcons.PlayArrow else MaKaDiMiIcons.Pause, tint = onSurface) {
                         paused = !paused
                     }
-                    RippleIconButton(SimpIcons.RestartAlt, tint = onSurface) {
+                    RippleIconButton(MaKaDiMiIcons.RestartAlt, tint = onSurface) {
                         paused = false
                         stickToBottom = true
                         restarts++
@@ -270,13 +270,13 @@ fun AppLogScreen(
                             ),
                     ) {
                         RippleIconButton(
-                            SimpIcons.KeyboardDoubleArrowDown,
+                            MaKaDiMiIcons.KeyboardDoubleArrowDown,
                             tint = if (stickToBottom) MaterialTheme.colorScheme.primary else onSurface,
                         ) {
                             stickToBottom = !stickToBottom
                         }
                     }
-                    RippleIconButton(if (isDesktop) SimpIcons.Download else SimpIcons.Share, tint = onSurface) {
+                    RippleIconButton(if (isDesktop) MaKaDiMiIcons.Download else MaKaDiMiIcons.Share, tint = onSurface) {
                         scope.launch {
                             if (!exportLog(shareTitle)) showToast(exportFailed, ToastGravity.Bottom)
                         }
@@ -439,12 +439,12 @@ private fun LogSearchField(
         shape = LeafShapeSmall,
         textStyle = typo().labelMedium.copy(color = MaterialTheme.colorScheme.onSurface),
         placeholder = { Text(stringResource(Res.string.log_search_hint), style = typo().labelMedium) },
-        leadingIcon = { Icon(SimpIcons.Search, contentDescription = null) },
+        leadingIcon = { Icon(MaKaDiMiIcons.Search, contentDescription = null) },
         trailingIcon =
             if (query.isNotEmpty()) {
                 {
                     IconButton(onClick = { onQueryChange("") }) {
-                        Icon(SimpIcons.Close, contentDescription = null)
+                        Icon(MaKaDiMiIcons.Close, contentDescription = null)
                     }
                 }
             } else {
@@ -619,7 +619,7 @@ private fun ErrorCard(
             .padding(start = 16.dp, end = 4.dp, top = 4.dp, bottom = 14.dp),
     ) {
         Row(verticalAlignment = Alignment.CenterVertically) {
-            Icon(SimpIcons.Error, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(18.dp))
+            Icon(MaKaDiMiIcons.Error, contentDescription = null, tint = MaterialTheme.colorScheme.error, modifier = Modifier.size(18.dp))
             Spacer(Modifier.width(8.dp))
             Text(
                 line.tag,
@@ -630,7 +630,7 @@ private fun ErrorCard(
                 modifier = Modifier.weight(1f),
             )
             Text(clockTime(line.epochMillis), fontFamily = mono, fontSize = 11.sp, color = onSurfaceVariant)
-            RippleIconButton(SimpIcons.ContentCopy, tint = onSurfaceVariant, onClick = onCopy)
+            RippleIconButton(MaKaDiMiIcons.ContentCopy, tint = onSurfaceVariant, onClick = onCopy)
         }
         Text(
             line.message,
@@ -671,7 +671,7 @@ private fun ErrorCard(
             }
             Row(Modifier.padding(top = 10.dp), verticalAlignment = Alignment.CenterVertically) {
                 Icon(
-                    if (expanded) SimpIcons.UnfoldLess else SimpIcons.UnfoldMore,
+                    if (expanded) MaKaDiMiIcons.UnfoldLess else MaKaDiMiIcons.UnfoldMore,
                     contentDescription = null,
                     tint = MaterialTheme.colorScheme.primary,
                     modifier = Modifier.size(20.dp),

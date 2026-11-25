@@ -72,7 +72,7 @@ import com.kaspercito.makadimi.ui.component.NowPlayingBottomSheet
 import com.kaspercito.makadimi.ui.component.RippleIconButton
 import com.kaspercito.makadimi.ui.component.homeCardAspectRatio
 import com.kaspercito.makadimi.ui.icon.ArrowBackIosNew
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 import com.kaspercito.makadimi.ui.navigation.destination.home.MoodDestination
 import com.kaspercito.makadimi.ui.theme.desktopPanelDark
 import com.kaspercito.makadimi.ui.theme.typo
@@ -323,7 +323,7 @@ fun BrowseScreen(
                     navigationIcon = {
                         Box(Modifier.padding(horizontal = 5.dp)) {
                             RippleIconButton(
-                                SimpIcons.ArrowBackIosNew,
+                                MaKaDiMiIcons.ArrowBackIosNew,
                                 Modifier
                                     .size(32.dp),
                                 true,

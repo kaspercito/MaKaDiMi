@@ -11,7 +11,7 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 import com.kaspercito.makadimi.ui.icon.Pause
 import com.kaspercito.makadimi.ui.icon.PlayArrow
-import com.kaspercito.makadimi.ui.icon.SimpIcons
+import com.kaspercito.makadimi.ui.icon.MaKaDiMiIcons
 
 @Composable
 fun RippleIconButton(
@@ -43,9 +43,9 @@ fun PlayPauseButton(
 ) {
     RippleIconButton(
         if (!isPlaying) {
-            SimpIcons.PlayArrow
+            MaKaDiMiIcons.PlayArrow
         } else {
-            SimpIcons.Pause
+            MaKaDiMiIcons.Pause
         },
         modifier = modifier,
         tint = tint,
