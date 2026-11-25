@@ -1324,7 +1324,7 @@ private fun QueueItemActions(
     }
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class, androidx.compose.foundation.layout.ExperimentalLayoutApi::class)
 @Composable
 fun NowPlayingBottomSheet(
     onDismiss: () -> Unit,
@@ -1663,12 +1663,11 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                         thickness = 1.dp,
                     )
                     Spacer(modifier = Modifier.height(2.dp))
-                    Row(
-                        modifier =
-                            Modifier
-                                .fillMaxWidth()
-                                .padding(horizontal = 16.dp, vertical = 12.dp),
+                    androidx.compose.foundation.layout.FlowRow(
+                        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp),
+                        maxItemsInEachRow = if (com.kaspercito.makadimi.extension.getScreenSizeInfo().wDP / LocalDensity.current.fontScale < 500) 2 else 4,
                         horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
                     ) {
                         val downloaded = uiState.songUIState.downloadState == DownloadState.STATE_DOWNLOADED
                         ActionTile(
@@ -1716,28 +1715,6 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                     }
                     if (queuePosition != null) {
                         QueueItemActions(position = queuePosition, onDone = hideModalBottomSheet)
-                    }
-                    Crossfade(targetState = onDelete != null) {
-                        if (it) {
-                            ActionButton(
-                                icon = SimpIcons.Delete,
-                                text = Res.string.delete_song_from_playlist,
-                            ) {
-                                hideModalBottomSheet()
-                                onDelete?.invoke()
-                            }
-                        }
-                    }
-                    Crossfade(targetState = onLibraryDelete != null) {
-                        if (it) {
-                            ActionButton(
-                                icon = SimpIcons.Delete,
-                                text = Res.string.delete,
-                            ) {
-                                hideModalBottomSheet()
-                                onLibraryDelete?.invoke()
-                            }
-                        }
                     }
                     CheckBoxActionButton(
                         defaultChecked = uiState.songUIState.liked,
@@ -1863,6 +1840,28 @@ shape = com.kaspercito.makadimi.ui.theme.LeafShapeLarge,
                                 text = Res.string.quick_playback_title,
                             ) {
                                 quickPlayback = true
+                            }
+                        }
+                    }
+                    Crossfade(targetState = onDelete != null) {
+                        if (it) {
+                            ActionButton(
+                                icon = SimpIcons.Delete,
+                                text = Res.string.delete_song_from_playlist,
+                            ) {
+                                hideModalBottomSheet()
+                                onDelete?.invoke()
+                            }
+                        }
+                    }
+                    Crossfade(targetState = onLibraryDelete != null) {
+                        if (it) {
+                            ActionButton(
+                                icon = SimpIcons.Delete,
+                                text = Res.string.delete,
+                            ) {
+                                hideModalBottomSheet()
+                                onLibraryDelete?.invoke()
                             }
                         }
                     }

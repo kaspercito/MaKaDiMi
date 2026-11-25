@@ -152,9 +152,8 @@ private fun NeonDock(
     onTabSelected: (BottomNavScreen) -> Unit,
 ) {
     val cs = MaterialTheme.colorScheme
-    val brush = auroraBrush()
     val haptics = androidx.compose.ui.platform.LocalHapticFeedback.current
-    val dockShape = RoundedCornerShape(32.dp)
+    val dockShape = MaterialTheme.shapes.extraLarge
     var showDj by remember { mutableStateOf(false) }
     val aiDjValue by koinInject<com.kaspercito.domain.manager.DataStoreManager>().aiDj
         .collectAsState(com.kaspercito.domain.manager.DataStoreManager.FALSE)
@@ -181,7 +180,7 @@ private fun NeonDock(
             val renderTab: @Composable (BottomNavScreen) -> Unit = { screen ->
                 val selected = screen.ordinal == selectedIndex
                 val contentColor by animateColorAsState(
-                    if (selected) cs.onPrimary else cs.onSurfaceVariant,
+                    if (selected) cs.primary else cs.onSurfaceVariant,
                     label = "dockTabColor",
                 )
                 val interaction = remember { androidx.compose.foundation.interaction.MutableInteractionSource() }
@@ -200,7 +199,6 @@ private fun NeonDock(
                                 scaleY = pressScale
                             }.heightIn(min = 52.dp)
                             .clip(tabShape)
-                            .then(if (selected) Modifier.background(brush) else Modifier)
                             .selectable(
                                 selected = selected,
                                 interactionSource = interaction,
@@ -214,8 +212,14 @@ private fun NeonDock(
                     horizontalAlignment = Alignment.CenterHorizontally,
                     verticalArrangement = Arrangement.Center,
                 ) {
-                    CompositionLocalProvider(LocalContentColor provides contentColor) {
-                        screen.icon()
+                    Box(
+                        Modifier.background(if (selected) cs.primaryContainer else Color.Transparent, RoundedCornerShape(50))
+                            .padding(horizontal = 12.dp, vertical = 3.dp),
+                        contentAlignment = Alignment.Center,
+                    ) {
+                        CompositionLocalProvider(LocalContentColor provides if (selected) cs.onPrimaryContainer else contentColor) {
+                            screen.icon()
+                        }
                     }
                     Text(
                         stringResource(screen.title),
@@ -229,7 +233,14 @@ private fun NeonDock(
             // El DJ vive en el centro del dock: tabs a la izquierda, orbe, tabs a la derecha.
             val half = (tabs.size + 1) / 2
             tabs.take(half).forEach { renderTab(it) }
-            DjOrb(active = djActive, size = 44.dp, halo = 1.2f, animate = false, onClick = { showDj = true })
+            Column(
+                Modifier.clip(tabShape).clickable(role = Role.Button) { showDj = true }
+                    .padding(horizontal = 8.dp, vertical = 4.dp),
+                horizontalAlignment = Alignment.CenterHorizontally,
+            ) {
+                DjOrb(active = djActive, size = 30.dp, halo = 1.2f, animate = false)
+                Text(stringResource(Res.string.dj_title), style = MaterialTheme.typography.labelSmall, color = cs.onSurface)
+            }
             tabs.drop(half).forEach { renderTab(it) }
         }
     }

@@ -7,7 +7,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.background
-import androidx.compose.foundation.horizontalScroll
+import com.kaspercito.makadimi.ui.icon.KeyboardArrowDown
+import com.kaspercito.makadimi.ui.icon.Tune
+import com.kaspercito.makadimi.ui.icon.Check
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -27,7 +29,6 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.layout.wrapContentHeight
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.rememberLazyListState
-import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.Card
@@ -77,7 +78,6 @@ import com.kaspercito.makadimi.extension.isScrollingUp
 import com.kaspercito.makadimi.extension.ultraThinBarStyle
 import com.kaspercito.makadimi.getPlatform
 import com.kaspercito.makadimi.ui.component.AddToPlaylistModalBottomSheet
-import com.kaspercito.makadimi.ui.component.Chip
 import com.kaspercito.makadimi.ui.component.EndOfPage
 import com.kaspercito.makadimi.ui.component.GridLibraryPlaylist
 import com.kaspercito.makadimi.ui.component.LibraryItem
@@ -187,7 +187,7 @@ fun LibraryScreen(
         viewModel.getRecentlyAdded()
     }
 
-    val chipRowState = rememberScrollState()
+    var sectionsOpen by remember { mutableStateOf(false) }
     val currentFilter by viewModel.currentScreen.collectAsStateWithLifecycle()
     // A chip asked for by a deep link (simpmusic://library?tab=…), applied once and cleared.
     val libraryTabRequest by sharedViewModel.libraryTabRequest.collectAsStateWithLifecycle()
@@ -603,50 +603,33 @@ fun LibraryScreen(
                 contentColor = MaterialTheme.colorScheme.onBackground,
             )
         }
-        Row(
-            modifier =
-                Modifier
-                    .horizontalScroll(chipRowState)
-                    .padding(horizontal = 15.dp)
-                    .padding(bottom = 8.dp)
-                    .background(Color.Transparent),
-            horizontalArrangement = Arrangement.spacedBy(4.dp),
-        ) {
-            LibraryChipType.entries.forEach { type ->
-                // Mix for you left this row for a tab of its own.
-                if (type == LibraryChipType.YOUTUBE_MIX_FOR_YOU) {
-                    return@forEach
-                }
-                if (type == LibraryChipType.YOUTUBE_MUSIC_PLAYLIST && !loggedIn) {
-                    return@forEach
-                }
-                // Like the YouTube chip, only offered once there is an account behind it.
-                if (type == LibraryChipType.SPOTIFY_PLAYLIST && !spotifyLoggedIn) {
-                    return@forEach
-                }
-                // Nothing to recap without the plays — gated exactly as the YouTube chip above
-                // is gated on being logged in.
-                if (type == LibraryChipType.WRAPPED && !localTrackingEnabled) {
-                    return@forEach
-                }
-                Chip(
-                    isAnimated = false,
-                    isSelected = type == currentFilter,
-                    text =
-                        when (type) {
-                            LibraryChipType.YOUR_LIBRARY -> stringResource(Res.string.your_library)
-                            LibraryChipType.YOUTUBE_MUSIC_PLAYLIST -> stringResource(Res.string.your_youtube_playlists)
-                            LibraryChipType.SPOTIFY_PLAYLIST -> stringResource(Res.string.spotify_playlists)
-                            LibraryChipType.YOUTUBE_MIX_FOR_YOU -> stringResource(Res.string.mix_for_you)
-                            LibraryChipType.LOCAL_PLAYLIST -> stringResource(Res.string.your_playlists)
-                            LibraryChipType.FAVORITE_PLAYLIST -> stringResource(Res.string.favorite_playlists)
-                            LibraryChipType.DOWNLOADED_PLAYLIST -> stringResource(Res.string.downloaded_playlists)
-                            LibraryChipType.FAVORITE_PODCAST -> stringResource(Res.string.favorite_podcasts)
-                            LibraryChipType.CHART -> stringResource(Res.string.makadimi_charts)
-                            LibraryChipType.WRAPPED -> stringResource(Res.string.wrapped)
+        val sections = LibraryChipType.entries.filter { type ->
+            when (type) {
+                LibraryChipType.YOUTUBE_MIX_FOR_YOU -> false
+                LibraryChipType.YOUTUBE_MUSIC_PLAYLIST -> loggedIn
+                LibraryChipType.SPOTIFY_PLAYLIST -> spotifyLoggedIn
+                LibraryChipType.WRAPPED -> localTrackingEnabled
+                else -> true
+            }
+        }
+        Box(Modifier.padding(horizontal = 16.dp, vertical = 4.dp)) {
+            androidx.compose.material3.FilledTonalButton(modifier = Modifier.fillMaxWidth(), onClick = { sectionsOpen = true }) {
+                androidx.compose.material3.Icon(SimpIcons.Tune, contentDescription = null, modifier = Modifier.size(18.dp))
+                Text(sectionLabel(currentFilter), modifier = Modifier.weight(1f).padding(horizontal = 10.dp))
+                androidx.compose.material3.Icon(SimpIcons.KeyboardArrowDown, contentDescription = null)
+            }
+            androidx.compose.material3.DropdownMenu(expanded = sectionsOpen, onDismissRequest = { sectionsOpen = false }) {
+                sections.forEach { type ->
+                    androidx.compose.material3.DropdownMenuItem(
+                        text = { Text(sectionLabel(type)) },
+                        trailingIcon = {
+                            if (type == currentFilter) androidx.compose.material3.Icon(SimpIcons.Check, contentDescription = null)
                         },
-                ) {
-                    viewModel.setCurrentScreen(type)
+                        onClick = {
+                            sectionsOpen = false
+                            viewModel.setCurrentScreen(type)
+                        },
+                    )
                 }
             }
         }
@@ -700,3 +683,18 @@ fun LibraryScreen(
  * 48dp icon buttons) + 16 = 822dp — so this must follow if that row changes.
  */
 private val YOUR_LIBRARY_MAX_WIDTH = 842.dp
+
+@Composable
+private fun sectionLabel(type: LibraryChipType): String =
+    when (type) {
+        LibraryChipType.YOUR_LIBRARY -> stringResource(Res.string.your_library)
+        LibraryChipType.YOUTUBE_MUSIC_PLAYLIST -> stringResource(Res.string.your_youtube_playlists)
+        LibraryChipType.SPOTIFY_PLAYLIST -> stringResource(Res.string.spotify_playlists)
+        LibraryChipType.YOUTUBE_MIX_FOR_YOU -> stringResource(Res.string.mix_for_you)
+        LibraryChipType.LOCAL_PLAYLIST -> stringResource(Res.string.your_playlists)
+        LibraryChipType.FAVORITE_PLAYLIST -> stringResource(Res.string.favorite_playlists)
+        LibraryChipType.DOWNLOADED_PLAYLIST -> stringResource(Res.string.downloaded_playlists)
+        LibraryChipType.FAVORITE_PODCAST -> stringResource(Res.string.favorite_podcasts)
+        LibraryChipType.CHART -> stringResource(Res.string.makadimi_charts)
+        LibraryChipType.WRAPPED -> stringResource(Res.string.wrapped)
+    }

@@ -22,6 +22,9 @@ import androidx.compose.animation.shrinkHorizontally
 import androidx.compose.animation.slideInHorizontally
 import androidx.compose.animation.slideOutHorizontally
 import androidx.compose.animation.togetherWith
+import androidx.compose.foundation.combinedClickable
+import com.kaspercito.makadimi.ui.component.QuickPlaybackSheet
+import makadimi.composeapp.generated.resources.quick_playback_title
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.MarqueeAnimationMode
 import androidx.compose.foundation.BorderStroke
@@ -274,7 +277,9 @@ fun MiniPlayer(
         // One shape for both the Card and the clip below. They must not diverge: the clip wraps
         // the Card's own background draw, so the larger radius wins and silently becomes the
         // visible one.
-        val miniPlayerShape = RoundedCornerShape(topStart = 28.dp, topEnd = 10.dp, bottomEnd = 28.dp, bottomStart = 10.dp)
+        var showQuickControls by rememberSaveable { mutableStateOf(false) }
+        if (showQuickControls) QuickPlaybackSheet(onDismiss = { showQuickControls = false })
+        val miniPlayerShape = MaterialTheme.shapes.extraLarge
         // Without glass the card follows the theme, not the playing artwork.
         val cardColor =
             if (isLiquidGlassEnabled == DataStoreManager.TRUE) {
@@ -298,7 +303,7 @@ fun MiniPlayer(
                 modifier
                     .then(
                         if (isLiquidGlassEnabled == DataStoreManager.TRUE) {
-                            Modifier.liquidGlass(backdrop, layer, luminance, RoundedCornerShape(16.dp))
+                            Modifier.liquidGlass(backdrop, layer, luminance, miniPlayerShape)
                         } else {
                             Modifier
                         },
@@ -306,8 +311,10 @@ fun MiniPlayer(
                         Modifier
                             .clip(miniPlayerShape)
                             .offset { IntOffset(0, offsetY.value.roundToInt()) }
-                            .clickable(
+                            .combinedClickable(
                                 onClick = onClick,
+                                onLongClickLabel = stringResource(Res.string.quick_playback_title),
+                                onLongClick = { showQuickControls = true },
                             ).pointerInput(Unit) {
                                 detectVerticalDragGestures(
                                     onDragStart = {
@@ -541,7 +548,7 @@ fun MiniPlayer(
                         modifier =
                             Modifier
                                 .size(controlSize)
-                                .then(if (isFlat) Modifier.background(auroraBrush(), RoundedCornerShape(topStart = 16.dp, topEnd = 5.dp, bottomEnd = 16.dp, bottomStart = 5.dp)) else Modifier),
+                                .then(if (isFlat) Modifier.background(auroraBrush(), RoundedCornerShape(50)) else Modifier),
                         contentAlignment = Alignment.Center,
                     ) {
                         Crossfade(targetState = loading, label = "") {

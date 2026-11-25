@@ -1099,4 +1099,6 @@ Built with ❤️ on top of the open source project SimpMusic by Tuan Minh Nguye
     <string name="collection_search_more">Search more songs</string>
     <string name="collection_type_two_chars">Enter at least two characters</string>
     <string name="collection_narrow_results">Showing up to 200 songs. Narrow your search to find more specific results.</string>
+    <string name="all_sections">All sections</string>
+    <string name="fewer_sections">Fewer sections</string>
 </resources>

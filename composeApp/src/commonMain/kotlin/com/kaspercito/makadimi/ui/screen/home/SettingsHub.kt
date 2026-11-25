@@ -47,6 +47,8 @@ import com.kaspercito.makadimi.extension.getScreenSizeInfo
 import com.kaspercito.makadimi.ui.theme.neonBrush
 import com.kaspercito.makadimi.ui.theme.typo
 import makadimi.composeapp.generated.resources.Res
+import makadimi.composeapp.generated.resources.fewer_sections
+import makadimi.composeapp.generated.resources.all_sections
 import makadimi.composeapp.generated.resources.clear
 import makadimi.composeapp.generated.resources.hub_categories
 import makadimi.composeapp.generated.resources.hub_no_results
@@ -72,6 +74,8 @@ fun SettingsHub(
     modifier: Modifier = Modifier,
 ) {
     var query by rememberSaveable { mutableStateOf("") }
+    var expanded by rememberSaveable { mutableStateOf(false) }
+    var lastSection by rememberSaveable { mutableStateOf("") }
     val filtered = remember(query, entries) {
         val terms = query.split(' ').filter { it.isNotBlank() }
         entries.filter { entry ->
@@ -125,12 +129,15 @@ fun SettingsHub(
         }
 
         val columns = when {
+            screenWidth / fontScale < 280 -> 1
             screenWidth < 410 || fontScale >= 1.3f -> 2
             screenWidth >= 680 -> 4
             else -> 3
         }
         Column(verticalArrangement = Arrangement.spacedBy(10.dp)) {
-            filtered.chunked(columns).forEach { rowEntries ->
+            val visible = if (query.isNotBlank() || expanded) filtered else
+                filtered.sortedByDescending { it.key == lastSection }.take(columns * 2)
+            visible.chunked(columns).forEach { rowEntries ->
                 Row(
                     modifier = Modifier.fillMaxWidth().height(IntrinsicSize.Max),
                     horizontalArrangement = Arrangement.spacedBy(10.dp),
@@ -145,6 +152,7 @@ fun SettingsHub(
                                     .background(cs.surfaceContainerLow)
                                     .border(1.dp, cs.outlineVariant.copy(alpha = 0.65f), LeafShapeSmall)
                                     .clickable(role = Role.Button) {
+                                        lastSection = entry.key
                                         focusManager.clearFocus()
                                         onJump(entry.key)
                                     }
@@ -176,6 +184,11 @@ fun SettingsHub(
                     // Relleno para que la última fila no estire sus tarjetas.
                     repeat(columns - rowEntries.size) { Spacer(Modifier.weight(1f)) }
                 }
+            }
+        }
+        if (query.isBlank() && filtered.size > columns * 2) {
+            androidx.compose.material3.TextButton(onClick = { expanded = !expanded }) {
+                Text(stringResource(if (expanded) Res.string.fewer_sections else Res.string.all_sections))
             }
         }
         // Línea de luz bajo el hub

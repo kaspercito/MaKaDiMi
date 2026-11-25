@@ -1,7 +1,6 @@
 package com.kaspercito.makadimi.ui.component
 
 import androidx.compose.foundation.shape.CircleShape
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ElevatedFilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.LocalMinimumInteractiveComponentSize
@@ -34,12 +33,12 @@ fun Chip(
         backgroundColor = Color.Transparent,
         contentPadding = 0.dp,
         borderWidth = 1.dp,
-        shape = RoundedCornerShape(topStart = 16.dp, topEnd = 5.dp, bottomEnd = 16.dp, bottomStart = 5.dp),
+        shape = CircleShape,
         oneCircleDurationMillis = 2500,
     ) {
         CompositionLocalProvider(LocalMinimumInteractiveComponentSize provides Dp.Unspecified) {
             ElevatedFilterChip(
-                shape = RoundedCornerShape(topStart = 16.dp, topEnd = 5.dp, bottomEnd = 16.dp, bottomStart = 5.dp),
+                shape = CircleShape,
                 // No shadow. An unselected chip has no fill, and a drop shadow under a see-through
                 // shape shows THROUGH it as a dark ring instead of sitting behind it. Naming
                 // `elevation` alone is enough: pressed, focused and hovered all default to it.
@@ -52,12 +51,12 @@ fun Chip(
                         // opaque — that contrast IS the selection, and it is the only one that has
                         // to be found at a glance.
                         containerColor = Color.Transparent,
-                        selectedContainerColor = MaterialTheme.colorScheme.primary.copy(alpha = 0.22f),
+                        selectedContainerColor = MaterialTheme.colorScheme.primary,
                         labelColor = MaterialTheme.colorScheme.onSurfaceVariant,
                         // `primary` is a pale #B2C5FF on the dark theme, so the label has to be its
                         // matching `on` token — a hand-picked white would read on one theme and
                         // vanish on the other.
-                        selectedLabelColor = MaterialTheme.colorScheme.primary,
+                        selectedLabelColor = MaterialTheme.colorScheme.onPrimary,
                     ),
                 onClick = { onClick.invoke() },
                 label = {

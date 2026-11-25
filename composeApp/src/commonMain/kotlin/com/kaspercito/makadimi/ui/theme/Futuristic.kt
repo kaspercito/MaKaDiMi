@@ -105,12 +105,16 @@ fun Modifier.glassPanel(
     borderAlpha: Float = 0.55f,
 ): Modifier {
     val cs = MaterialTheme.colorScheme
-    val sheen =
-        Brush.verticalGradient(
-            listOf(cs.onSurface.copy(alpha = 0.07f), Color.Transparent),
+    val sheen = androidx.compose.runtime.remember(tint, alpha, cs.primary, cs.tertiary) {
+        Brush.linearGradient(
+            listOf(
+                androidx.compose.ui.graphics.lerp(tint, cs.primary, 0.16f).copy(alpha = alpha),
+                tint.copy(alpha = (alpha + 0.18f).coerceAtMost(1f)),
+                androidx.compose.ui.graphics.lerp(tint, cs.tertiary, 0.08f).copy(alpha = alpha),
+            ),
         )
+    }
     return this
-        .background(tint.copy(alpha = alpha), shape)
         .background(sheen, shape)
         .neonBorder(shape, alpha = borderAlpha * 0.6f)
 }

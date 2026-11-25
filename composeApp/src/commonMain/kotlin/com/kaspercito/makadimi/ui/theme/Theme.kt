@@ -200,11 +200,11 @@ private fun ColorScheme.withObsidianDarkSurfaces(brand: Boolean): ColorScheme {
  */
 private val MakadimiShapes =
     Shapes(
-        extraSmall = RoundedCornerShape(10.dp),
+        extraSmall = RoundedCornerShape(8.dp),
         small = RoundedCornerShape(16.dp),
         medium = LeafShape,
         large = LeafShapeLarge,
-        extraLarge = RoundedCornerShape(34.dp),
+        extraLarge = RoundedCornerShape(topStart = 32.dp, topEnd = 32.dp, bottomStart = 16.dp, bottomEnd = 16.dp),
     )
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)

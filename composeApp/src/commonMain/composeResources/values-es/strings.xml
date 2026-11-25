@@ -1059,4 +1059,6 @@
     <string name="collection_search_more">Buscar en más canciones</string>
     <string name="collection_type_two_chars">Escribe al menos dos caracteres</string>
     <string name="collection_narrow_results">Mostrando hasta 200 canciones. Afina la búsqueda para encontrar la que quieres.</string>
+    <string name="all_sections">Ver todas las secciones</string>
+    <string name="fewer_sections">Ver menos secciones</string>
 </resources>

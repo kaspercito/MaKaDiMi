@@ -1157,39 +1157,30 @@ fun HomeQuickAccess(navController: NavController) {
                 navController.navigate(RecentlySongsDestination)
             },
         )
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
-    ) {
-        items.forEach { (icon, label, onClick) ->
-            Column(
-                modifier =
-                    Modifier
-                        .weight(1f)
-                        .clip(shape)
-                        .glassPanel(shape, alpha = 0.55f)
-                        .clickable { onClick() }
-                        .padding(vertical = 14.dp, horizontal = 4.dp),
-                horizontalAlignment = Alignment.CenterHorizontally,
-            ) {
-                Box(
-                    modifier =
-                        Modifier
-                            .size(38.dp)
-                            .clip(RoundedCornerShape(topStart = 14.dp, topEnd = 4.dp, bottomEnd = 14.dp, bottomStart = 4.dp))
-                            .background(Brush.linearGradient(listOf(cs.primary.copy(alpha = 0.30f), cs.secondary.copy(alpha = 0.18f)))),
-                    contentAlignment = Alignment.Center,
-                ) {
-                    Icon(icon, contentDescription = label, tint = cs.primary, modifier = Modifier.size(21.dp))
+    androidx.compose.foundation.layout.BoxWithConstraints(Modifier.fillMaxWidth()) {
+        val columns = when {
+            maxWidth / LocalDensity.current.fontScale < 240.dp -> 1
+            maxWidth / LocalDensity.current.fontScale < 640.dp -> 2
+            else -> 4
+        }
+        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+            items.chunked(columns).forEach { group ->
+                Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
+                    group.forEach { (icon, label, onClick) ->
+                        Row(
+                            modifier = Modifier.weight(1f)
+                                .glassPanel(shape, tint = cs.surfaceContainerHigh)
+                                .clip(shape)
+                                .clickable(role = androidx.compose.ui.semantics.Role.Button, onClick = onClick)
+                                .padding(horizontal = 12.dp, vertical = 14.dp),
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.spacedBy(10.dp),
+                        ) {
+                            Icon(icon, contentDescription = null, tint = cs.primary, modifier = Modifier.size(22.dp))
+                            Text(label, style = MaterialTheme.typography.labelLarge, color = cs.onSurface)
+                        }
+                    }
                 }
-                Spacer(Modifier.height(7.dp))
-                Text(
-                    text = label,
-                    style = typo().bodySmall.copy(fontSize = 11.sp, fontWeight = FontWeight.SemiBold),
-                    color = cs.onBackground,
-                    maxLines = 1,
-                    overflow = androidx.compose.ui.text.style.TextOverflow.Ellipsis,
-                )
             }
         }
     }

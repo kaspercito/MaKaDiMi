@@ -1,6 +1,5 @@
 package com.kaspercito.makadimi.ui.screen.other
 
-import com.kaspercito.makadimi.ui.theme.LeafShape
 import com.kaspercito.makadimi.ui.theme.LeafShapeSmall
 import com.kaspercito.makadimi.ui.theme.neonBorder
 import androidx.compose.animation.AnimatedContent
@@ -1139,11 +1138,11 @@ fun SearchScreen(
                     .onFocusChanged {
                         isFocused = it.isFocused
                     }.padding(horizontal = 16.dp)
-                    .neonBorder(LeafShape, alpha = if (isFocused) 0.9f else 0.5f),
-            shape = LeafShape,
+                    .neonBorder(MaterialTheme.shapes.extraLarge, alpha = if (isFocused) 0.9f else 0.35f),
+            shape = MaterialTheme.shapes.extraLarge,
             colors =
                 SearchBarDefaults.colors(
-                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh.copy(alpha = 0.75f),
+                    containerColor = MaterialTheme.colorScheme.surfaceContainerHigh,
                 ),
             // See the note on SongSelectionTopAppBar above — the Column owns the status-bar inset.
             windowInsets = WindowInsets(0),
